@@ -1,0 +1,43 @@
+About the transformation of coordinates
+=======================================
+
+Iso-game-engine uses three kinds of coordinates.  Map coordinates, iso
+coordinates, and screen coordinates.  Map coordinates relate to a
+bird's-eye-view of the map like this:
+
++--------+--------+--------+--------+
+|        |        |        |        |
+| (0, 0) | (1, 0) | (2, 0) | (3, 0) |
+|        |        |        |        |
++--------+--------+--------+--------+
+|        |        |        |        |
+| (0, 1) | (1, 1) | (2, 1) | (3, 1) |
+|        |        |        |        |
++--------+--------+--------+--------+
+|        |        |        |        |
+| (0, 2) | (1, 2) | (2, 2) | (3, 2) |
+|        |        |        |        |
++--------+--------+--------+--------+
+|        |        |        |        |
+| (0, 3) | (1, 3) | (2, 3) | (3, 3) |
+|        |        |        |        |
++--------+--------+--------+--------+
+
+Note that the map is divided into tiles, and the units of the map coordinates
+are tiles.
+
+Using map coordinates, we can talk about the upper-left, lower-left, lower-right
+and upper-right corners of the map.  The camera angle is expressed in terms of
+which corner of the map it points towards.
+
+Map coordinates are transformed into iso coordinates by rotation and vertical
+scaling.  The exact transformation used depends on the current camera angle.
+The transformation from map coordinates to iso coordinates is also complicated
+by elevation.
+
+Screen coordinates are the actual coordinates where objects appear on the
+screen.  iso coordinates are transformed into screen coordinates by a
+translation operation.  Scrolling action by the player determines this
+translation.  There may also be a scaling operation involved if we need to
+shrink the graphics to fit a small screen.
+
