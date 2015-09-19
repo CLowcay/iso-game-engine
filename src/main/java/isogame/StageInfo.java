@@ -13,10 +13,10 @@ public class StageInfo {
 			throw new CorruptDataException("Incorrect number of tiles in stage");
 	}
 
-	public Tile getTile(int x, int y) throws IndexOutOfBoundsException {
-		if (x < 0 || y < 0 || x >= w || y >= h)
+	public Tile getTile(MapPoint pos) throws IndexOutOfBoundsException {
+		if (pos.x < 0 || pos.y < 0 || pos.x >= w || pos.y >= h)
 			throw new IndexOutOfBoundsException();
-		return data[(y * w) + x];
+		return data[(pos.y * w) + pos.x];
 	}
 }
 

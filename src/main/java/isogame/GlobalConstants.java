@@ -5,7 +5,7 @@ package isogame;
  * change it.
  * */
 public class GlobalConstants {
-	public final int TILEW = 512;
-	public final int TILEH = 256;
+	public final double TILEW = 512;
+	public final double TILEH = 256;
 }
 

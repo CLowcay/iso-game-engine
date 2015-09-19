@@ -3,9 +3,8 @@ package isogame;
 public class Sprite {
 	private final SpriteInfo info;
 
-	// position of the sprite on the map.  Not in screen coordinates. 
-	public int x;
-	public int y;
+	// position of the sprite on the map.
+	public MapPoint pos;
 
 	// The direction the sprite is facing
 	public FacingDirection direction;

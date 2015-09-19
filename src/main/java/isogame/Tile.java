@@ -11,12 +11,10 @@ public class Tile {
 	public final SlopeType slope;
 	public final boolean isManaZone;
 	public final StartZoneType startZone;
-	public final int x;
-	public final int y;
+	public final MapPoint pos;
 
 	public Tile(
-		int x,
-		int y,
+		MapPoint pos,
 		int elevation,
 		SlopeType slope,
 		boolean isManaZone,
@@ -24,8 +22,9 @@ public class Tile {
 		TerrainTexture texture
 	) {
 		this.elevation = elevation;
+		this.pos = pos;
 
-		if ((x + y) % 2 == 0) {
+		if ((pos.x + pos.y) % 2 == 0) {
 			this.texture = texture.evenPaint;
 		} else {
 			this.texture = texture.oddPaint;
@@ -34,8 +33,6 @@ public class Tile {
 		this.slope = slope;
 		this.isManaZone = isManaZone;
 		this.startZone = startZone;
-		this.x = x;
-		this.y = y;
 	}
 }
 
