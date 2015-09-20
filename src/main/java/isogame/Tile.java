@@ -34,5 +34,10 @@ public class Tile {
 		this.isManaZone = isManaZone;
 		this.startZone = startZone;
 	}
+
+	@Override
+	public String toString() {
+		return pos.toString();
+	}
 }
 
