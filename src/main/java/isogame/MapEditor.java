@@ -70,8 +70,10 @@ public class MapEditor extends Application {
 			for (int y = 0; y < 8; y++) {
 				TerrainTexture t;
 				if ((x + y) % 2 == 0) t = black; else t = white;
+				int elevation;
+				if (x == 4 && y == 1) elevation = 1; else elevation = 0;
 				data[(y * 8) + x] = new Tile(
-					new MapPoint(x, y), 0,
+					new MapPoint(x, y), elevation,
 					SlopeType.NONE, false,
 					StartZoneType.NONE, t);
 			}
