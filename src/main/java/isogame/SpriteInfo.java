@@ -8,7 +8,7 @@ public class SpriteInfo {
 	public final Map<String, SpriteAnimation> animations;
 
 	public SpriteInfo() {
-		animations = new HashMap();
+		animations = new HashMap<String, SpriteAnimation>();
 	}
 }
 

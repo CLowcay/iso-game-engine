@@ -11,7 +11,7 @@ public class Stage {
 
 	public Stage(StageInfo info) {
 		this.info = info;
-		sprites = new HashMap();
+		sprites = new HashMap<MapPoint, Sprite>();
 	}
 
 	public void addSprite(Sprite sprite) {
