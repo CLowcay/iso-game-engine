@@ -49,6 +49,11 @@ public class View {
 	 * */
 	public void renderFrame(GraphicsContext cx, Stage stage) {
 		Affine t = new Affine();
+		cx.setTransform(t);
+
+		cx.setFill(Color.WHITE);
+		cx.fillRect(0, 0, viewportW, viewportH);
+
 		t.appendScale(viewportW / ISO_VIEWPORTW, viewportH / ISO_VIEWPORTH);
 		t.appendTranslation(-x, -y);
 		cx.setTransform(t);

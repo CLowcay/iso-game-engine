@@ -80,16 +80,22 @@ public class Stage {
 			Point2D p = correctedIsoCoord(tile.pos, angle);
 			double x = p.getX();
 			double y = p.getY();
-			xs[0] = x + (TILEW / 2);
-			ys[0] = y;
-			xs[1] = x + TILEW;
-			ys[1] = y + (TILEH / 2);
-			xs[2] = x + (TILEW / 2);
-			ys[2] = y + TILEH;
-			xs[3] = x;
-			ys[3] = y + (TILEH / 2);
-			cx.setFill(tile.texture);
-			cx.fillPolygon(xs, ys, 4);
+
+			if (visible.intersects(x, y, TILEW, TILEH)) {
+				cx.save();
+				cx.translate(x, y);
+				xs[0] = TILEW / 2;
+				ys[0] = -2;
+				xs[1] = TILEW + 2;
+				ys[1] = TILEH / 2;
+				xs[2] = TILEW / 2;
+				ys[2] = TILEH + 2;
+				xs[3] = -2;
+				ys[3] = TILEH / 2;
+				cx.setFill(tile.texture);
+				cx.fillPolygon(xs, ys, 4);
+				cx.restore();
+			}
 		});
 	}
 }

@@ -42,7 +42,6 @@ public class MapEditor extends Application {
 
 
 					GraphicsContext cx = canvas.getGraphicsContext2D();
-					cx.clearRect(0, 0, 960, 540);
 					view.renderFrame(cx, stage);
 				}
 			};
