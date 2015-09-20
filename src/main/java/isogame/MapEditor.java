@@ -16,25 +16,40 @@ public class MapEditor extends Application {
 
 	@Override
 	public void start(javafx.stage.Stage primaryStage) {
-		Canvas canvas = new Canvas();
+		Canvas canvas = new Canvas(960, 540);
 		StackPane root = new StackPane();
 		root.getChildren().add(canvas);
 
 		try {
 			Stage stage = exampleStage();
+			View view = new View(960, 540);
+			view.centreOnTile(stage, new MapPoint(3, 3));
 
 			AnimationTimer animateCanvas = new AnimationTimer() {
+				int count0 = 0;
+				int count = 0;
+				long now0 = 0;
+
 				@Override
 				public void handle(long now) {
+					count++;
+					if (now0 == 0) now0 = now;
+					if ((now - now0) >= 5000000000l) {
+						System.err.println("fps: " + ((count - count0) / 5));
+						now0 = now;
+						count0 = count;
+					}
+
+
 					GraphicsContext cx = canvas.getGraphicsContext2D();
-					cx.clearRect(0, 0, 300, 250);
-					stage.render(cx, null);
+					cx.clearRect(0, 0, 960, 540);
+					view.renderFrame(cx, stage);
 				}
 			};
 
 			animateCanvas.start();
 
-			Scene scene = new Scene(root, 300, 250);
+			Scene scene = new Scene(root, 960, 540);
 
 			primaryStage.setTitle("Hello World!");
 			primaryStage.setScene(scene);

@@ -14,7 +14,22 @@ public class MapPoint {
 
 	@Override
 	public String toString() {
-		return "(" + x + ", " + y + ")";
+		return "MAP:(" + x + ", " + y + ")";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof MapPoint) {
+			MapPoint p = (MapPoint) obj;
+			return p.x == x && p.y == y;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return x + y;
 	}
 }
 
