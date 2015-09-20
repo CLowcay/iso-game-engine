@@ -12,3 +12,10 @@
 hs_err_pid*
 
 *.swp
+/.nb-gradle/private/
+.gradle/
+gradle/
+build/
+iso-game-engine.iml
+iso-game-engine.ipr
+iso-game-engine.iws
