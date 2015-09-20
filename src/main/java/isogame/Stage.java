@@ -74,27 +74,39 @@ public class Stage {
 	 * Render the entire stage (skipping the invisible bits for efficiency).
 	 * */
 	public void render(GraphicsContext cx, CameraAngle angle, BoundingBox visible) {
-		double[] xs = new double[4];
-		double[] ys = new double[4];
+		double[] xs = new double[6];
+		double[] ys = new double[6];
 		terrain.iterateTiles(angle).forEachRemaining(tile -> {
 			Point2D p = correctedIsoCoord(tile.pos, angle);
 			double x = p.getX();
 			double y = p.getY();
 
 			if (visible.intersects(x, y, TILEW, TILEH)) {
-				cx.save();
-				cx.translate(x, y);
-				xs[0] = TILEW / 2;
-				ys[0] = -2;
-				xs[1] = TILEW + 2;
-				ys[1] = TILEH / 2;
-				xs[2] = TILEW / 2;
-				ys[2] = TILEH + 2;
-				xs[3] = -2;
-				ys[3] = TILEH / 2;
-				cx.setFill(tile.texture);
-				cx.fillPolygon(xs, ys, 4);
-				cx.restore();
+				switch (tile.adjustSlopeForCameraAngle(angle)) {
+					case NONE:
+						cx.save();
+						cx.translate(x, y);
+						xs[0] = TILEW / 2; ys[0] = -2;
+						xs[1] = TILEW + 2; ys[1] = TILEH / 2;
+						xs[2] = TILEW / 2; ys[2] = TILEH + 2;
+						xs[3] = -2;        ys[3] = TILEH / 2;
+						cx.setFill(tile.texture);
+						cx.fillPolygon(xs, ys, 4);
+
+						for (int i = 0; i < tile.elevation; i++) {
+							cx.translate(0, TILEH / 2);
+							xs[0] = 0;         ys[0] = 0;
+							xs[1] = 0;         ys[1] = (TILEH / 2) + 2;
+							xs[2] = TILEW / 2; ys[2] = TILEH + 2;
+							xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
+							xs[4] = TILEW;     ys[4] = 0;
+							xs[5] = TILEW / 2; ys[5] = TILEH / 2;
+							cx.setFill(tile.getCliffTexture(angle));
+							cx.fillPolygon(xs, ys, 6);
+						}
+						cx.restore();
+						break;
+				}
 			}
 		});
 	}

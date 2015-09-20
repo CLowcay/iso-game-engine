@@ -65,17 +65,23 @@ public class MapEditor extends Application {
 	private Stage exampleStage() throws CorruptDataException {
 		TerrainTexture black = new TerrainTexture("/black.jpg");
 		TerrainTexture white = new TerrainTexture("/white.jpg");
+		CliffTexture cliff = new CliffTexture(
+			"/cliff_texture.png",
+			"/cliff_texture_narrow.png");
 		Tile[] data = new Tile[8 * 8];
 		for (int x = 0; x < 8; x++) {
 			for (int y = 0; y < 8; y++) {
 				TerrainTexture t;
 				if ((x + y) % 2 == 0) t = black; else t = white;
-				int elevation;
-				if (x == 4 && y == 1) elevation = 1; else elevation = 0;
+				int elevation = 0;
+				if (x == 4 && y == 1) elevation = 2;
+				if (x == 4 && y == 2) elevation = 1;
+				if (x == 5 && y == 2) elevation = 1;
+				if (x == 5 && y == 1) elevation = 1;
 				data[(y * 8) + x] = new Tile(
 					new MapPoint(x, y), elevation,
 					SlopeType.NONE, false,
-					StartZoneType.NONE, t);
+					StartZoneType.NONE, t, cliff);
 			}
 		}
 		StageInfo terrain = new StageInfo(8, 8, data);
