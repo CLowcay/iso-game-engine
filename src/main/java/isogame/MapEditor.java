@@ -73,13 +73,28 @@ public class MapEditor extends Application {
 			for (int y = 0; y < 8; y++) {
 				TerrainTexture t;
 				if ((x + y) % 2 == 0) t = black; else t = white;
-				//t = black;
 				int elevation = 0;
 				SlopeType slope = SlopeType.NONE;
 				if (x == 0 && y == 1) slope = SlopeType.N;
 				if (x == 1 && y == 1) slope = SlopeType.N;
 				if (x == 0 && y == 0) elevation = 1;
 				if (x == 1 && y == 0) elevation = 1;
+
+				if (x == 0 && y == 6) slope = SlopeType.S;
+				if (x == 1 && y == 6) slope = SlopeType.S;
+				if (x == 0 && y == 7) elevation = 1;
+				if (x == 1 && y == 7) elevation = 1;
+
+				if (x == 6 && y == 0) slope = SlopeType.E;
+				if (x == 6 && y == 1) slope = SlopeType.E;
+				if (x == 7 && y == 0) elevation = 1;
+				if (x == 7 && y == 1) elevation = 1;
+
+				if (x == 7 && y == 6) slope = SlopeType.W;
+				if (x == 7 && y == 7) slope = SlopeType.W;
+				if (x == 6 && y == 6) elevation = 1;
+				if (x == 6 && y == 7) elevation = 1;
+
 				// if (x == 4 && y == 1) elevation = 2;
 				// if (x == 4 && y == 2) elevation = 1;
 				// if (x == 5 && y == 2) elevation = 1;
