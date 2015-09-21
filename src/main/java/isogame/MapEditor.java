@@ -79,10 +79,13 @@ public class MapEditor extends Application {
 				KeyCode k = event.getCode();
 				keys.add(k);
 				setScrollingAnimation(scrolling, keys);
+				switch (k) {
+					case A: view.rotateLeft(); break;
+					case D: view.rotateRight(); break;
+				}
 			});
 			scene.setOnKeyReleased(event -> {
-				KeyCode k = event.getCode();
-				keys.remove(k);
+				keys.remove(event.getCode());
 				setScrollingAnimation(scrolling, keys);
 			});
 			
@@ -102,32 +105,32 @@ public class MapEditor extends Application {
 
 		if (kup && !kdown) {
 			if (kleft && !kright) {
-				scrolling.setAnimation(new Point2D(TILEH, TILEH), SCROLL_SPEED);
-				scrolling.start();
-			} else if (kright && !kleft) {
-				scrolling.setAnimation(new Point2D(-TILEH, TILEH), SCROLL_SPEED);
-				scrolling.start();
-			} else if (!kleft && !kright) {
-				scrolling.setAnimation(new Point2D(0, TILEH), SCROLL_SPEED);
-				scrolling.start();
-			}
-		} else if (kdown && !kup) {
-			if (kleft && !kright) {
-				scrolling.setAnimation(new Point2D(TILEH, -TILEH), SCROLL_SPEED);
-				scrolling.start();
-			} else if (kright && !kleft) {
 				scrolling.setAnimation(new Point2D(-TILEH, -TILEH), SCROLL_SPEED);
+				scrolling.start();
+			} else if (kright && !kleft) {
+				scrolling.setAnimation(new Point2D(TILEH, -TILEH), SCROLL_SPEED);
 				scrolling.start();
 			} else if (!kleft && !kright) {
 				scrolling.setAnimation(new Point2D(0, -TILEH), SCROLL_SPEED);
 				scrolling.start();
 			}
-		} else if (!kdown && !kup) {
+		} else if (kdown && !kup) {
 			if (kleft && !kright) {
-				scrolling.setAnimation(new Point2D(TILEH, 0), SCROLL_SPEED);
+				scrolling.setAnimation(new Point2D(-TILEH, TILEH), SCROLL_SPEED);
 				scrolling.start();
 			} else if (kright && !kleft) {
+				scrolling.setAnimation(new Point2D(TILEH, TILEH), SCROLL_SPEED);
+				scrolling.start();
+			} else if (!kleft && !kright) {
+				scrolling.setAnimation(new Point2D(0, TILEH), SCROLL_SPEED);
+				scrolling.start();
+			}
+		} else if (!kdown && !kup) {
+			if (kleft && !kright) {
 				scrolling.setAnimation(new Point2D(-TILEH, 0), SCROLL_SPEED);
+				scrolling.start();
+			} else if (kright && !kleft) {
+				scrolling.setAnimation(new Point2D(TILEH, 0), SCROLL_SPEED);
 				scrolling.start();
 			} else {
 				scrolling.stop();
