@@ -73,14 +73,20 @@ public class MapEditor extends Application {
 			for (int y = 0; y < 8; y++) {
 				TerrainTexture t;
 				if ((x + y) % 2 == 0) t = black; else t = white;
+				//t = black;
 				int elevation = 0;
-				if (x == 4 && y == 1) elevation = 2;
-				if (x == 4 && y == 2) elevation = 1;
-				if (x == 5 && y == 2) elevation = 1;
-				if (x == 5 && y == 1) elevation = 1;
+				SlopeType slope = SlopeType.NONE;
+				if (x == 0 && y == 1) slope = SlopeType.N;
+				if (x == 1 && y == 1) slope = SlopeType.N;
+				if (x == 0 && y == 0) elevation = 1;
+				if (x == 1 && y == 0) elevation = 1;
+				// if (x == 4 && y == 1) elevation = 2;
+				// if (x == 4 && y == 2) elevation = 1;
+				// if (x == 5 && y == 2) elevation = 1;
+				// if (x == 5 && y == 1) elevation = 1;
 				data[(y * 8) + x] = new Tile(
 					new MapPoint(x, y), elevation,
-					SlopeType.NONE, false,
+					slope, false,
 					StartZoneType.NONE, t, cliff);
 			}
 		}
