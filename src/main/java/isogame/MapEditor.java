@@ -95,10 +95,11 @@ public class MapEditor extends Application {
 				if (x == 6 && y == 6) elevation = 1;
 				if (x == 6 && y == 7) elevation = 1;
 
-				// if (x == 4 && y == 1) elevation = 2;
-				// if (x == 4 && y == 2) elevation = 1;
-				// if (x == 5 && y == 2) elevation = 1;
-				// if (x == 5 && y == 1) elevation = 1;
+				if (x == 4 && y == 3) slope = SlopeType.S;
+				if (x == 3 && y == 4) slope = SlopeType.E;
+				if (x == 4 && y == 5) slope = SlopeType.N;
+				if (x == 5 && y == 4) slope = SlopeType.W;
+
 				data[(y * 8) + x] = new Tile(
 					new MapPoint(x, y), elevation,
 					slope, false,

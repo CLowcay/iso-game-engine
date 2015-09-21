@@ -101,6 +101,13 @@ public class Stage {
 						xs[3] = TILEW / 2; ys[3] = TILEH + 4;
 						cx.setFill(tile.texture);
 						cx.fillPolygon(xs, ys, 4);
+
+						xs[0] = TILEW / 2; ys[0] = TILEH;
+						xs[1] = TILEW;     ys[1] = 0;
+						xs[2] = TILEW;     ys[2] = (TILEH / 2) + 2;
+						xs[3] = TILEW / 2; ys[3] = TILEH + 2;
+						cx.setFill(tile.getCliffTexture(angle));
+						cx.fillPolygon(xs, ys, 4);
 						break;
 					case E:
 						xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
@@ -109,6 +116,15 @@ public class Stage {
 						xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
 						cx.setFill(tile.texture);
 						cx.fillPolygon(xs, ys, 4);
+
+						xs[0] = 0;         ys[0] = TILEH / 2;
+						xs[1] = TILEW / 2; ys[1] = TILEH / 2;
+						xs[2] = TILEW;     ys[2] = 0;
+						xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
+						xs[4] = TILEW / 2; ys[4] = TILEH + 2;
+						xs[5] = 0;         ys[5] = (TILEH / 2) + 2;
+						cx.setFill(tile.getCliffTexture(angle));
+						cx.fillPolygon(xs, ys, 6);
 						break;
 					case S:
 						xs[0] = -4;        ys[0] = -2;
@@ -117,6 +133,15 @@ public class Stage {
 						xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
 						cx.setFill(tile.texture);
 						cx.fillPolygon(xs, ys, 4);
+
+						xs[0] = 0;         ys[0] = 0;
+						xs[1] = TILEW / 2; ys[1] = TILEH / 2;
+						xs[2] = TILEW;     ys[2] = TILEH / 2;
+						xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
+						xs[4] = TILEW / 2; ys[4] = TILEH + 2;
+						xs[5] = 0;         ys[5] = (TILEH / 2) + 2;
+						cx.setFill(tile.getCliffTexture(angle));
+						cx.fillPolygon(xs, ys, 6);
 						break;
 					case W:
 						xs[0] = -4;        ys[0] = 0;
@@ -125,9 +150,17 @@ public class Stage {
 						xs[3] = TILEW / 2; ys[3] = TILEH + 4;
 						cx.setFill(tile.texture);
 						cx.fillPolygon(xs, ys, 4);
+
+						xs[0] = 0;         ys[0] = 0;
+						xs[1] = TILEW / 2; ys[1] = TILEH;
+						xs[2] = TILEW / 2; ys[2] = TILEH + 2;
+						xs[3] = 0;         ys[3] = (TILEH / 2) + 2;
+						cx.setFill(tile.getCliffTexture(angle));
+						cx.fillPolygon(xs, ys, 4);
 						break;
 				}
 
+				cx.setFill(tile.getCliffTexture(angle));
 				for (int i = 0; i < tile.elevation; i++) {
 					cx.translate(0, TILEH / 2);
 					xs[0] = 0;         ys[0] = 0;
@@ -136,7 +169,6 @@ public class Stage {
 					xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
 					xs[4] = TILEW;     ys[4] = 0;
 					xs[5] = TILEW / 2; ys[5] = TILEH / 2;
-					cx.setFill(tile.getCliffTexture(angle));
 					cx.fillPolygon(xs, ys, 6);
 				}
 				cx.restore();
