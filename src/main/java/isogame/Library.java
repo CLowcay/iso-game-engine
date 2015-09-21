@@ -2,6 +2,7 @@ package isogame;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -79,12 +80,13 @@ public class Library {
 
 	/**
 	 * Load the library described in a JSON file.
+	 * @param inStream The input stream.  It will be closed automatically.
 	 * */
-	public Library(String url) throws IOException, CorruptDataException {
+	public Library(InputStream inStream, String url)
+		throws IOException, CorruptDataException
+	{
 		try (BufferedReader in =
-			new BufferedReader(
-			new InputStreamReader(
-				this.getClass().getResourceAsStream(url), "UTF-8"))
+			new BufferedReader(new InputStreamReader(inStream, "UTF-8"))
 		) {
 			if (in == null) throw new FileNotFoundException("File not found " + url);
 			JSONParser parser = new JSONParser();
