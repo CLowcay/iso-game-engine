@@ -16,9 +16,13 @@ public class MapEditor extends Application {
 
 	@Override
 	public void start(javafx.stage.Stage primaryStage) {
-		Canvas canvas = new Canvas(960, 540);
 		StackPane root = new StackPane();
+		Scene scene = new Scene(root, 960, 540);
+
+		Canvas canvas = new Canvas();
 		root.getChildren().add(canvas);
+		canvas.widthProperty().bind(scene.widthProperty());
+		canvas.heightProperty().bind(scene.heightProperty());
 
 		try {
 			Stage stage = exampleStage();
@@ -40,19 +44,23 @@ public class MapEditor extends Application {
 						count0 = count;
 					}
 
-
 					GraphicsContext cx = canvas.getGraphicsContext2D();
 					view.renderFrame(cx, stage);
 				}
 			};
 
-			animateCanvas.start();
-
-			Scene scene = new Scene(root, 960, 540);
-
 			primaryStage.setTitle("Hello World!");
 			primaryStage.setScene(scene);
+			animateCanvas.start();
 			primaryStage.show();
+
+			// Listen for window resize events
+			scene.widthProperty().addListener((obs, w, w0) -> {
+				view.setViewport(w.intValue(), (int) canvas.getHeight());
+			});
+			scene.heightProperty().addListener((obs, h, h0) -> {
+				view.setViewport((int) canvas.getWidth(), h.intValue());
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
