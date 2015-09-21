@@ -15,6 +15,7 @@ import javafx.scene.image.Image;
  * 
  * */
 public class SpriteAnimation {
+	public final String id;
 	public final int frames;
 	public final int framerate;  // in fps
 	public final int w;  // width of a single frame.  Width of the image is w * frames
@@ -22,20 +23,18 @@ public class SpriteAnimation {
 	private final Image buffer;
 
 	public SpriteAnimation(
+		String id,
+		String url,
 		int frames,
-		int framerate,
-		int w,
-		int h,
-		String url
-	) throws CorruptDataException {
+		int framerate
+	) {
 		this.frames = frames;
 		this.framerate = framerate;
-		this.w = w;
-		this.h = h;
 		this.buffer = new Image(url);
+		this.id = id;
 
-		if ((int) buffer.getWidth() != w * frames || (int) buffer.getHeight() != h * 4)
-			throw new CorruptDataException("Image " + url + " has the wrong dimensions");
+		w = ((int) buffer.getWidth()) / frames;
+		h = ((int) buffer.getHeight()) / 4;
 	}
 
 	public void renderFrame(

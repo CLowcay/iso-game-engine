@@ -11,9 +11,9 @@ public class Sprite {
 
 	public SpriteAnimation animation;
 
-	public Sprite(SpriteInfo info, String animation) {
+	public Sprite(SpriteInfo info) throws CorruptDataException {
 		this.info = info;
-		setAnimation(animation);
+		setAnimation(info.getDefaultAnimation().id);
 	}
 
 	public void setAnimation(String animation) {
