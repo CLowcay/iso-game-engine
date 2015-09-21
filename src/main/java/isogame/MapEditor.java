@@ -4,10 +4,16 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
+import java.util.EnumSet;
+import java.util.Set;
+import static isogame.GlobalConstants.TILEH;
+import static isogame.GlobalConstants.SCROLL_SPEED;
  
 public class MapEditor extends Application {
 	public static void main(final String[] arguments) {
@@ -29,6 +35,11 @@ public class MapEditor extends Application {
 			View view = new View(960, 540);
 			view.centreOnTile(stage, new MapPoint(3, 3));
 
+			final ContinuousAnimator scrolling = new ContinuousAnimator();
+			scrolling.reset(view.getScrollPos());
+
+			final GraphicsContext cx = canvas.getGraphicsContext2D();
+
 			AnimationTimer animateCanvas = new AnimationTimer() {
 				int count0 = 0;
 				int count = 0;
@@ -44,7 +55,7 @@ public class MapEditor extends Application {
 						count0 = count;
 					}
 
-					GraphicsContext cx = canvas.getGraphicsContext2D();
+					view.setScrollPos(scrolling.valueAt(now));
 					view.renderFrame(cx, stage);
 				}
 			};
@@ -61,9 +72,68 @@ public class MapEditor extends Application {
 			scene.heightProperty().addListener((obs, h, h0) -> {
 				view.setViewport((int) canvas.getWidth(), h.intValue());
 			});
+
+			// Listen for keyboard events
+			final Set<KeyCode> keys = EnumSet.noneOf(KeyCode.class);
+			scene.setOnKeyPressed(event -> {
+				KeyCode k = event.getCode();
+				keys.add(k);
+				setScrollingAnimation(scrolling, keys);
+			});
+			scene.setOnKeyReleased(event -> {
+				KeyCode k = event.getCode();
+				keys.remove(k);
+				setScrollingAnimation(scrolling, keys);
+			});
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
+		}
+	}
+
+	private void setScrollingAnimation(
+		ContinuousAnimator scrolling, Set<KeyCode> keys
+	) {
+		boolean kup = keys.contains(KeyCode.UP);
+		boolean kdown = keys.contains(KeyCode.DOWN);
+		boolean kleft = keys.contains(KeyCode.LEFT);
+		boolean kright = keys.contains(KeyCode.RIGHT);
+
+		if (kup && !kdown) {
+			if (kleft && !kright) {
+				scrolling.setAnimation(new Point2D(TILEH, TILEH), SCROLL_SPEED);
+				scrolling.start();
+			} else if (kright && !kleft) {
+				scrolling.setAnimation(new Point2D(-TILEH, TILEH), SCROLL_SPEED);
+				scrolling.start();
+			} else if (!kleft && !kright) {
+				scrolling.setAnimation(new Point2D(0, TILEH), SCROLL_SPEED);
+				scrolling.start();
+			}
+		} else if (kdown && !kup) {
+			if (kleft && !kright) {
+				scrolling.setAnimation(new Point2D(TILEH, -TILEH), SCROLL_SPEED);
+				scrolling.start();
+			} else if (kright && !kleft) {
+				scrolling.setAnimation(new Point2D(-TILEH, -TILEH), SCROLL_SPEED);
+				scrolling.start();
+			} else if (!kleft && !kright) {
+				scrolling.setAnimation(new Point2D(0, -TILEH), SCROLL_SPEED);
+				scrolling.start();
+			}
+		} else if (!kdown && !kup) {
+			if (kleft && !kright) {
+				scrolling.setAnimation(new Point2D(TILEH, 0), SCROLL_SPEED);
+				scrolling.start();
+			} else if (kright && !kleft) {
+				scrolling.setAnimation(new Point2D(-TILEH, 0), SCROLL_SPEED);
+				scrolling.start();
+			} else {
+				scrolling.stop();
+			}
+		} else {
+			scrolling.stop();
 		}
 	}
 

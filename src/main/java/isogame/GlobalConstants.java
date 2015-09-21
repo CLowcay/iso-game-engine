@@ -12,5 +12,8 @@ public class GlobalConstants {
 
 	public static final double ISO_VIEWPORTW = 1920 * 2;
 	public static final double ISO_VIEWPORTH = 1080 * 2;
+
+	// number of seconds to scroll one tile height
+	public static final double SCROLL_SPEED = 4;
 }
 

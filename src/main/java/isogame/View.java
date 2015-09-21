@@ -11,20 +11,20 @@ import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
 
 public class View {
-	public CameraAngle angle;
+	private CameraAngle angle;
 
 	// These are in iso space coordinates.  Please refer to coordinates.txt for
 	// more information.
-	public double x;
-	public double y;
+	private double x;
+	private double y;
 
 	// letterboxing coordinates
-	public double lx;
-	public double ly;
+	private double lx;
+	private double ly;
 
 	// These are in screen coordinates
-	public double viewportW;
-	public double viewportH;
+	private double viewportW;
+	private double viewportH;
 
 	/**
 	 * Create a view with an initial viewport.
@@ -70,6 +70,23 @@ public class View {
 		y = centre.getY() - ((ISO_VIEWPORTH - TILEH) / 2.0);
 	}
 
+	public void rotateLeft() {
+		angle = angle.nextClockwise();
+	}
+
+	public void rotateRight() {
+		angle = angle.nextAnticlockwise();
+	}
+
+	public void setScrollPos(Point2D p) {
+		this.x = p.getX();
+		this.y = p.getY();
+	}
+
+	public Point2D getScrollPos() {
+		return new Point2D(x, y);
+	}
+
 	/**
 	 * Render a single complete frame.
 	 * */
@@ -89,7 +106,8 @@ public class View {
 
 		Point2D test1 = stage.toIsoCoord(new MapPoint(0, 0), angle);
 		Point2D test2 = t.transform(test1);
-		stage.render(cx, angle, new BoundingBox(x, y, ISO_VIEWPORTW, ISO_VIEWPORTH));
+		stage.render(cx, angle, new BoundingBox(x, y - TILEH,
+				ISO_VIEWPORTW, ISO_VIEWPORTH + (2 * TILEH)));
 
 		cx.restore();
 
