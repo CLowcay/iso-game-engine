@@ -56,9 +56,9 @@ import org.json.simple.parser.ParseException;
  * }
  * */
 public class Library {
-	public Map<String, SpriteInfo> sprites = new HashMap<>();
-	public Map<String, TerrainTexture> terrains = new HashMap<>();
-	public Map<String, CliffTexture> cliffTextures = new HashMap<>();
+	private Map<String, SpriteInfo> sprites = new HashMap<>();
+	private Map<String, TerrainTexture> terrains = new HashMap<>();
+	private Map<String, CliffTexture> cliffTextures = new HashMap<>();
 
 	private CliffTexture defaultCliffTexture = null;
 
@@ -83,10 +83,28 @@ public class Library {
 		else return r;
 	}
 
+	public void addSprite(SpriteInfo sprite) {
+		sprites.put(sprite.id, sprite);
+	}
+
+	public void addTerrain(TerrainTexture terrain) {
+		terrains.put(terrain.id, terrain);
+	}
+
+	public void addCliffTexture(CliffTexture cliffTexture) {
+		cliffTextures.put(cliffTexture.id, cliffTexture);
+	}
+
 	public CliffTexture getDefaultCliffTexture() throws CorruptDataException {
 		if (defaultCliffTexture == null)
 			throw new CorruptDataException("No cliff textures defined");
 		else return defaultCliffTexture;
+	}
+
+	/**
+	 * Create an empty library
+	 * */
+	public Library() {
 	}
 
 	/**
