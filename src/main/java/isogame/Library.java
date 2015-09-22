@@ -5,6 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.simple.JSONArray;
@@ -95,21 +98,34 @@ public class Library {
 			JSONArray terrains = (JSONArray) json.get("terrains");
 			JSONArray cliffTextures = (JSONArray) json.get("cliffTextures");
 
+			if (sprites == null) throw new CorruptDataException(
+				"Missing sprites section in " + url);
+			if (terrains == null) throw new CorruptDataException(
+				"Missing terrains section in " + url);
+			if (cliffTextures == null) throw new CorruptDataException(
+				"Missing cliffTextures section in " + url);
+
 			for (Object x : sprites) {
 				JSONObject sprite = (JSONObject) x;
 				String id = (String) sprite.get("id");
+				if (id == null)
+					throw new CorruptDataException("Missing id for sprite in " + url);
 				this.sprites.put(id, parseSprite(sprite));
 			}
 
 			for (Object x : terrains) {
 				JSONObject terrain = (JSONObject) x;
 				String id = (String) terrain.get("id");
+				if (id == null)
+					throw new CorruptDataException("Missing id for sprite in " + url);
 				this.terrains.put(id, parseTerrain(terrain));
 			}
 
 			for (Object x : cliffTextures) {
 				JSONObject cliffTerrain = (JSONObject) x;
 				String id = (String) cliffTerrain.get("id");
+				if (id == null)
+					throw new CorruptDataException("Missing id for sprite in " + url);
 				this.cliffTextures.put(id, parseCliffTexture(cliffTerrain));
 			}
 
@@ -120,11 +136,38 @@ public class Library {
 		}
 	}
 
-	private SpriteInfo parseSprite(JSONObject sprite) {
+	@SuppressWarnings("unchecked")
+	public void writeToStream(OutputStream outStream) throws IOException {
+		try (PrintWriter out =
+			new PrintWriter(new OutputStreamWriter(outStream, "UTF-8"));
+		) {
+			JSONObject o = new JSONObject();
+
+			JSONArray spriteArray = new JSONArray();
+			sprites.values().forEach(x -> spriteArray.add(x.getJSON()));
+			JSONArray terrainArray = new JSONArray();
+			terrains.values().forEach(x -> terrainArray.add(x.getJSON()));
+			JSONArray cliffArray = new JSONArray();
+			cliffTextures.values().forEach(x -> cliffArray.add(x.getJSON()));
+
+			o.put("sprites", spriteArray);
+			o.put("terrains", terrainArray);
+			o.put("cliffTextures", cliffArray);
+
+			out.print(o);
+		}
+	}
+
+	private SpriteInfo parseSprite(JSONObject sprite)
+		throws CorruptDataException
+	{
 		String id = (String) sprite.get("id");
 		SpriteInfo r = new SpriteInfo(id);
 
 		JSONArray animations = (JSONArray) sprite.get("animations");
+		if (animations == null) throw new CorruptDataException(
+			"Sprite " + id + " is missing animations");
+
 		for (Object x : animations) {
 			JSONObject animation = (JSONObject) x;
 			String animID = (String) animation.get("id");
@@ -132,21 +175,39 @@ public class Library {
 			Number frames = (Number) animation.get("nframes");
 			Number framerate =(Number) animation.get("framerate");
 
+			if (
+				animID == null || url == null || frames == null || framerate == null
+			) {
+				throw new CorruptDataException("Corrupted animation in sprite " + id);
+			}
+
 			r.addAnimation(animID, new SpriteAnimation(
 				animID, url, frames.intValue(), framerate.intValue()));
 		}
 		return r;
 	}
 
-	private TerrainTexture parseTerrain(JSONObject terrain) {
+	private TerrainTexture parseTerrain(JSONObject terrain)
+		throws CorruptDataException
+	{
+		String id = (String) terrain.get("id");
 		String url = (String) terrain.get("url");
-		return new TerrainTexture(url);
+		if (url == null) throw new CorruptDataException(
+			"Terrain " + id + " missing url");
+	
+		return new TerrainTexture(id, url);
 	}
 
-	private CliffTexture parseCliffTexture(JSONObject cliffTerrain) {
+	private CliffTexture parseCliffTexture(JSONObject cliffTerrain)
+		throws CorruptDataException
+	{
+		String id = (String) cliffTerrain.get("id");
 		String urlWide = (String) cliffTerrain.get("urlWide");
 		String urlNarrow = (String) cliffTerrain.get("urlNarrow");
-		return new CliffTexture(urlWide, urlNarrow);
+		if (urlWide == null || urlNarrow == null) throw new CorruptDataException(
+			"Cliff texture " + id + " is missing urls");
+
+		return new CliffTexture(id, urlWide, urlNarrow);
 	}
 }
 

@@ -3,14 +3,23 @@ package isogame;
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
+import org.json.simple.JSONObject;
 
-public class CliffTexture {
+public class CliffTexture implements HasJSONRepresentation {
 	// a paint for every direction the slope could be going.
 	private final Paint ul;
 	private final Paint ur;
 	private final Paint flat;
 
-	public CliffTexture(String urlWide, String urlNarrow) {
+	public final String id;
+	private final String urlWide;
+	private final String urlNarrow;
+
+	public CliffTexture(String id, String urlWide, String urlNarrow) {
+		this.id = id;
+		this.urlWide = urlWide;
+		this.urlNarrow = urlNarrow;
+
 		Image imgWide = new Image(urlWide, false);
 		Image imgNarrow = new Image(urlNarrow, false);
 		ul = new ImagePattern(imgNarrow, -1, 0, 2, 1, true);
@@ -28,6 +37,17 @@ public class CliffTexture {
 			default:
 				throw new RuntimeException("Invalid slope type, this cannot happen");
 		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONObject r = new JSONObject();
+		r.put("id", id);
+		r.put("urlWide", urlWide);
+		r.put("urlNarrow", urlNarrow);
+
+		return r;
 	}
 }
 

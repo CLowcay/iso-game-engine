@@ -144,9 +144,10 @@ public class MapEditor extends Application {
 	 * Make a simple example stage for testing purposes.
 	 * */
 	private Stage exampleStage() throws CorruptDataException {
-		TerrainTexture black = new TerrainTexture("/black.jpg");
-		TerrainTexture white = new TerrainTexture("/white.jpg");
+		TerrainTexture black = new TerrainTexture("black", "/black.jpg");
+		TerrainTexture white = new TerrainTexture("white", "/white.jpg");
 		CliffTexture cliff = new CliffTexture(
+			"cliffs",
 			"/cliff_texture.png",
 			"/cliff_texture_narrow.png");
 		Tile[] data = new Tile[8 * 8];

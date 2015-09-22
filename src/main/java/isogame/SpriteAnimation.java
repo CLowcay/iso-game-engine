@@ -2,6 +2,7 @@ package isogame;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import org.json.simple.JSONObject;
 
 /**
  * Every sprite has four rotations, which are layed out vertically.  Each layer
@@ -14,8 +15,9 @@ import javafx.scene.image.Image;
  * facing down and right
  * 
  * */
-public class SpriteAnimation {
+public class SpriteAnimation implements HasJSONRepresentation {
 	public final String id;
+	private final String url;
 	public final int frames;
 	public final int framerate;  // in fps
 	public final int w;  // width of a single frame.  Width of the image is w * frames
@@ -32,6 +34,7 @@ public class SpriteAnimation {
 		this.framerate = framerate;
 		this.buffer = new Image(url);
 		this.id = id;
+		this.url = url;
 
 		w = ((int) buffer.getWidth()) / frames;
 		h = ((int) buffer.getHeight()) / 4;
@@ -71,6 +74,15 @@ public class SpriteAnimation {
 		cx.drawImage(buffer, frame * w, rotation * h, w, h, x, y, w, h);
 	}
 
-
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONObject r = new JSONObject();
+		r.put("id", id);
+		r.put("url", url);
+		r.put("nframes", new Integer(frames));
+		r.put("framerate", new Integer(framerate));
+		return r;
+	}
 }
 
