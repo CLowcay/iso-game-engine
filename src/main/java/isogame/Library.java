@@ -60,6 +60,8 @@ public class Library {
 	public Map<String, TerrainTexture> terrains = new HashMap<>();
 	public Map<String, CliffTexture> cliffTextures = new HashMap<>();
 
+	private CliffTexture defaultCliffTexture = null;
+
 	public Sprite newSprite(String id) throws CorruptDataException {
 		SpriteInfo i = sprites.get(id);
 		if (i == null)
@@ -79,6 +81,12 @@ public class Library {
 		if (r == null)
 			throw new CorruptDataException("Missing cliff texture " + id);
 		else return r;
+	}
+
+	public CliffTexture getDefaultCliffTexture() throws CorruptDataException {
+		if (defaultCliffTexture == null)
+			throw new CorruptDataException("No cliff textures defined");
+		else return defaultCliffTexture;
 	}
 
 	/**
@@ -207,7 +215,9 @@ public class Library {
 		if (urlWide == null || urlNarrow == null) throw new CorruptDataException(
 			"Cliff texture " + id + " is missing urls");
 
-		return new CliffTexture(id, urlWide, urlNarrow);
+		CliffTexture r = new CliffTexture(id, urlWide, urlNarrow);
+		if (defaultCliffTexture == null) defaultCliffTexture = r;
+		return r;
 	}
 }
 
