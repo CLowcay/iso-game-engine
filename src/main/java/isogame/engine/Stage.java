@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;

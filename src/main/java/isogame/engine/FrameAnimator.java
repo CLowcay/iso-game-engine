@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 public class FrameAnimator {
 	int frame0 = 0;

@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 public class Sprite {
 	private final SpriteInfo info;

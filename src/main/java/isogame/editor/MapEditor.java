@@ -1,5 +1,16 @@
-package isogame;
+package isogame.editor;
  
+import isogame.engine.CliffTexture;
+import isogame.engine.ContinuousAnimator;
+import isogame.engine.CorruptDataException;
+import isogame.engine.MapPoint;
+import isogame.engine.SlopeType;
+import isogame.engine.Stage;
+import isogame.engine.StageInfo;
+import isogame.engine.StartZoneType;
+import isogame.engine.TerrainTexture;
+import isogame.engine.Tile;
+import isogame.engine.View;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;

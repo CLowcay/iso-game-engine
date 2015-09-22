@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 import javafx.scene.paint.Paint;
 

@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

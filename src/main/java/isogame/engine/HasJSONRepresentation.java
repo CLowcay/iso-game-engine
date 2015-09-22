@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 import org.json.simple.JSONObject;
 

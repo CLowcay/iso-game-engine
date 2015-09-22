@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 public class CorruptDataException extends Exception {
 	public CorruptDataException() {

@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 /**
  * The four camera angles.

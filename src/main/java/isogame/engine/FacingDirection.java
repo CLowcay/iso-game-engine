@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 /**
  * What direction a sprite is facing, relative to a bird's-eye-view.

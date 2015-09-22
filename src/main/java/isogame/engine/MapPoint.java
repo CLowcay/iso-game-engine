@@ -1,4 +1,4 @@
-package isogame;
+package isogame.engine;
 
 /**
  * A map coordinate.  See coordinates.txt for more information.
