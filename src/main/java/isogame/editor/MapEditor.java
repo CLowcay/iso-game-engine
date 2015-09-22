@@ -71,7 +71,11 @@ public class MapEditor extends Application {
 		menuBar.getMenus().add(menuFile);
 		guiRoot.setTop(menuBar);
 
+
 		try {
+			LibraryPane library = new LibraryPane("global_library.json");
+			guiRoot.setLeft(library);
+
 			Stage stage = exampleStage();
 			View view = new View(960, 540);
 			view.centreOnTile(stage, new MapPoint(3, 3));
@@ -101,7 +105,7 @@ public class MapEditor extends Application {
 				}
 			};
 
-			primaryStage.setTitle("Hello World!");
+			primaryStage.setTitle("isogame map editor");
 			primaryStage.setScene(scene);
 			animateCanvas.start();
 			primaryStage.show();

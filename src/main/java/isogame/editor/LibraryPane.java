@@ -1,10 +1,116 @@
 package isogame.editor;
 
+import isogame.engine.CliffTexture;
+import isogame.engine.CorruptDataException;
+import isogame.engine.Library;
+import isogame.engine.SlopeType;
+import isogame.engine.TerrainTexture;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class LibraryPane extends VBox {
-	public LibraryPane() {
+	private FlowPane sprites = new FlowPane();
+	private FlowPane textures = new FlowPane();
+	private FlowPane cliffTextures = new FlowPane();
+	private ScrollPane palette = new ScrollPane();
+
+	ToggleGroup spritesGroup = new ToggleGroup();
+	ToggleGroup texturesGroup = new ToggleGroup();
+	ToggleGroup cliffsGroup = new ToggleGroup();
+
+	private Library global;
+	private Library local = null;
+
+	public LibraryPane(String globalLibraryFile)
+		throws IOException, CorruptDataException
+	{
 		super();
+
+		HBox header = new HBox();
+		ToggleButton selectTextures = new ToggleButton("Textures");
+		selectTextures.setSelected(true);
+		ToggleButton selectSprites = new ToggleButton("Sprites");
+		ToggleButton selectCliffs = new ToggleButton("Cliffs");
+		ToggleGroup headerButtons = new ToggleGroup();
+		selectTextures.setToggleGroup(headerButtons);
+		selectSprites.setToggleGroup(headerButtons);
+		selectCliffs.setToggleGroup(headerButtons);
+		Button newButton = new Button("New...");
+
+		selectSprites.setOnAction(event -> {
+			if (!selectSprites.isSelected()) selectSprites.setSelected(true);
+			else palette.setContent(sprites);
+		});
+		selectTextures.setOnAction(event -> {
+			if (!selectTextures.isSelected()) selectTextures.setSelected(true);
+			palette.setContent(textures);
+		});
+		selectCliffs.setOnAction(event -> {
+			if (!selectCliffs.isSelected()) selectCliffs.setSelected(true);
+			palette.setContent(cliffTextures);
+		});
+
+		VBox.setVgrow(palette, Priority.ALWAYS);
+		palette.setPrefWidth(0);
+		palette.setContent(textures);
+		palette.setFitToWidth(true);
+
+		header.getChildren().addAll(
+			selectTextures, selectSprites, selectCliffs, newButton);
+
+		this.getChildren().addAll(header, palette);
+
+		loadGlobalLibrary(globalLibraryFile);
+	}
+
+	/**
+	 * Save the global library.  The local library is saved with the stage.
+	 * */
+	public void save(String filename) throws IOException {
+		global.writeToStream(new FileOutputStream(filename));
+	}
+
+	/**
+	 * To be called once at the time when this object is constructed.
+	 * */
+	private void loadGlobalLibrary(String filename)
+		throws IOException, CorruptDataException
+	{
+		global = new Library(new FileInputStream(filename), filename);
+
+		global.allTerrains().forEach(t -> addTexture(t));
+		global.allCliffTextures().forEach(t -> addCliffTexture(t));
+	}
+
+	private void addTexture(TerrainTexture tex) {
+		Canvas preview = new Canvas(64, 32);
+		GraphicsContext gc = preview.getGraphicsContext2D();
+		gc.setFill(tex.evenPaint);
+		gc.fillRect(0, 0, 64, 32);
+		ToggleButton t = new ToggleButton("", preview);
+		t.setToggleGroup(texturesGroup);
+		textures.getChildren().add(t);
+	}
+
+	private void addCliffTexture(CliffTexture tex) {
+		Canvas preview = new Canvas(64, 32);
+		GraphicsContext gc = preview.getGraphicsContext2D();
+		gc.setFill(tex.getTexture(SlopeType.NONE));
+		gc.fillRect(0, 0, 64, 32);
+		ToggleButton t = new ToggleButton("", preview);
+		t.setToggleGroup(texturesGroup);
+		cliffTextures.getChildren().add(t);
 	}
 }
 

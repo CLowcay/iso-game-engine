@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.simple.JSONArray;
@@ -81,6 +82,18 @@ public class Library {
 		if (r == null)
 			throw new CorruptDataException("Missing cliff texture " + id);
 		else return r;
+	}
+
+	public Collection<SpriteInfo> allSprites() {
+		return sprites.values();
+	}
+
+	public Collection<TerrainTexture> allTerrains() {
+		return terrains.values();
+	}
+
+	public Collection<CliffTexture> allCliffTextures() {
+		return cliffTextures.values();
 	}
 
 	public void addSprite(SpriteInfo sprite) {
