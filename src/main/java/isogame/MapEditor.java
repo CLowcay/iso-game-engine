@@ -7,13 +7,19 @@ import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 import java.util.EnumSet;
 import java.util.Set;
-import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.SCROLL_SPEED;
+import static isogame.GlobalConstants.TILEH;
  
 public class MapEditor extends Application {
 	public static void main(final String[] arguments) {
@@ -29,6 +35,30 @@ public class MapEditor extends Application {
 		root.getChildren().add(canvas);
 		canvas.widthProperty().bind(scene.widthProperty());
 		canvas.heightProperty().bind(scene.heightProperty());
+
+		BorderPane guiRoot = new BorderPane();
+		root.getChildren().add(guiRoot);
+
+		// the main menu
+		MenuBar menuBar = new MenuBar();
+		Menu menuFile = new Menu("File");
+		MenuItem fileNew = new MenuItem("New");
+		fileNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
+		MenuItem fileOpen = new MenuItem("Open");
+		fileOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
+		MenuItem fileSave = new MenuItem("Save");
+		fileSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
+		MenuItem fileSaveAs = new MenuItem("Save As...");
+		fileSaveAs.setAccelerator(KeyCombination.keyCombination("Shift+Ctrl+S"));
+		MenuItem fileExit = new MenuItem("Exit");
+		fileExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
+		fileExit.setOnAction(event -> {
+			System.exit(0);
+		});
+		menuFile.getItems().addAll(
+			fileNew, fileOpen, fileSave, fileSaveAs, new SeparatorMenuItem(), fileExit);
+		menuBar.getMenus().add(menuFile);
+		guiRoot.setTop(menuBar);
 
 		try {
 			Stage stage = exampleStage();
