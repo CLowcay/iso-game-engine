@@ -4,6 +4,7 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +61,36 @@ public class Stage {
 			default: throw new RuntimeException(
 				"Invalid camera angle.  This cannot happen");
 		}
+	}
+
+	/**
+	 * Convert an iso coordinate to the (uncorrected) map tile that lives there.
+	 * */
+	public MapPoint fromIsoCoord(Point2D in, CameraAngle a) {
+		Point2D t;
+		try {
+			switch (a) {
+				case UL:
+					t = rUL.inverseTransform(isoTransform.inverseTransform(in));
+					break;
+				case LL:
+					t = rLL.inverseTransform(isoTransform.inverseTransform(in));
+					break;
+				case LR:
+					t = rLR.inverseTransform(isoTransform.inverseTransform(in));
+					break;
+				case UR:
+					t = rUR.inverseTransform(isoTransform.inverseTransform(in));
+					break;
+				default: throw new RuntimeException(
+					"Invalid camera angle.  This cannot happen");
+			}
+		} catch (NonInvertibleTransformException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+
+		return new MapPoint(
+			(int) Math.floor(t.getX() - 0.5), (int) Math.floor(t.getY() + 0.5));
 	}
 
 	/**

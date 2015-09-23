@@ -36,6 +36,7 @@ public class LibraryPane extends VBox {
 		throws IOException, CorruptDataException
 	{
 		super();
+		this.setFocusTraversable(false);
 
 		HBox header = new HBox();
 		ToggleButton selectTextures = new ToggleButton("Textures");
@@ -65,6 +66,15 @@ public class LibraryPane extends VBox {
 		palette.setPrefWidth(0);
 		palette.setContent(textures);
 		palette.setFitToWidth(true);
+
+		selectTextures.setFocusTraversable(false);
+		selectSprites.setFocusTraversable(false);
+		selectCliffs.setFocusTraversable(false);
+		newButton.setFocusTraversable(false);
+		palette.setFocusTraversable(false);
+		sprites.setFocusTraversable(false);
+		textures.setFocusTraversable(false);
+		cliffTextures.setFocusTraversable(false);
 
 		header.getChildren().addAll(
 			selectTextures, selectSprites, selectCliffs, newButton);
@@ -99,6 +109,7 @@ public class LibraryPane extends VBox {
 		gc.setFill(tex.evenPaint);
 		gc.fillRect(0, 0, 64, 32);
 		ToggleButton t = new ToggleButton("", preview);
+		t.setFocusTraversable(false);
 		t.setToggleGroup(texturesGroup);
 		textures.getChildren().add(t);
 	}
@@ -109,6 +120,7 @@ public class LibraryPane extends VBox {
 		gc.setFill(tex.getTexture(SlopeType.NONE));
 		gc.fillRect(0, 0, 64, 32);
 		ToggleButton t = new ToggleButton("", preview);
+		t.setFocusTraversable(false);
 		t.setToggleGroup(texturesGroup);
 		cliffTextures.getChildren().add(t);
 	}

@@ -17,6 +17,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.Node;
 import java.util.EnumSet;
 import java.util.Set;
 import static isogame.GlobalConstants.SCROLL_SPEED;
@@ -25,7 +26,7 @@ import static isogame.GlobalConstants.TILEH;
 public class EditorCanvas extends Pane {
 	private final AnimationTimer animateCanvas;
 
-	public EditorCanvas() throws CorruptDataException {
+	public EditorCanvas(Node root) throws CorruptDataException {
 		super();
 		this.setFocusTraversable(true);
 
@@ -73,7 +74,7 @@ public class EditorCanvas extends Pane {
 
 		// Listen for keyboard events
 		final Set<KeyCode> keys = EnumSet.noneOf(KeyCode.class);
-		this.setOnKeyPressed(event -> {
+		root.setOnKeyPressed(event -> {
 			KeyCode k = event.getCode();
 			keys.add(k);
 			setScrollingAnimation(scrolling, keys);
@@ -82,9 +83,14 @@ public class EditorCanvas extends Pane {
 				case D: view.rotateRight(); break;
 			}
 		});
-		this.setOnKeyReleased(event -> {
+		root.setOnKeyReleased(event -> {
 			keys.remove(event.getCode());
 			setScrollingAnimation(scrolling, keys);
+		});
+
+		// Listen for mouse events
+		root.setOnMouseMoved(event -> {
+			MapPoint p = view.tileAtMouse(new Point2D(event.getX(), event.getY()), stage);
 		});
 	}
 

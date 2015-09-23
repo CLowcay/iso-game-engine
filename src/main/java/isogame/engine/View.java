@@ -5,6 +5,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 import static isogame.GlobalConstants.ISO_VIEWPORTH;
 import static isogame.GlobalConstants.ISO_VIEWPORTW;
 import static isogame.GlobalConstants.TILEH;
@@ -37,6 +38,8 @@ public class View {
 		y = 0;
 		lx = 0;
 		ly = 0;
+
+		updateScreenTransform();
 	}
 
 	/**
@@ -62,12 +65,15 @@ public class View {
 			viewportW = w;
 			viewportH = h;
 		}
+
+		updateScreenTransform();
 	}
 
 	public void centreOnTile(Stage stage, MapPoint pos) {
 		Point2D centre = stage.toIsoCoord(pos, angle);
 		x = centre.getX() - ((ISO_VIEWPORTW - TILEW) / 2.0);
 		y = centre.getY() - ((ISO_VIEWPORTH - TILEH) / 2.0);
+		updateScreenTransform();
 	}
 
 	public void rotateLeft() {
@@ -81,31 +87,42 @@ public class View {
 	public void setScrollPos(Point2D p) {
 		this.x = p.getX();
 		this.y = p.getY();
+		updateScreenTransform();
 	}
 
 	public Point2D getScrollPos() {
 		return new Point2D(x, y);
 	}
 
+	public MapPoint tileAtMouse(Point2D mouse, Stage stage) {
+		try {
+			return stage.fromIsoCoord(
+				screenTransform.inverseTransform(mouse), angle);
+		} catch (NonInvertibleTransformException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+	}
+
+	Affine screenTransform;
+
+	private void updateScreenTransform() {
+		screenTransform = new Affine();
+		screenTransform.appendTranslation(lx, ly);
+		screenTransform.appendScale(
+			viewportW / ISO_VIEWPORTW, viewportH / ISO_VIEWPORTH);
+		screenTransform.appendTranslation(-x, -y);
+	}
+
 	/**
 	 * Render a single complete frame.
 	 * */
 	public void renderFrame(GraphicsContext cx, Stage stage) {
-		Affine t = new Affine();
-		cx.setTransform(t);
-
 		cx.setFill(Color.WHITE);
 		cx.fillRect(lx, ly, viewportW, viewportH);
 
 		cx.save();
+		cx.setTransform(screenTransform);
 
-		t.appendTranslation(lx, ly);
-		t.appendScale(viewportW / ISO_VIEWPORTW, viewportH / ISO_VIEWPORTH);
-		t.appendTranslation(-x, -y);
-		cx.setTransform(t);
-
-		Point2D test1 = stage.toIsoCoord(new MapPoint(0, 0), angle);
-		Point2D test2 = t.transform(test1);
 		stage.render(cx, angle, new BoundingBox(x, y - TILEH,
 				ISO_VIEWPORTW, ISO_VIEWPORTH + (2 * TILEH)));
 

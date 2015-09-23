@@ -18,7 +18,7 @@ public class MapEditor extends Application {
 
 		try {
 			LibraryPane library = new LibraryPane("global_library.json");
-			EditorCanvas canvas = new EditorCanvas();
+			EditorCanvas canvas = new EditorCanvas(root);
 			MainMenu menuBar = new MainMenu(library);
 
 			guiRoot.setTop(menuBar);
