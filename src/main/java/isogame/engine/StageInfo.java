@@ -122,5 +122,83 @@ public class StageInfo {
 			}
 		};
 	}
+
+	/**
+	 * Iterate over the tiles in the correct order to do mouse collision
+	 * detection when the mouse is at point p with elevation 0.
+	 * */
+	public Iterator<Tile> iterateCollisionDetection(MapPoint p, CameraAngle a) {
+		// vector to move down columns of tiles
+		final int dx;
+		final int dy;
+		final int tx;
+		final int ty;
+
+		switch (a) {
+			case UL: dx = +1; dy = +1; tx = w - 1; ty = h - 1; break;
+			case LL: dx = +1; dy = -1; tx = w - 1; ty =     0; break;
+			case LR: dx = -1; dy = -1; tx =     0; ty =     0; break;
+			case UR: dx = -1; dy = +1; tx =     0; ty = h - 1; break;
+			default: throw new RuntimeException("Invalid camera angle, this cannot happen");
+		}
+
+		int ny = (ty - p.y) / dy;
+		int nx = (tx - p.x) / dx;
+
+		int startx;
+		int starty;
+
+		int xcheck = p.x + (ny * dx);
+		if (xcheck < 0 || xcheck >= w) {
+			startx = p.x + (nx * dx);
+			starty = p.y + (nx * dy);
+		} else {
+			startx = xcheck;
+			starty = p.y + (ny * dy);
+		}
+
+		return new Iterator<Tile>() {
+			int x = startx;
+			int y = starty;
+			int untilMove = 2;
+
+			@Override
+			public boolean hasNext() {
+				return x >= 0 && x < w && y >= 0 && y < h;
+			}
+
+			public Tile next() {
+				if (!hasNext()) throw new NoSuchElementException();
+
+				int rx;
+				int ry;
+
+				switch (untilMove) {
+					case 2:
+						untilMove = 1;
+						rx = x;
+						ry = y + dy;
+						if (ry >= 0 && ry < h) break;
+					case 1:
+						untilMove = 0;
+						rx = x + dx;
+						ry = y;
+						if (rx >= 0 && rx < w) break;
+					case 0:
+						rx = x;
+						ry = y;
+
+						x -= dx;
+						y -= dy;
+						untilMove = 2;
+						break;
+					default: throw new RuntimeException(
+						"Invalid move counter.  This cannot happen");
+				}
+
+				return data[(ry * w) + rx];
+			}
+		};
+	}
 }
 
