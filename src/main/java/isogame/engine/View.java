@@ -96,7 +96,7 @@ public class View {
 
 	public MapPoint tileAtMouse(Point2D mouse, Stage stage) {
 		try {
-			return stage.fromIsoCoord(
+			return stage.mouseTileCollision(
 				screenTransform.inverseTransform(mouse), angle);
 		} catch (NonInvertibleTransformException e) {
 			throw new RuntimeException("This cannot happen", e);

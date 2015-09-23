@@ -118,11 +118,24 @@ public class Stage {
 
 			switch (tile.adjustSlopeForCameraAngle(a)) {
 				case NONE:
-					xs[0] = TILEW / 2; ys[0] = -2;
-					xs[1] = TILEW + 4; ys[1] = TILEH / 2;
-					xs[2] = TILEW / 2; ys[2] = TILEH + 2;
-					xs[3] = -4;        ys[3] = TILEH / 2;
-					pts = 4;
+					if (tile.elevation == 0) {
+						xs[0] = TILEW / 2; ys[0] = -2;
+						xs[1] = TILEW + 4; ys[1] = TILEH / 2;
+						xs[2] = TILEW / 2; ys[2] = TILEH + 2;
+						xs[3] = -4;        ys[3] = TILEH / 2;
+						pts = 4;
+					} else if (tile.elevation > 0) {
+						double extension = (TILEH * ((double) tile.elevation)) / 2;
+						xs[0] = TILEW / 2; ys[0] = -2;
+						xs[1] = TILEW + 4; ys[1] = TILEH / 2;
+						xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + extension + 2;
+						xs[3] = TILEW / 4; ys[3] = TILEH + extension + 2;
+						xs[4] = -4;        ys[4] = (TILEH / 2) + extension + 2;
+						xs[5] = -4;        ys[5] = TILEH / 2;
+						pts = 6;
+					} else {
+						throw new RuntimeException("Negative elevation not supported");
+					}
 					break;
 				case N:
 					xs[0] = -4;        ys[0] = (TILEH / 2) + 2;

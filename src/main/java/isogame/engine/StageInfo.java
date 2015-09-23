@@ -128,6 +128,11 @@ public class StageInfo {
 	 * detection when the mouse is at point p with elevation 0.
 	 * */
 	public Iterator<Tile> iterateCollisionDetection(MapPoint p, CameraAngle a) {
+		/* WARNING: This method is complicated and subtle, but absolutely essential
+		 * for reliable collision detection.  Think very carefully before modifying
+		 * this code.
+		 * */
+
 		// vector to move down columns of tiles
 		final int dx;
 		final int dy;
@@ -148,23 +153,78 @@ public class StageInfo {
 		int startx;
 		int starty;
 
+		// now we basically have to determine which edge of the board intersects a
+		// line drawn along the vector (dx, dy).
 		int xcheck = p.x + (ny * dx);
-		if (xcheck < 0 || xcheck >= w) {
-			startx = p.x + (nx * dx);
-			starty = p.y + (nx * dy);
-		} else {
+		int ycheck = p.y + (nx * dy);
+		if (xcheck >= 0 && xcheck < w) {
+			// it intercepts the y axis.
 			startx = xcheck;
 			starty = p.y + (ny * dy);
+		} else if (ycheck >= 0 && ycheck < h) {
+			// it intercepts the x axis.
+			startx = p.x + (nx * dx);
+			starty = ycheck;
+		} else {
+			// it does not intercept, but we might be looking at one of the two
+			// corner diamonds on either side of the map.  Shift the start point from
+			// side to side and see if we can find an intercept starting at the
+			// shifted point.
+			int x = p.x - dx;
+			int y = p.y;
+			ny = (ty - y) / dy;
+			nx = (tx - x) / dx;
+
+			xcheck = x + (ny * dx);
+			ycheck = y + (nx * dy);
+			if (xcheck >= 0 && xcheck < w) {
+				startx = xcheck;
+				starty = y + (ny * dy);
+			} else if (ycheck >= 0 && ycheck < h) {
+				startx = x + (nx * dx);
+				starty = ycheck;
+			} else {
+				x = p.x;
+				y = p.y - dy;
+				ny = (ty - y) / dy;
+				nx = (tx - x) / dx;
+
+				xcheck = x + (ny * dx);
+				ycheck = y + (nx * dy);
+				if (xcheck >= 0 && xcheck < w) {
+					startx = xcheck;
+					starty = y + (ny * dy);
+				} else if (ycheck >= 0 && ycheck < h) {
+					startx = x + (nx * dx);
+					starty = ycheck;
+				} else {
+					// no, there really is no intercept, so just set the starting point
+					// to something arbitrary.  The iterator will not that this is not a
+					// valid point and no tiles will be iterated over in this case.
+					startx = p.x;
+					starty = p.y;
+				}
+			}
 		}
 
 		return new Iterator<Tile>() {
 			int x = startx;
 			int y = starty;
+
+			int xa = startx + dx;
+			int ya = starty;
+
+			int xb = startx;
+			int yb = starty + dy;
+
 			int untilMove = 2;
 
 			@Override
 			public boolean hasNext() {
-				return x >= 0 && x < w && y >= 0 && y < h;
+				return
+					(x  >= 0 &&  x < w &&  y >= 0 &&  y < h) ||
+					(xa >= 0 && xa < w && ya >= 0 && ya < h) ||
+					(xb >= 0 && xb < w && yb >= 0 && yb < h);
 			}
 
 			public Tile next() {
@@ -176,21 +236,18 @@ public class StageInfo {
 				switch (untilMove) {
 					case 2:
 						untilMove = 1;
-						rx = x;
-						ry = y + dy;
-						if (ry >= 0 && ry < h) break;
+						rx = xa; ry = ya;
+						xa -= dx; ya -= dy;
+						if (rx >= 0 && rx < w && ry >= 0 && ry < h) break;
 					case 1:
 						untilMove = 0;
-						rx = x + dx;
-						ry = y;
-						if (rx >= 0 && rx < w) break;
+						rx = xb; ry = yb;
+						xb -= dx; yb -= dy;
+						if (rx >= 0 && rx < w && ry >= 0 && ry < h) break;
 					case 0:
-						rx = x;
-						ry = y;
-
-						x -= dx;
-						y -= dy;
 						untilMove = 2;
+						rx = x; ry = y;
+						x  -= dx; y  -= dy;
 						break;
 					default: throw new RuntimeException(
 						"Invalid move counter.  This cannot happen");

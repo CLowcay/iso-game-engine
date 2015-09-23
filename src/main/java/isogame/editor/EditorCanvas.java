@@ -100,10 +100,10 @@ public class EditorCanvas extends Pane {
 			@Override
 			public void handle(MouseEvent event) {
 				MapPoint p = view.tileAtMouse(new Point2D(event.getX(), event.getY()), stage);
-				if (p != p0 && stage.terrain.hasTile(p)) {
+				if (p != p0) {
 					p0 = p;
 					stage.clearAllHighlighting();
-					stage.setHighlight(p, 0);
+					if (p != null) stage.setHighlight(p, 0);
 				}
 			}
 		});
