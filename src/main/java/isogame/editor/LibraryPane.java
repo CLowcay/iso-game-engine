@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.File;
 
 public class LibraryPane extends VBox {
 	private FlowPane sprites = new FlowPane();
@@ -32,7 +33,7 @@ public class LibraryPane extends VBox {
 	private Library global;
 	private Library local = null;
 
-	public LibraryPane(String globalLibraryFile, EditorCanvas canvas)
+	public LibraryPane(File dataRoot, EditorCanvas canvas)
 		throws IOException, CorruptDataException
 	{
 		super();
@@ -81,7 +82,8 @@ public class LibraryPane extends VBox {
 
 		this.getChildren().addAll(header, palette);
 
-		loadGlobalLibrary(globalLibraryFile, canvas);
+		loadGlobalLibrary(
+			(new File(dataRoot, "global_library.json")).toString(), canvas);
 	}
 
 	/**
