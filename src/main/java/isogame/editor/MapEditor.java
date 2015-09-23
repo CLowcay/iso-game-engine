@@ -17,8 +17,8 @@ public class MapEditor extends Application {
 		BorderPane guiRoot = new BorderPane();
 
 		try {
-			LibraryPane library = new LibraryPane("global_library.json");
 			EditorCanvas canvas = new EditorCanvas(root);
+			LibraryPane library = new LibraryPane("global_library.json", canvas);
 			MainMenu menuBar = new MainMenu(library);
 
 			guiRoot.setTop(menuBar);

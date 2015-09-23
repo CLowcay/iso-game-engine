@@ -22,6 +22,14 @@ public class StageInfo {
 		return data[(pos.y * w) + pos.x];
 	}
 
+	public void setTile(Tile tile)
+		throws IndexOutOfBoundsException
+	{
+		if (tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= w || tile.pos.y >= h)
+			throw new IndexOutOfBoundsException();
+		data[(tile.pos.y * w) + tile.pos.x] = tile;
+	}
+
 	public boolean hasTile(MapPoint pos) {
 		return pos.x >= 0 && pos.y >= 0 && pos.x < w && pos.y < h;
 	}

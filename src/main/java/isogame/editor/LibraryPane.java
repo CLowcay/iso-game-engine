@@ -32,7 +32,7 @@ public class LibraryPane extends VBox {
 	private Library global;
 	private Library local = null;
 
-	public LibraryPane(String globalLibraryFile)
+	public LibraryPane(String globalLibraryFile, EditorCanvas canvas)
 		throws IOException, CorruptDataException
 	{
 		super();
@@ -81,7 +81,7 @@ public class LibraryPane extends VBox {
 
 		this.getChildren().addAll(header, palette);
 
-		loadGlobalLibrary(globalLibraryFile);
+		loadGlobalLibrary(globalLibraryFile, canvas);
 	}
 
 	/**
@@ -94,16 +94,16 @@ public class LibraryPane extends VBox {
 	/**
 	 * To be called once at the time when this object is constructed.
 	 * */
-	private void loadGlobalLibrary(String filename)
+	private void loadGlobalLibrary(String filename, EditorCanvas canvas)
 		throws IOException, CorruptDataException
 	{
 		global = new Library(new FileInputStream(filename), filename);
 
-		global.allTerrains().forEach(t -> addTexture(t));
-		global.allCliffTextures().forEach(t -> addCliffTexture(t));
+		global.allTerrains().forEach(t -> addTexture(t, canvas));
+		global.allCliffTextures().forEach(t -> addCliffTexture(t, canvas));
 	}
 
-	private void addTexture(TerrainTexture tex) {
+	private void addTexture(TerrainTexture tex, EditorCanvas canvas) {
 		Canvas preview = new Canvas(64, 32);
 		GraphicsContext gc = preview.getGraphicsContext2D();
 		gc.setFill(tex.evenPaint);
@@ -111,10 +111,11 @@ public class LibraryPane extends VBox {
 		ToggleButton t = new ToggleButton("", preview);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(texturesGroup);
+		t.setOnAction(event -> canvas.setTool(new TerrainTextureTool(tex)));
 		textures.getChildren().add(t);
 	}
 
-	private void addCliffTexture(CliffTexture tex) {
+	private void addCliffTexture(CliffTexture tex, EditorCanvas canvas) {
 		Canvas preview = new Canvas(64, 32);
 		GraphicsContext gc = preview.getGraphicsContext2D();
 		gc.setFill(tex.getTexture(SlopeType.NONE));

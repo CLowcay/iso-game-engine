@@ -7,6 +7,7 @@ import javafx.scene.paint.Paint;
  * */
 public class Tile {
 	public final int elevation;
+	private final TerrainTexture tex;
 	public final Paint texture;
 	public final CliffTexture cliffTexture;
 	public final SlopeType slope;
@@ -26,6 +27,7 @@ public class Tile {
 		this.elevation = elevation;
 		this.pos = pos;
 
+		tex = texture;
 		if ((pos.x + pos.y) % 2 == 0) {
 			this.texture = texture.evenPaint;
 		} else {
@@ -37,6 +39,34 @@ public class Tile {
 		this.slope = slope;
 		this.isManaZone = isManaZone;
 		this.startZone = startZone;
+	}
+
+	/**
+	 * Make a new tile with a different texture
+	 * */
+	public Tile newTexture(TerrainTexture tex) {
+		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
+	}
+
+	/**
+	 * Make a new tile with different elevation characteristics
+	 * */
+	public Tile newElevatoin(int elevation, SlopeType slope, CliffTexture cliffTexture) {
+		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
+	}
+
+	/**
+	 * Make a new tile with a different mana zone property
+	 * */
+	public Tile newManaZone(boolean isManaZone) {
+		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
+	}
+
+	/**
+	 * Make a new tile with a different start zone type
+	 * */
+	public Tile newStartZone(StartZoneType startZone) {
+		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
 	}
 
 	public SlopeType adjustSlopeForCameraAngle(CameraAngle angle) {

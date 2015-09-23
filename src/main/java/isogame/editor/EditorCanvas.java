@@ -13,6 +13,7 @@ import isogame.engine.Tile;
 import isogame.engine.View;
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -29,6 +30,7 @@ import static isogame.GlobalConstants.TILEH;
 
 public class EditorCanvas extends Pane {
 	private final AnimationTimer animateCanvas;
+	private Tool tool = null;
 
 	public EditorCanvas(Node root) throws CorruptDataException {
 		super();
@@ -95,18 +97,41 @@ public class EditorCanvas extends Pane {
 		});
 
 		// Listen for mouse events
-		root.setOnMouseMoved(new EventHandler<MouseEvent>() {
+		root.addEventHandler(MouseEvent.ANY, new EventHandler<MouseEvent>() {
 			MapPoint p0 = null;
+
 			@Override
 			public void handle(MouseEvent event) {
-				MapPoint p = view.tileAtMouse(new Point2D(event.getX(), event.getY()), stage);
-				if (p != p0) {
-					p0 = p;
-					stage.clearAllHighlighting();
-					if (p != null) stage.setHighlight(p, 0);
+				EventType etype = event.getEventType();
+				if (etype == MouseEvent.MOUSE_MOVED ||
+					etype == MouseEvent.MOUSE_DRAGGED
+				) {
+					MapPoint p = view.tileAtMouse(
+						new Point2D(event.getX(), event.getY()), stage);
+
+					if (p != p0) {
+						p0 = p;
+						stage.clearAllHighlighting();
+						if (p != null) {
+							stage.setHighlight(p, 0);
+
+							if (event.isPrimaryButtonDown() && tool != null) {
+								tool.apply(p, stage);
+							}
+						}
+					}
+				} else if (etype == MouseEvent.MOUSE_PRESSED) {
+					MapPoint p = view.tileAtMouse(
+						new Point2D(event.getX(), event.getY()), stage);
+
+					if (p != null && tool != null) tool.apply(p, stage);
 				}
 			}
 		});
+	}
+
+	public void setTool(Tool tool) {
+		this.tool = tool;
 	}
 
 	/**
