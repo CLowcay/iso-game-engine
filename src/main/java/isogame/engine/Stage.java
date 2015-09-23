@@ -75,25 +75,22 @@ public class Stage {
 			switch (a) {
 				case UL:
 					t = rUL.inverseTransform(isoTransform.inverseTransform(in));
-					break;
+					return new MapPoint((int) (t.getX() - 0.5), (int) t.getY());
 				case LL:
 					t = rLL.inverseTransform(isoTransform.inverseTransform(in));
-					break;
+					return new MapPoint((int) (t.getX() + 0.5), (int) (t.getY() + 1.5));
 				case LR:
 					t = rLR.inverseTransform(isoTransform.inverseTransform(in));
-					break;
+					return new MapPoint((int) (t.getX() + 1.5), (int) t.getY());
 				case UR:
 					t = rUR.inverseTransform(isoTransform.inverseTransform(in));
-					break;
+					return new MapPoint((int) (t.getX() - 1.5), (int) (t.getY() + 0.5));
 				default: throw new RuntimeException(
 					"Invalid camera angle.  This cannot happen");
 			}
 		} catch (NonInvertibleTransformException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
-
-		return new MapPoint(
-			(int) Math.floor(t.getX() - 0.5), (int) Math.floor(t.getY() + 0.5));
 	}
 
 	/**
@@ -129,7 +126,7 @@ public class Stage {
 						xs[0] = TILEW / 2; ys[0] = -2;
 						xs[1] = TILEW + 4; ys[1] = TILEH / 2;
 						xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + extension + 2;
-						xs[3] = TILEW / 4; ys[3] = TILEH + extension + 2;
+						xs[3] = TILEW / 2; ys[3] = TILEH + extension + 2;
 						xs[4] = -4;        ys[4] = (TILEH / 2) + extension + 2;
 						xs[5] = -4;        ys[5] = TILEH / 2;
 						pts = 6;
