@@ -12,10 +12,12 @@ import isogame.engine.TerrainTexture;
 import isogame.engine.Tile;
 import isogame.engine.View;
 import javafx.animation.AnimationTimer;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.Node;
 import java.util.EnumSet;
@@ -89,8 +91,17 @@ public class EditorCanvas extends Pane {
 		});
 
 		// Listen for mouse events
-		root.setOnMouseMoved(event -> {
-			MapPoint p = view.tileAtMouse(new Point2D(event.getX(), event.getY()), stage);
+		root.setOnMouseMoved(new EventHandler<MouseEvent>() {
+			MapPoint p0 = null;
+			@Override
+			public void handle(MouseEvent event) {
+				MapPoint p = view.tileAtMouse(new Point2D(event.getX(), event.getY()), stage);
+				if (p != p0 && stage.terrain.hasTile(p)) {
+					p0 = p;
+					stage.clearAllHighlighting();
+					stage.setHighlight(p, 0);
+				}
+			}
 		});
 	}
 

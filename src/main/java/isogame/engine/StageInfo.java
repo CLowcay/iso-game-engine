@@ -22,6 +22,10 @@ public class StageInfo {
 		return data[(pos.y * w) + pos.x];
 	}
 
+	public boolean hasTile(MapPoint pos) {
+		return pos.x >= 0 && pos.y >= 0 && pos.x < w && pos.y < h;
+	}
+
 	/**
 	 * Iterate over the tiles in this sort of order:
 	 * 0 2 5

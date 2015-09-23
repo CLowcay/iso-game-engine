@@ -7,8 +7,10 @@ import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import static isogame.GlobalConstants.ELEVATION_H;
+import static isogame.GlobalConstants.HIGHLIGHT_COLORS;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
 
@@ -101,6 +103,72 @@ public class Stage {
 		return toIsoCoord(p, a).add(0, ELEVATION_H * terrain.getTile(p).elevation);
 	}
 
+	private Map<MapPoint, LinkedList<Integer>> highlighting = new HashMap<>();
+
+	/**
+	 * Highlight a tile.
+	 * @param p The tile to highlight
+	 * @param priority The highlighter to use.  A tile map be under several
+	 * highlights at once, but only the highest priority highlight is actually
+	 * rendered.
+	 * */
+	public void setHighlight(MapPoint p, int priority) {
+		if (priority < 0 || priority >= HIGHLIGHT_COLORS.length) {
+			throw new RuntimeException("Invalid highlight priority " + priority);
+		}
+
+		LinkedList<Integer> highlights = highlighting.get(p);
+
+		// insert new highlight value into the list, keeping the list sorted.  Ugly
+		// but it works
+		if (highlights == null) {
+			highlights = new LinkedList<>();
+			highlights.add(priority);
+			highlighting.put(p, highlights);
+		} else {
+			int i = 0;
+			for (int h : highlights) {
+				if (priority > h) {
+					highlights.add(i, priority);
+					break;
+				} else {
+					i++;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Clear a highlighting level.
+	 * */
+	public void clearHighlighting(int priority) {
+		highlighting.values().forEach(h -> h.remove(priority));
+	}
+
+	/**
+	 * Clear all highlighting.
+	 * */
+	public void clearAllHighlighting() {
+		highlighting.clear();
+	}
+
+	public boolean isHighlighted(MapPoint p) {
+		return highlighting.containsKey(p);
+	}
+
+	private void doHighlight(
+		GraphicsContext cx, MapPoint p, double[] xs, double[] ys
+	) {
+		LinkedList<Integer> h = highlighting.get(p);
+		if (h != null) {
+			Integer i = h.peekFirst();
+			if (i != null) {
+				cx.setFill(HIGHLIGHT_COLORS[i]);
+				cx.fillPolygon(xs, ys, 4);
+			}
+		}
+	}
+
 	/**
 	 * Render the entire stage (skipping the invisible bits for efficiency).
 	 * */
@@ -124,6 +192,7 @@ public class Stage {
 						xs[3] = -4;        ys[3] = TILEH / 2;
 						cx.setFill(tile.texture);
 						cx.fillPolygon(xs, ys, 4);
+						doHighlight(cx, tile.pos, xs, ys);
 						break;
 					case N:
 						xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
@@ -132,6 +201,7 @@ public class Stage {
 						xs[3] = TILEW / 2; ys[3] = TILEH + 4;
 						cx.setFill(tile.texture);
 						cx.fillPolygon(xs, ys, 4);
+						doHighlight(cx, tile.pos, xs, ys);
 
 						xs[0] = TILEW / 2; ys[0] = TILEH;
 						xs[1] = TILEW;     ys[1] = 0;
@@ -147,6 +217,7 @@ public class Stage {
 						xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
 						cx.setFill(tile.texture);
 						cx.fillPolygon(xs, ys, 4);
+						doHighlight(cx, tile.pos, xs, ys);
 
 						xs[0] = 0;         ys[0] = TILEH / 2;
 						xs[1] = TILEW / 2; ys[1] = TILEH / 2;
@@ -164,6 +235,7 @@ public class Stage {
 						xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
 						cx.setFill(tile.texture);
 						cx.fillPolygon(xs, ys, 4);
+						doHighlight(cx, tile.pos, xs, ys);
 
 						xs[0] = 0;         ys[0] = 0;
 						xs[1] = TILEW / 2; ys[1] = TILEH / 2;
@@ -181,6 +253,7 @@ public class Stage {
 						xs[3] = TILEW / 2; ys[3] = TILEH + 4;
 						cx.setFill(tile.texture);
 						cx.fillPolygon(xs, ys, 4);
+						doHighlight(cx, tile.pos, xs, ys);
 
 						xs[0] = 0;         ys[0] = 0;
 						xs[1] = TILEW / 2; ys[1] = TILEH;
