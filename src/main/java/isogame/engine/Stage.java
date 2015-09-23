@@ -3,6 +3,7 @@ package isogame.engine;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Paint;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
@@ -10,7 +11,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import static isogame.GlobalConstants.ELEVATION_H;
-import static isogame.GlobalConstants.HIGHLIGHT_COLORS;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
 
@@ -104,6 +104,11 @@ public class Stage {
 	}
 
 	private Map<MapPoint, LinkedList<Integer>> highlighting = new HashMap<>();
+	private Paint[] highlightColors = {};
+
+	public void setHighlightColors(Paint[] highlightColors) {
+		this.highlightColors = highlightColors;
+	}
 
 	/**
 	 * Highlight a tile.
@@ -113,7 +118,7 @@ public class Stage {
 	 * rendered.
 	 * */
 	public void setHighlight(MapPoint p, int priority) {
-		if (priority < 0 || priority >= HIGHLIGHT_COLORS.length) {
+		if (priority < 0 || priority >= highlightColors.length) {
 			throw new RuntimeException("Invalid highlight priority " + priority);
 		}
 
@@ -163,7 +168,7 @@ public class Stage {
 		if (h != null) {
 			Integer i = h.peekFirst();
 			if (i != null) {
-				cx.setFill(HIGHLIGHT_COLORS[i]);
+				cx.setFill(highlightColors[i]);
 				cx.fillPolygon(xs, ys, 4);
 			}
 		}

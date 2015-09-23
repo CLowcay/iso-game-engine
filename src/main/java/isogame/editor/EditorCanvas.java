@@ -20,6 +20,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import java.util.EnumSet;
 import java.util.Set;
 import static isogame.GlobalConstants.SCROLL_SPEED;
@@ -38,6 +40,8 @@ public class EditorCanvas extends Pane {
 		canvas.heightProperty().bind(this.heightProperty());
 
 		Stage stage = exampleStage();
+		stage.setHighlightColors(new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)});
+
 		View view = new View(960, 540);
 		view.centreOnTile(stage, new MapPoint(3, 3));
 

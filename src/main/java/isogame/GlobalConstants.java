@@ -1,8 +1,5 @@
 package isogame;
 
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-
 /**
  * Any global configuration goes here so it's easy to find when we need to
  * change it.
@@ -18,10 +15,5 @@ public class GlobalConstants {
 
 	// number of seconds to scroll one tile height
 	public static final double SCROLL_SPEED = 4;
-
-	// Colors to use for highlighting
-	public static final Paint[] HIGHLIGHT_COLORS = {
-		Color.BLUE
-	};
 }
 
