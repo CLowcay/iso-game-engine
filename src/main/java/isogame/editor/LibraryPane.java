@@ -82,8 +82,7 @@ public class LibraryPane extends VBox {
 
 		this.getChildren().addAll(header, palette);
 
-		loadGlobalLibrary(
-			(new File(dataRoot, "global_library.json")).toString(), canvas);
+		loadGlobalLibrary((new File(dataRoot, "global_library.json")), canvas);
 	}
 
 	/**
@@ -96,10 +95,10 @@ public class LibraryPane extends VBox {
 	/**
 	 * To be called once at the time when this object is constructed.
 	 * */
-	private void loadGlobalLibrary(String filename, EditorCanvas canvas)
+	private void loadGlobalLibrary(File filename, EditorCanvas canvas)
 		throws IOException, CorruptDataException
 	{
-		global = new Library(new FileInputStream(filename), filename);
+		global = new Library(new FileInputStream(filename), filename.toString());
 
 		global.allTerrains().forEach(t -> addTexture(t, canvas));
 		global.allCliffTextures().forEach(t -> addCliffTexture(t, canvas));
