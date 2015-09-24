@@ -112,7 +112,13 @@ public class LibraryPane extends VBox {
 		ToggleButton t = new ToggleButton("", preview);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(texturesGroup);
-		t.setOnAction(event -> canvas.setTool(new TerrainTextureTool(tex)));
+		t.setOnAction(event -> {
+			if (t.isSelected()) {
+				canvas.setTool(new TerrainTextureTool(tex));
+			} else {
+				canvas.setTool(null);
+			}
+		});
 		textures.getChildren().add(t);
 	}
 

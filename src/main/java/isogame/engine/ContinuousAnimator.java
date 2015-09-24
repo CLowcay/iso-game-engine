@@ -33,7 +33,7 @@ public class ContinuousAnimator {
 	 * @param speed The number of times per second we traverse the entire vector
 	 * */
 	public void setAnimation(Point2D vector, double speed) {
-		if (running) {
+		if (running && (!vector.equals(this.vector) || speed != this.speed)) {
 			animationChanging = true;
 			this.vector1 = vector;
 			this.speed1 = speed;
