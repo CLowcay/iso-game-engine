@@ -8,6 +8,7 @@ import isogame.engine.TerrainTexture;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -15,10 +16,11 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.Node;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.File;
 
 public class LibraryPane extends VBox {
 	private FlowPane sprites = new FlowPane();
@@ -54,13 +56,26 @@ public class LibraryPane extends VBox {
 			if (!selectSprites.isSelected()) selectSprites.setSelected(true);
 			else palette.setContent(sprites);
 		});
+
 		selectTextures.setOnAction(event -> {
 			if (!selectTextures.isSelected()) selectTextures.setSelected(true);
 			palette.setContent(textures);
 		});
+
 		selectCliffs.setOnAction(event -> {
 			if (!selectCliffs.isSelected()) selectCliffs.setSelected(true);
 			palette.setContent(cliffTextures);
+		});
+
+		newButton.setOnAction(event -> {
+			Node selected = palette.getContent();
+			if (selected == sprites) {
+			} else if (selected == textures) {
+				(new NewTextureDialog(dataRoot))
+					.showAndWait()
+					.ifPresent(tex -> addTexture(tex, canvas));
+			} else if (selected == cliffTextures) {
+			}
 		});
 
 		VBox.setVgrow(palette, Priority.ALWAYS);
