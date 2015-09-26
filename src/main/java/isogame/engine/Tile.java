@@ -1,6 +1,10 @@
 package isogame.engine;
 
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Paint;
+import static isogame.GlobalConstants.ELEVATION_H;
+import static isogame.GlobalConstants.TILEH;
+import static isogame.GlobalConstants.TILEW;
 
 /**
  * Represents a single tile in a stage.
@@ -105,6 +109,127 @@ public class Tile {
 	public Paint getCliffTexture(CameraAngle angle) {
 		return cliffTexture.getTexture(adjustSlopeForCameraAngle(angle));
 	}
+
+	private double[] xs = new double[6];
+	private double[] ys = new double[6];
+
+	/**
+	 * Render this tile at (0,0).  If you need to draw the tile somewhere else,
+	 * do a translation before calling this method.
+	 * */
+	public void render(GraphicsContext cx, Paint hcolor, CameraAngle angle) {
+		switch (adjustSlopeForCameraAngle(angle)) {
+			case NONE:
+				xs[0] = TILEW / 2; ys[0] = -2;
+				xs[1] = TILEW + 4; ys[1] = TILEH / 2;
+				xs[2] = TILEW / 2; ys[2] = TILEH + 2;
+				xs[3] = -4;        ys[3] = TILEH / 2;
+				cx.setFill(texture);
+				cx.fillPolygon(xs, ys, 4);
+				doHighlight(cx, hcolor, xs, ys, 4);
+				break;
+			case N:
+				xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
+				xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
+				xs[2] = TILEW + 4; ys[2] = 0;
+				xs[3] = TILEW / 2; ys[3] = TILEH + 4;
+				cx.setFill(texture);
+				cx.fillPolygon(xs, ys, 4);
+				doHighlight(cx, hcolor, xs, ys, 4);
+
+				xs[0] = TILEW / 2; ys[0] = TILEH;
+				xs[1] = TILEW;     ys[1] = 0;
+				xs[2] = TILEW;     ys[2] = (TILEH / 2) + 2;
+				xs[3] = TILEW / 2; ys[3] = TILEH + 2;
+				cx.setFill(getCliffTexture(angle));
+				cx.fillPolygon(xs, ys, 4);
+				doHighlight(cx, hcolor, xs, ys, 4);
+				break;
+			case E:
+				xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
+				xs[1] = TILEW / 2; ys[1] = -2;
+				xs[2] = TILEW + 4; ys[2] = -2;
+				xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
+				cx.setFill(texture);
+				cx.fillPolygon(xs, ys, 4);
+				doHighlight(cx, hcolor, xs, ys, 4);
+
+				xs[0] = 0;         ys[0] = TILEH / 2;
+				xs[1] = TILEW / 2; ys[1] = TILEH / 2;
+				xs[2] = TILEW;     ys[2] = 0;
+				xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
+				xs[4] = TILEW / 2; ys[4] = TILEH + 2;
+				xs[5] = 0;         ys[5] = (TILEH / 2) + 2;
+				cx.setFill(getCliffTexture(angle));
+				cx.fillPolygon(xs, ys, 6);
+				doHighlight(cx, hcolor, xs, ys, 6);
+				break;
+			case S:
+				xs[0] = -4;        ys[0] = -2;
+				xs[1] = TILEW / 2; ys[1] = -2;
+				xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
+				xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
+				cx.setFill(texture);
+				cx.fillPolygon(xs, ys, 4);
+				doHighlight(cx, hcolor, xs, ys, 4);
+
+				xs[0] = 0;         ys[0] = 0;
+				xs[1] = TILEW / 2; ys[1] = TILEH / 2;
+				xs[2] = TILEW;     ys[2] = TILEH / 2;
+				xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
+				xs[4] = TILEW / 2; ys[4] = TILEH + 2;
+				xs[5] = 0;         ys[5] = (TILEH / 2) + 2;
+				cx.setFill(getCliffTexture(angle));
+				cx.fillPolygon(xs, ys, 6);
+				doHighlight(cx, hcolor, xs, ys, 6);
+				break;
+			case W:
+				xs[0] = -4;        ys[0] = 0;
+				xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
+				xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
+				xs[3] = TILEW / 2; ys[3] = TILEH + 4;
+				cx.setFill(texture);
+				cx.fillPolygon(xs, ys, 4);
+				doHighlight(cx, hcolor, xs, ys, 4);
+
+				xs[0] = 0;         ys[0] = 0;
+				xs[1] = TILEW / 2; ys[1] = TILEH;
+				xs[2] = TILEW / 2; ys[2] = TILEH + 2;
+				xs[3] = 0;         ys[3] = (TILEH / 2) + 2;
+				cx.setFill(getCliffTexture(angle));
+				cx.fillPolygon(xs, ys, 4);
+				doHighlight(cx, hcolor, xs, ys, 4);
+				break;
+		}
+
+		if (elevation > 0) {
+			cx.setFill(getCliffTexture(angle));
+			cx.translate(0, TILEH / 2);
+			double elevel = ((double) elevation) * (TILEH / 2);
+			xs[0] = 0;         ys[0] = 0;
+			xs[1] = 0;         ys[1] = elevel + 2;
+			xs[2] = TILEW / 2; ys[2] = elevel + (TILEH / 2) + 2;
+			xs[3] = TILEW;     ys[3] = elevel + 2;
+			xs[4] = TILEW;     ys[4] = 0;
+			xs[5] = TILEW / 2; ys[5] = TILEH / 2;
+			cx.fillPolygon(xs, ys, 6);
+			doHighlight(cx, hcolor, xs, ys, 6);
+		}
+	}
+
+	private void doHighlight(
+		GraphicsContext cx,
+		Paint hcolor,
+		double[] xs,
+		double[] ys,
+		int pts
+	) {
+			if (hcolor != null) {
+				cx.setFill(hcolor);
+				cx.fillPolygon(xs, ys, pts);
+			}
+	}
+
 
 	@Override
 	public String toString() {

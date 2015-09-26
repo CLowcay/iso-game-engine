@@ -274,132 +274,27 @@ public class Stage {
 		return highlighting.containsKey(p);
 	}
 
-	private void doHighlight(
-		GraphicsContext cx, MapPoint p, double[] xs, double[] ys, int pts
-	) {
-		LinkedList<Integer> h = highlighting.get(p);
-		if (h != null) {
-			Integer i = h.peekFirst();
-			if (i != null) {
-				cx.setFill(highlightColors[i]);
-				cx.fillPolygon(xs, ys, pts);
-			}
-		}
-	}
-
 	/**
 	 * Render the entire stage (skipping the invisible bits for efficiency).
 	 * */
 	public void render(GraphicsContext cx, CameraAngle angle, BoundingBox visible) {
-		double[] xs = new double[6];
-		double[] ys = new double[6];
 		terrain.iterateTiles(angle).forEachRemaining(tile -> {
 			Point2D p = correctedIsoCoord(tile.pos, angle);
 			double x = p.getX();
 			double y = p.getY();
 
 			if (visible.intersects(x, y, TILEW, TILEH)) {
+				// get the highlight color
+				Paint hcolor = null;
+				LinkedList<Integer> h = highlighting.get(tile.pos);
+				if (h != null) {
+					Integer i = h.peekFirst();
+					if (i != null) hcolor = highlightColors[i];
+				}
+
 				cx.save();
 				cx.translate(x, y);
-
-				switch (tile.adjustSlopeForCameraAngle(angle)) {
-					case NONE:
-						xs[0] = TILEW / 2; ys[0] = -2;
-						xs[1] = TILEW + 4; ys[1] = TILEH / 2;
-						xs[2] = TILEW / 2; ys[2] = TILEH + 2;
-						xs[3] = -4;        ys[3] = TILEH / 2;
-						cx.setFill(tile.texture);
-						cx.fillPolygon(xs, ys, 4);
-						doHighlight(cx, tile.pos, xs, ys, 4);
-						break;
-					case N:
-						xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
-						xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
-						xs[2] = TILEW + 4; ys[2] = 0;
-						xs[3] = TILEW / 2; ys[3] = TILEH + 4;
-						cx.setFill(tile.texture);
-						cx.fillPolygon(xs, ys, 4);
-						doHighlight(cx, tile.pos, xs, ys, 4);
-
-						xs[0] = TILEW / 2; ys[0] = TILEH;
-						xs[1] = TILEW;     ys[1] = 0;
-						xs[2] = TILEW;     ys[2] = (TILEH / 2) + 2;
-						xs[3] = TILEW / 2; ys[3] = TILEH + 2;
-						cx.setFill(tile.getCliffTexture(angle));
-						cx.fillPolygon(xs, ys, 4);
-						doHighlight(cx, tile.pos, xs, ys, 4);
-						break;
-					case E:
-						xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
-						xs[1] = TILEW / 2; ys[1] = -2;
-						xs[2] = TILEW + 4; ys[2] = -2;
-						xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
-						cx.setFill(tile.texture);
-						cx.fillPolygon(xs, ys, 4);
-						doHighlight(cx, tile.pos, xs, ys, 4);
-
-						xs[0] = 0;         ys[0] = TILEH / 2;
-						xs[1] = TILEW / 2; ys[1] = TILEH / 2;
-						xs[2] = TILEW;     ys[2] = 0;
-						xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
-						xs[4] = TILEW / 2; ys[4] = TILEH + 2;
-						xs[5] = 0;         ys[5] = (TILEH / 2) + 2;
-						cx.setFill(tile.getCliffTexture(angle));
-						cx.fillPolygon(xs, ys, 6);
-						doHighlight(cx, tile.pos, xs, ys, 6);
-						break;
-					case S:
-						xs[0] = -4;        ys[0] = -2;
-						xs[1] = TILEW / 2; ys[1] = -2;
-						xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-						xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
-						cx.setFill(tile.texture);
-						cx.fillPolygon(xs, ys, 4);
-						doHighlight(cx, tile.pos, xs, ys, 4);
-
-						xs[0] = 0;         ys[0] = 0;
-						xs[1] = TILEW / 2; ys[1] = TILEH / 2;
-						xs[2] = TILEW;     ys[2] = TILEH / 2;
-						xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
-						xs[4] = TILEW / 2; ys[4] = TILEH + 2;
-						xs[5] = 0;         ys[5] = (TILEH / 2) + 2;
-						cx.setFill(tile.getCliffTexture(angle));
-						cx.fillPolygon(xs, ys, 6);
-						doHighlight(cx, tile.pos, xs, ys, 6);
-						break;
-					case W:
-						xs[0] = -4;        ys[0] = 0;
-						xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
-						xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-						xs[3] = TILEW / 2; ys[3] = TILEH + 4;
-						cx.setFill(tile.texture);
-						cx.fillPolygon(xs, ys, 4);
-						doHighlight(cx, tile.pos, xs, ys, 4);
-
-						xs[0] = 0;         ys[0] = 0;
-						xs[1] = TILEW / 2; ys[1] = TILEH;
-						xs[2] = TILEW / 2; ys[2] = TILEH + 2;
-						xs[3] = 0;         ys[3] = (TILEH / 2) + 2;
-						cx.setFill(tile.getCliffTexture(angle));
-						cx.fillPolygon(xs, ys, 4);
-						doHighlight(cx, tile.pos, xs, ys, 4);
-						break;
-				}
-
-				if (tile.elevation > 0) {
-					cx.setFill(tile.getCliffTexture(angle));
-					cx.translate(0, TILEH / 2);
-					double elevel = ((double) tile.elevation) * (TILEH / 2);
-					xs[0] = 0;         ys[0] = 0;
-					xs[1] = 0;         ys[1] = elevel + 2;
-					xs[2] = TILEW / 2; ys[2] = elevel + (TILEH / 2) + 2;
-					xs[3] = TILEW;     ys[3] = elevel + 2;
-					xs[4] = TILEW;     ys[4] = 0;
-					xs[5] = TILEW / 2; ys[5] = TILEH / 2;
-					cx.fillPolygon(xs, ys, 6);
-					doHighlight(cx, tile.pos, xs, ys, 6);
-				}
-
+				tile.render(cx, hcolor, angle);
 				cx.restore();
 			}
 		});
