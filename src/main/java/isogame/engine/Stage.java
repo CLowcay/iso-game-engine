@@ -113,6 +113,7 @@ public class Stage {
 			double[] ys = new double[6];
 			int pts;
 
+			double extension = (TILEH * ((double) tile.elevation)) / 2;
 			switch (tile.adjustSlopeForCameraAngle(a)) {
 				case NONE:
 					if (tile.elevation == 0) {
@@ -122,7 +123,6 @@ public class Stage {
 						xs[3] = -4;        ys[3] = TILEH / 2;
 						pts = 4;
 					} else if (tile.elevation > 0) {
-						double extension = (TILEH * ((double) tile.elevation)) / 2;
 						xs[0] = TILEW / 2; ys[0] = -2;
 						xs[1] = TILEW + 4; ys[1] = TILEH / 2;
 						xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + extension + 2;
@@ -138,33 +138,37 @@ public class Stage {
 					xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
 					xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
 					xs[2] = TILEW + 4; ys[2] = 0;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + 4;
-					pts = 5;
+					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
+					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 4;
+					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
+					pts = 6;
 					break;
 				case E:
 					xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
 					xs[1] = TILEW / 2; ys[1] = -2;
 					xs[2] = TILEW + 4; ys[2] = -2;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + 2;
-					pts = 5;
+					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
+					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 2;
+					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
+					pts = 6;
 					break;
 				case S:
 					xs[0] = -4;        ys[0] = -2;
 					xs[1] = TILEW / 2; ys[1] = -2;
 					xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-					xs[3] = TILEW / 2; ys[3] = TILEH  + 2;
-					xs[4] = -4;        ys[4] = (TILEH / 2) + 2;
-					pts = 5;
+					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
+					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 2;
+					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
+					pts = 6;
 					break;
 				case W:
 					xs[0] = -4;        ys[0] = 0;
 					xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
 					xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-					xs[3] = TILEW / 2; ys[3] = TILEH + 4;
-					xs[4] = -4;        ys[4] = (TILEH / 2) + 2;
-					pts = 5;
+					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
+					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 4;
+					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
+					pts = 6;
 					break;
 				default: throw new RuntimeException(
 					"Invalid slope type. This cannot happen");

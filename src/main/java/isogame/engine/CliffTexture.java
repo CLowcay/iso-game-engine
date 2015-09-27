@@ -39,6 +39,10 @@ public class CliffTexture implements HasJSONRepresentation {
 		}
 	}
 
+	public Paint getFlatTexture() {
+		return flat;
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {

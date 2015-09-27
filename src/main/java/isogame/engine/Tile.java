@@ -212,16 +212,17 @@ public class Tile {
 				break;
 		}
 
-		if (elevation > 0) {
-			cx.setFill(getCliffTexture(angle));
+		Paint epaint = cliffTexture.getFlatTexture();
+		for (int i = 0; i < elevation; i++) {
 			cx.translate(0, TILEH / 2);
-			double elevel = ((double) elevation) * (TILEH / 2);
 			xs[0] = 0;         ys[0] = 0;
-			xs[1] = 0;         ys[1] = elevel + 2;
-			xs[2] = TILEW / 2; ys[2] = elevel + (TILEH / 2) + 2;
-			xs[3] = TILEW;     ys[3] = elevel + 2;
+			xs[1] = 0;         ys[1] = (TILEH / 2) + 2;
+			xs[2] = TILEW / 2; ys[2] = TILEH + 2;
+			xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
 			xs[4] = TILEW;     ys[4] = 0;
 			xs[5] = TILEW / 2; ys[5] = TILEH / 2;
+
+			cx.setFill(epaint);
 			cx.fillPolygon(xs, ys, 6);
 			doHighlight(cx, hcolor, xs, ys, 6);
 		}
@@ -239,7 +240,6 @@ public class Tile {
 				cx.fillPolygon(xs, ys, pts);
 			}
 	}
-
 
 	@Override
 	public String toString() {
