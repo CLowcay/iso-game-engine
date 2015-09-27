@@ -20,6 +20,16 @@ public class Tile {
 	public final MapPoint pos;
 
 	public Tile(
+		int elevation,
+		SlopeType slope,
+		TerrainTexture texture,
+		CliffTexture cliffTexture
+	) {
+		this(new MapPoint(0, 0), elevation, slope,
+			false, StartZoneType.NONE, texture, cliffTexture);
+	}
+
+	public Tile(
 		MapPoint pos,
 		int elevation,
 		SlopeType slope,
@@ -55,7 +65,7 @@ public class Tile {
 	/**
 	 * Make a new tile with different elevation characteristics
 	 * */
-	public Tile newElevatoin(int elevation, SlopeType slope, CliffTexture cliffTexture) {
+	public Tile newElevation(int elevation, SlopeType slope, CliffTexture cliffTexture) {
 		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
 	}
 
