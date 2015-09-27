@@ -77,6 +77,9 @@ public class LibraryPane extends VBox {
 					.showAndWait()
 					.ifPresent(tex -> addTexture(tex, canvas));
 			} else if (selected == cliffTextures) {
+				(new NewCliffTextureDialog(dataRoot))
+					.showAndWait()
+					.ifPresent(tex -> addCliffTexture(tex, canvas));
 			}
 		});
 
