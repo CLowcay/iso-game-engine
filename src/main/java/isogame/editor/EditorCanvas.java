@@ -17,12 +17,14 @@ import javafx.event.EventType;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import java.io.File;
 import java.util.EnumSet;
 import java.util.Set;
 import static isogame.GlobalConstants.SCROLL_SPEED;
@@ -31,6 +33,39 @@ import static isogame.GlobalConstants.TILEH;
 public class EditorCanvas extends Pane {
 	private final AnimationTimer animateCanvas;
 	private Tool tool = null;
+	private View view;
+
+	Stage stage = null;
+	File stageFile = null;
+
+	public void loadStage(LibraryPane library) {
+	}
+
+	public void saveStage() {
+	}
+
+	public void saveStageAs() {
+	}
+
+	public void newStage(LibraryPane library) {
+		try {
+			(new NewMapDialog(library.getGlobalLibrary().getTerrain("blank")))
+				.showAndWait()
+				.ifPresent(terrain -> {
+					stage = new Stage(terrain);
+					stageFile = null;
+					stage.setHighlightColors(new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)});
+					view.centreOnTile(stage, new MapPoint(3, 3));
+				});
+		} catch (CorruptDataException e) {
+			Alert d = new Alert(Alert.AlertType.ERROR);
+			d.setHeaderText("Cannot create map");
+			d.setContentText(
+				"You may be missing some textures.\n\nException was:\n" +
+				e.toString());
+			d.show();
+		}
+	}
 
 	public EditorCanvas(Node root) throws CorruptDataException {
 		super();
@@ -41,11 +76,7 @@ public class EditorCanvas extends Pane {
 		canvas.widthProperty().bind(this.widthProperty());
 		canvas.heightProperty().bind(this.heightProperty());
 
-		Stage stage = exampleStage();
-		stage.setHighlightColors(new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)});
-
-		View view = new View(960, 540);
-		view.centreOnTile(stage, new MapPoint(3, 3));
+		view = new View(960, 540);
 
 		final ContinuousAnimator scrolling = new ContinuousAnimator();
 		scrolling.reset(view.getScrollPos());

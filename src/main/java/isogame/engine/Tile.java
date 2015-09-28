@@ -19,6 +19,10 @@ public class Tile {
 	public final StartZoneType startZone;
 	public final MapPoint pos;
 
+	public Tile(MapPoint p, TerrainTexture texture) {
+		this(p, 0, SlopeType.NONE, false, StartZoneType.NONE, texture, null);
+	}
+
 	public Tile(
 		int elevation,
 		SlopeType slope,
@@ -212,19 +216,21 @@ public class Tile {
 				break;
 		}
 
-		Paint epaint = cliffTexture.getFlatTexture();
-		for (int i = 0; i < elevation; i++) {
-			cx.translate(0, TILEH / 2);
-			xs[0] = 0;         ys[0] = 0;
-			xs[1] = 0;         ys[1] = (TILEH / 2) + 2;
-			xs[2] = TILEW / 2; ys[2] = TILEH + 2;
-			xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
-			xs[4] = TILEW;     ys[4] = 0;
-			xs[5] = TILEW / 2; ys[5] = TILEH / 2;
+		if (elevation != 0) {
+			Paint epaint = cliffTexture.getFlatTexture();
+			for (int i = 0; i < elevation; i++) {
+				cx.translate(0, TILEH / 2);
+				xs[0] = 0;         ys[0] = 0;
+				xs[1] = 0;         ys[1] = (TILEH / 2) + 2;
+				xs[2] = TILEW / 2; ys[2] = TILEH + 2;
+				xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
+				xs[4] = TILEW;     ys[4] = 0;
+				xs[5] = TILEW / 2; ys[5] = TILEH / 2;
 
-			cx.setFill(epaint);
-			cx.fillPolygon(xs, ys, 6);
-			doHighlight(cx, hcolor, xs, ys, 6);
+				cx.setFill(epaint);
+				cx.fillPolygon(xs, ys, 6);
+				doHighlight(cx, hcolor, xs, ys, 6);
+			}
 		}
 	}
 

@@ -37,6 +37,10 @@ public class LibraryPane extends VBox {
 	private Library global;
 	private Library local = null;
 
+	public Library getGlobalLibrary() {
+		return global;
+	}
+
 	public LibraryPane(File dataRoot, EditorCanvas canvas)
 		throws IOException, CorruptDataException
 	{

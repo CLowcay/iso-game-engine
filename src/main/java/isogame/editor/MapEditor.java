@@ -27,7 +27,7 @@ public class MapEditor extends Application {
 		try {
 			EditorCanvas canvas = new EditorCanvas(root);
 			LibraryPane library = new LibraryPane(getDataDir(primaryStage), canvas);
-			MainMenu menuBar = new MainMenu(library);
+			MainMenu menuBar = new MainMenu(library, canvas);
 
 			guiRoot.setTop(menuBar);
 			guiRoot.setLeft(library);

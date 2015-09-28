@@ -26,8 +26,8 @@ public class NewCliffTextureDialog extends Dialog<CliffTexture> {
 		super();
 
 		// Set up the header and footer
-		this.setTitle("New terrain texture");
-		this.setHeaderText("Choose an image file to use as a terrain texture");
+		this.setTitle("New cliff texture");
+		this.setHeaderText("Choose an image file to use as a cliff texture");
 		this.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		// The dialog content
