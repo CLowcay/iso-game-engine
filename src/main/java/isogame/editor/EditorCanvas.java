@@ -63,12 +63,14 @@ public class EditorCanvas extends Pane {
 				if (now0 == 0) now0 = now;
 				if ((now - now0) >= 5000000000l) {
 					System.err.println("fps: " + ((count - count0) / 5));
-					now0 = now;
+					now0 = now0 + 5000000000l;
 					count0 = count;
 				}
 
-				view.setScrollPos(scrolling.valueAt(now));
-				view.renderFrame(cx, stage);
+				if (stage != null) {
+					view.setScrollPos(scrolling.valueAt(now));
+					view.renderFrame(cx, stage);
+				}
 			}
 		};
 
@@ -102,6 +104,8 @@ public class EditorCanvas extends Pane {
 
 			@Override
 			public void handle(MouseEvent event) {
+				if (stage == null) return;
+
 				EventType etype = event.getEventType();
 				if (etype == MouseEvent.MOUSE_MOVED ||
 					etype == MouseEvent.MOUSE_DRAGGED
