@@ -2,8 +2,10 @@ package isogame.engine;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
-public class StageInfo {
+public class StageInfo implements HasJSONRepresentation {
 	public final int w;
 	public final int h;
 	private final Tile[] data;
@@ -14,6 +16,22 @@ public class StageInfo {
 		this.data = data;
 		if (data.length != w * h)
 			throw new CorruptDataException("Incorrect number of tiles in stage");
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONArray a = new JSONArray();
+		int ndata = w * h;
+		for (int i = 0; i < ndata; i++) {
+			a.add(data[i].getJSON());
+		}
+
+		JSONObject r = new JSONObject();
+		r.put("w", new Integer(w));
+		r.put("h", new Integer(h));
+		r.put("data", a);
+		return r;
 	}
 
 	public Tile getTile(MapPoint pos) throws IndexOutOfBoundsException {

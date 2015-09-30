@@ -109,6 +109,18 @@ public class LibraryPane extends VBox {
 		loadGlobalLibrary((new File(dataRoot, "global_library.json")), canvas);
 	}
 
+	public Library newLocalLibrary() {
+		local = new Library();
+		return local;
+	}
+
+	/**
+	 * Close the local library.
+	 * */
+	public void closeLocal() {
+		local = null;
+	}
+
 	/**
 	 * Save the global library.  The local library is saved with the stage.
 	 * */

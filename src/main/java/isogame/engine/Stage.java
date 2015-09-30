@@ -11,11 +11,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import static isogame.GlobalConstants.ELEVATION_H;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
 
-public class Stage {
+public class Stage implements HasJSONRepresentation {
 	public final StageInfo terrain;
 	public final Map<MapPoint, Sprite> sprites;
 	// transformation from map coordinates to iso coordinates
@@ -48,6 +50,20 @@ public class Stage {
 
 	public void addSprite(Sprite sprite) {
 		sprites.put(sprite.pos, sprite);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONArray s = new JSONArray();
+		for (Sprite sprite : sprites.values()) {
+			s.add(sprite.getJSON());
+		}
+
+		JSONObject r = new JSONObject();
+		r.put("terrain", terrain.getJSON());
+		r.put("sprites", s);
+		return r;
 	}
 
 	/**

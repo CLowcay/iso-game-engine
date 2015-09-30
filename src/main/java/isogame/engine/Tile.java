@@ -2,6 +2,7 @@ package isogame.engine;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Paint;
+import org.json.simple.JSONObject;
 import static isogame.GlobalConstants.ELEVATION_H;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
@@ -9,7 +10,7 @@ import static isogame.GlobalConstants.TILEW;
 /**
  * Represents a single tile in a stage.
  * */
-public class Tile {
+public class Tile implements HasJSONRepresentation {
 	public final int elevation;
 	private final TerrainTexture tex;
 	public final Paint texture;
@@ -57,6 +58,20 @@ public class Tile {
 		this.slope = slope;
 		this.isManaZone = isManaZone;
 		this.startZone = startZone;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONObject r = new JSONObject();
+		r.put("p", pos.getJSON());
+		r.put("elevation", new Integer(elevation));
+		r.put("slope", slope.name());
+		r.put("isManaZone", new Boolean(isManaZone));
+		r.put("startZone", startZone.name());
+		r.put("texture", tex.id);
+		if (cliffTexture != null) r.put("cliffTexture", cliffTexture.id);
+		return r;
 	}
 
 	/**

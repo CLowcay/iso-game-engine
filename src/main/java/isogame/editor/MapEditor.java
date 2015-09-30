@@ -25,9 +25,10 @@ public class MapEditor extends Application {
 		BorderPane guiRoot = new BorderPane();
 
 		try {
-			EditorCanvas canvas = new EditorCanvas(root);
-			LibraryPane library = new LibraryPane(getDataDir(primaryStage), canvas);
-			MainMenu menuBar = new MainMenu(library, canvas);
+			File dataDir = getDataDir(primaryStage);
+			EditorCanvas canvas = new EditorCanvas(root, primaryStage);
+			LibraryPane library = new LibraryPane(dataDir, canvas);
+			MainMenu menuBar = new MainMenu(library, dataDir, canvas);
 
 			guiRoot.setTop(menuBar);
 			guiRoot.setLeft(library);

@@ -175,8 +175,19 @@ public class Library {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Write this library to an output stream.
+	 * */
 	public void writeToStream(OutputStream outStream) throws IOException {
+		writeToStream(outStream, null);
+	}
+
+	/**
+	 * Write this library to an output stream along with stage data to make a map
+	 * file.
+	 * */
+	@SuppressWarnings("unchecked")
+	public void writeToStream(OutputStream outStream, Stage stage) throws IOException {
 		try (PrintWriter out =
 			new PrintWriter(new OutputStreamWriter(outStream, "UTF-8"));
 		) {
@@ -192,6 +203,7 @@ public class Library {
 			o.put("sprites", spriteArray);
 			o.put("terrains", terrainArray);
 			o.put("cliffTextures", cliffArray);
+			if (stage != null) o.put("stage", stage.getJSON());
 
 			out.print(o);
 		}

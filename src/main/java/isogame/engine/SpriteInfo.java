@@ -37,9 +37,7 @@ public class SpriteInfo implements HasJSONRepresentation {
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
 		JSONArray a = new JSONArray();
-		for (SpriteAnimation animation : animationsOrdered) {
-			a.add(animation.getJSON());
-		}
+		animationsOrdered.forEach(x -> a.add(x.getJSON()));
 
 		JSONObject r = new JSONObject();
 		r.put("id", id);

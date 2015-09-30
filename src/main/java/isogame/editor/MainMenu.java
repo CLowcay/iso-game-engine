@@ -6,33 +6,36 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
+import java.io.File;
 
 public class MainMenu extends MenuBar {
-	public MainMenu(LibraryPane libraryPane, EditorCanvas canvas) {
+	public MainMenu(LibraryPane libraryPane, File dataDir, EditorCanvas canvas) {
 		super();
 
 		Menu menuFile = new Menu("File");
 
 		MenuItem fileNew = new MenuItem("New");
 		fileNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
-		fileNew.setOnAction(event -> canvas.newStage(libraryPane));
+		fileNew.setOnAction(event -> canvas.newStage(libraryPane, dataDir));
 
 		MenuItem fileOpen = new MenuItem("Open");
 		fileOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
-		fileOpen.setOnAction(event -> canvas.loadStage(libraryPane));
+		fileOpen.setOnAction(event -> canvas.loadStage(libraryPane, dataDir));
 
 		MenuItem fileSave = new MenuItem("Save");
 		fileSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
-		fileSave.setOnAction(event -> canvas.saveStage());
+		fileSave.setOnAction(event -> canvas.saveStage(dataDir));
 
 		MenuItem fileSaveAs = new MenuItem("Save As...");
 		fileSaveAs.setAccelerator(KeyCombination.keyCombination("Shift+Ctrl+S"));
-		fileSaveAs.setOnAction(event -> canvas.saveStageAs());
+		fileSaveAs.setOnAction(event -> canvas.saveStageAs(dataDir));
 
 		MenuItem fileExit = new MenuItem("Exit");
 		fileExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
 		fileExit.setOnAction(event -> {
-			System.exit(0);
+			if (canvas.promptSaveContinue(libraryPane, dataDir)) {
+				System.exit(0);
+			}
 		});
 
 		menuFile.getItems().addAll(

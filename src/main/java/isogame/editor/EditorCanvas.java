@@ -3,6 +3,7 @@ package isogame.editor;
 import isogame.engine.CliffTexture;
 import isogame.engine.ContinuousAnimator;
 import isogame.engine.CorruptDataException;
+import isogame.engine.Library;
 import isogame.engine.MapPoint;
 import isogame.engine.SlopeType;
 import isogame.engine.Stage;
@@ -18,14 +19,21 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Window;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.Set;
 import static isogame.GlobalConstants.SCROLL_SPEED;
 import static isogame.GlobalConstants.TILEH;
@@ -33,27 +41,106 @@ import static isogame.GlobalConstants.TILEH;
 public class EditorCanvas extends Pane {
 	private final AnimationTimer animateCanvas;
 	private Tool tool = null;
-	private View view;
+	private final View view;
+	private final Window window;
 
+	boolean saved = true;
 	Stage stage = null;
 	File stageFile = null;
+	Library localLibrary = null;
 
-	public void loadStage(LibraryPane library) {
+	/**
+	 * Load a stage from a file.
+	 * */
+	public void loadStage(LibraryPane library, File dataDir) {
 	}
 
-	public void saveStage() {
+	/**
+	 * Save the current stage.
+	 * */
+	public void saveStage(File dataDir) {
+		if (saved || stage == null) return;
+		if (stageFile == null) {
+			saveStageAs(dataDir);
+		} else {
+			try {
+				localLibrary.writeToStream(new FileOutputStream(stageFile), stage);
+				saved = true;
+			} catch (IOException e) {
+				Alert d = new Alert(Alert.AlertType.ERROR);
+				d.setHeaderText("Cannot save file as " + stageFile.toString());
+				d.setContentText(e.toString());
+				d.show();
+			}
+		}
 	}
 
-	public void saveStageAs() {
+	/**
+	 * Save the current stage under a new name.
+	 * */
+	public void saveStageAs(File dataDir) {
+		if (saved || stage == null) return;
+
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Browse for texture file");
+		fc.setInitialDirectory(dataDir);
+		fc.getExtensionFilters().addAll(new ExtensionFilter("Map Files", "*.map"));
+		File r = fc.showSaveDialog(window);
+		if (r != null) {
+			// automatically append .map if the user didn't give an extension
+			String name = r.getName();
+			if (name.lastIndexOf('.') == -1) {
+				File p = r.getAbsoluteFile().getParentFile();
+				r = new File(p, name + ".map");
+			}
+			stageFile = r;
+			saveStage(dataDir);
+		}
 	}
 
-	public void newStage(LibraryPane library) {
+	/**
+	 * Prompt the user to save before closing a stage.
+	 * @return true if the close action should continue, otherwise false.
+	 * */
+	public boolean promptSaveContinue(LibraryPane library, File dataDir) {
+		if (saved) {
+			return true;
+		} else {
+			Alert d = new Alert(Alert.AlertType.CONFIRMATION, null, 
+				ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+			d.setHeaderText("Save first?");
+
+			Optional<ButtonType> r = d.showAndWait();
+			if (!r.isPresent()) {
+				return false;
+			} else {
+				ButtonType bt = r.get();
+				if (bt == ButtonType.YES) {
+					saveStage(dataDir);
+					return true;
+				} else if (bt == ButtonType.NO) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Make a new stage.
+	 * */
+	public void newStage(LibraryPane library, File dataDir) {
+		if (!promptSaveContinue(library, dataDir)) return;
+
 		try {
 			(new NewMapDialog(library.getGlobalLibrary().getTerrain("blank")))
 				.showAndWait()
 				.ifPresent(terrain -> {
 					stage = new Stage(terrain);
 					stageFile = null;
+					saved = false;
+					localLibrary = library.newLocalLibrary();
 					stage.setHighlightColors(new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)});
 					view.centreOnTile(stage, new MapPoint(3, 3));
 				});
@@ -64,12 +151,18 @@ public class EditorCanvas extends Pane {
 				"You may be missing some textures.\n\nException was:\n" +
 				e.toString());
 			d.show();
+			stage = null;
+			stageFile = null;
+			saved = true;
+			localLibrary = null;
 		}
 	}
 
-	public EditorCanvas(Node root) throws CorruptDataException {
+	public EditorCanvas(Node root, Window window) throws CorruptDataException {
 		super();
 		this.setFocusTraversable(true);
+
+		this.window = window;
 
 		Canvas canvas = new Canvas();
 		this.getChildren().add(canvas);
