@@ -27,6 +27,29 @@ public class CliffTexture implements HasJSONRepresentation {
 		flat = new ImagePattern(imgWide,  0, 0, 1, 1, true);
 	}
 
+	public static CliffTexture fromJSON(JSONObject json)
+		throws CorruptDataException
+	{
+		Object rId = json.get("id");
+		Object rUrlWide = json.get("urlWide");
+		Object rUrlNarrow = json.get("urlNarrow");
+
+		if (rId == null) throw new CorruptDataException("Error in cliff texture, missing id");
+		if (rUrlWide == null) throw new CorruptDataException("Error in cliff texture, missing urlWide");
+		if (rUrlNarrow == null) throw new CorruptDataException("Error in cliff texture, missing urlNarrow");
+
+		try {
+			return new CliffTexture(
+				(String) rId,
+				(String) rUrlWide,
+				(String) rUrlNarrow);
+		} catch (ClassCastException e) {
+			throw new CorruptDataException("Type error in cliff texture", e);
+		} catch (IllegalArgumentException e) {
+			throw new CorruptDataException("Bad filename in cliff texture", e);
+		}
+	}
+
 	public Paint getTexture(SlopeType s) {
 		switch (s) {
 			case N: return ur;

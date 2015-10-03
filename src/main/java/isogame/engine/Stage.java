@@ -48,6 +48,27 @@ public class Stage implements HasJSONRepresentation {
 		isoTransform.appendRotation(45, 0, 0);
 	}
 
+	public static Stage fromJSON(JSONObject json, Library lib)
+		throws CorruptDataException
+	{
+		Object rTerrain = json.get("terrain");
+		Object rSprites = json.get("sprites");
+
+		if (rTerrain == null) throw new CorruptDataException("Error in stage, missing terrain");
+		if (rSprites == null) throw new CorruptDataException("Error in stage, missing sprites");
+
+		try {
+			Stage r = new Stage(StageInfo.fromJSON((JSONObject) rTerrain, lib));
+			JSONArray sprites = (JSONArray) rSprites;
+			for (Object s : sprites) {
+				r.addSprite(Sprite.fromJSON((JSONObject) s, lib));
+			}
+			return r;
+		} catch (CorruptDataException e) {
+			throw new CorruptDataException("Type error in stage", e);
+		}
+	}
+
 	public void addSprite(Sprite sprite) {
 		sprites.put(sprite.pos, sprite);
 	}

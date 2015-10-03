@@ -18,6 +18,34 @@ public class StageInfo implements HasJSONRepresentation {
 			throw new CorruptDataException("Incorrect number of tiles in stage");
 	}
 
+	public static StageInfo fromJSON(JSONObject json, Library lib)
+		throws CorruptDataException
+	{
+		Object rW = json.get("w");
+		Object rH =  json.get("h");
+		Object rData = json.get("data");
+
+		if (rW == null) throw new CorruptDataException("Error in stage, missing w");
+		if (rH == null) throw new CorruptDataException("Error in stage, missing h");
+		if (rData == null) throw new CorruptDataException("Error in stage, missing data");
+
+		try {
+			JSONArray jsonData = (JSONArray) rData;
+			int w = ((Number) rW).intValue();
+			int h = ((Number) rH).intValue();
+			Tile[] data = new Tile[w * h];
+			int i = 0;
+			for (Object t : jsonData) {
+				data[i] = Tile.fromJSON((JSONObject) t, lib);
+				i += 1;
+			}
+
+			return new StageInfo(w, h, data);
+		} catch (ClassCastException e) {
+			throw new CorruptDataException("Type error in stage", e);
+		}
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {

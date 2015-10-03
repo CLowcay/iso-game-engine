@@ -14,6 +14,24 @@ public class MapPoint implements HasJSONRepresentation {
 		this.y = y;
 	}
 
+	public static MapPoint fromJSON(JSONObject json)
+		throws CorruptDataException
+	{
+		Object rX = json.get("x");
+		Object rY = json.get("y");
+
+		if (rX == null) throw new CorruptDataException("Error in point, missing x");
+		if (rY == null) throw new CorruptDataException("Error in point, missing y");
+
+		try {
+			return new MapPoint(
+				((Number) rX).intValue(),
+				((Number) rY).intValue());
+		} catch (ClassCastException e) {
+			throw new CorruptDataException("Type error in point", e);
+		}
+	}
+
 	@Override
 	public String toString() {
 		return "MAP:(" + x + ", " + y + ")";

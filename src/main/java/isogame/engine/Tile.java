@@ -60,6 +60,41 @@ public class Tile implements HasJSONRepresentation {
 		this.startZone = startZone;
 	}
 
+	public static Tile fromJSON(JSONObject json, Library lib)
+		throws CorruptDataException
+	{
+		Object rP = json.get("p");
+		Object rElevation = json.get("elevation");
+		Object rSlope = json.get("slope");
+		Object rIsManaZone = json.get("isManaZone");
+		Object rStartZone = json.get("startZone");
+		Object rTexture = json.get("texture");
+		Object rCliffTexture = json.get("cliffTexture");
+
+		if (rP == null) throw new CorruptDataException("Error in tile, missing p");
+		if (rElevation == null) throw new CorruptDataException("Error in tile, missing elevation");
+		if (rSlope == null) throw new CorruptDataException("Error in tile, missing slope");
+		if (rIsManaZone == null) throw new CorruptDataException("Error in tile, missing isManaZone");
+		if (rStartZone == null) throw new CorruptDataException("Error in tile, missing startZone");
+		if (rTexture == null) throw new CorruptDataException("Error in tile, missing texture");
+
+		try {
+			return new Tile(
+				MapPoint.fromJSON((JSONObject) rP),
+				((Number) rElevation).intValue(),
+				SlopeType.valueOf((String) rSlope),
+				(Boolean) rIsManaZone,
+				StartZoneType.valueOf((String) rStartZone),
+				lib.getTerrain((String) rTexture),
+				rCliffTexture == null? null :
+					lib.getCliffTexture((String) rCliffTexture));
+		} catch (ClassCastException e) {
+			throw new CorruptDataException("Type error in tile", e);
+		} catch (IllegalArgumentException e) {
+			throw new CorruptDataException("Type error in tile", e);
+		}
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {

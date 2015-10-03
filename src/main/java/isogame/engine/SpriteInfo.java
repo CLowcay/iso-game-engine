@@ -21,15 +21,36 @@ public class SpriteInfo implements HasJSONRepresentation {
 		animationsOrdered = new ArrayList<>();
 	}
 
+	public static SpriteInfo fromJSON(JSONObject json)
+		throws CorruptDataException
+	{
+		Object rId = json.get("id");
+		Object rAnimations = json.get("animations");
+
+		if (rId == null) throw new CorruptDataException("Error in sprite, missing id");
+		if (rAnimations == null) throw new CorruptDataException("Error in sprite, missing animations");
+
+		try {
+			SpriteInfo info = new SpriteInfo((String) rId);
+			JSONArray animations = (JSONArray) rAnimations;
+			for (Object a : animations) {
+				info.addAnimation(SpriteAnimation.fromJSON((JSONObject) a));
+			}
+			return info;
+		} catch (ClassCastException e) {
+			throw new CorruptDataException("Type error in sprite", e);
+		}
+	}
+
 	public SpriteAnimation getDefaultAnimation() throws CorruptDataException {
 		if (defaultAnimation == null)
 			throw new CorruptDataException("No animations defined for sprite " + id);
 		else return defaultAnimation;
 	}
 
-	public void addAnimation(String id, SpriteAnimation animation) {
+	public void addAnimation(SpriteAnimation animation) {
 		if (defaultAnimation == null) defaultAnimation = animation;
-		animations.put(id, animation);
+		animations.put(animation.id, animation);
 		animationsOrdered.add(animation);
 	}
 

@@ -28,6 +28,24 @@ public class TerrainTexture implements HasJSONRepresentation {
 		this.oddPaint = new ImagePattern(texture, -0.5, -0.5, 1, 1, true);
 	}
 
+	public static TerrainTexture fromJSON(JSONObject json)
+		throws CorruptDataException
+	{
+		Object rId = json.get("id");
+		Object rUrl = json.get("url");
+
+		if (rId == null) throw new CorruptDataException("Error in texture, missing id");
+		if (rUrl == null) throw new CorruptDataException("Error in texture, missing url");
+
+		try {
+			return new TerrainTexture((String) rId, (String) rUrl);
+		} catch (ClassCastException e) {
+			throw new CorruptDataException("Type error in texture", e);
+		} catch (IllegalArgumentException e) {
+			throw new CorruptDataException("Bad filename in texture", e);
+		}
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {

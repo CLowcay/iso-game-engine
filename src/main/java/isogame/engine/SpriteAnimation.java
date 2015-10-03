@@ -40,6 +40,30 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		h = ((int) buffer.getHeight()) / 4;
 	}
 
+	public static SpriteAnimation fromJSON(JSONObject json)
+		throws CorruptDataException
+	{
+		Object rId = json.get("id");
+		Object rUrl = json.get("url");
+		Object rFrames = json.get("nframes");
+		Object rFramerate = json.get("framerate");
+
+		if (rId == null) throw new CorruptDataException("Error in animation, missing id");
+		if (rUrl == null) throw new CorruptDataException("Error in animation, missing url");
+		if (rFrames == null) throw new CorruptDataException("Error in animation, missing nframes");
+		if (rFramerate == null) throw new CorruptDataException("Error in animation, missing framerate");
+
+		try {
+			return new SpriteAnimation(
+				(String) rId,
+				(String) rUrl,
+				((Number) rFrames).intValue(),
+				((Number) rFramerate).intValue());
+		} catch (ClassCastException e) {
+			throw new CorruptDataException("Type error in animation", e);
+		}
+	}
+
 	public void renderFrame(
 		GraphicsContext cx,
 		int x,

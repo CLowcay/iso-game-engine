@@ -8,5 +8,9 @@ public class CorruptDataException extends Exception {
 	public CorruptDataException(String msg) {
 		super(msg);
 	}
+
+	public CorruptDataException(String msg, Exception cause) {
+		super(msg, cause);
+	}
 }
 

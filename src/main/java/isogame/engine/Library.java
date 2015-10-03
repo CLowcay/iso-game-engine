@@ -70,6 +70,13 @@ public class Library {
 		else return new Sprite(i);
 	}
 
+	public SpriteInfo getSprite(String id) throws CorruptDataException {
+		SpriteInfo i = sprites.get(id);
+		if (i == null)
+			throw new CorruptDataException("Missing sprite " + id);
+		else return i;
+	}
+
 	public TerrainTexture getTerrain(String id) throws CorruptDataException {
 		TerrainTexture r = terrains.get(id);
 		if (r == null)
@@ -149,7 +156,7 @@ public class Library {
 				String id = (String) sprite.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				this.sprites.put(id, parseSprite(sprite));
+				this.sprites.put(id, SpriteInfo.fromJSON(sprite));
 			}
 
 			for (Object x : terrains) {
@@ -157,7 +164,7 @@ public class Library {
 				String id = (String) terrain.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				this.terrains.put(id, parseTerrain(terrain));
+				this.terrains.put(id, TerrainTexture.fromJSON(terrain));
 			}
 
 			for (Object x : cliffTextures) {
@@ -165,7 +172,7 @@ public class Library {
 				String id = (String) cliffTerrain.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				this.cliffTextures.put(id, parseCliffTexture(cliffTerrain));
+				this.cliffTextures.put(id, CliffTexture.fromJSON(cliffTerrain));
 			}
 
 		} catch (ClassCastException e) {
@@ -207,60 +214,6 @@ public class Library {
 
 			out.print(o);
 		}
-	}
-
-	private SpriteInfo parseSprite(JSONObject sprite)
-		throws CorruptDataException
-	{
-		String id = (String) sprite.get("id");
-		SpriteInfo r = new SpriteInfo(id);
-
-		JSONArray animations = (JSONArray) sprite.get("animations");
-		if (animations == null) throw new CorruptDataException(
-			"Sprite " + id + " is missing animations");
-
-		for (Object x : animations) {
-			JSONObject animation = (JSONObject) x;
-			String animID = (String) animation.get("id");
-			String url = (String) animation.get("url");
-			Number frames = (Number) animation.get("nframes");
-			Number framerate =(Number) animation.get("framerate");
-
-			if (
-				animID == null || url == null || frames == null || framerate == null
-			) {
-				throw new CorruptDataException("Corrupted animation in sprite " + id);
-			}
-
-			r.addAnimation(animID, new SpriteAnimation(
-				animID, url, frames.intValue(), framerate.intValue()));
-		}
-		return r;
-	}
-
-	private TerrainTexture parseTerrain(JSONObject terrain)
-		throws CorruptDataException
-	{
-		String id = (String) terrain.get("id");
-		String url = (String) terrain.get("url");
-		if (url == null) throw new CorruptDataException(
-			"Terrain " + id + " missing url");
-	
-		return new TerrainTexture(id, url);
-	}
-
-	private CliffTexture parseCliffTexture(JSONObject cliffTerrain)
-		throws CorruptDataException
-	{
-		String id = (String) cliffTerrain.get("id");
-		String urlWide = (String) cliffTerrain.get("urlWide");
-		String urlNarrow = (String) cliffTerrain.get("urlNarrow");
-		if (urlWide == null || urlNarrow == null) throw new CorruptDataException(
-			"Cliff texture " + id + " is missing urls");
-
-		CliffTexture r = new CliffTexture(id, urlWide, urlNarrow);
-		if (defaultCliffTexture == null) defaultCliffTexture = r;
-		return r;
 	}
 }
 

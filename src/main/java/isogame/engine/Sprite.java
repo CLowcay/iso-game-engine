@@ -18,13 +18,36 @@ public class Sprite implements HasJSONRepresentation {
 		setAnimation(info.getDefaultAnimation().id);
 	}
 
+	public static Sprite fromJSON(JSONObject json, Library lib)
+		throws CorruptDataException
+	{
+		Object rPos = json.get("pos");
+		Object rDirection = json.get("direction");
+		Object rSprite = json.get("sprite");
+
+		if (rPos == null) throw new CorruptDataException("Error in sprite, missing pos");
+		if (rDirection == null) throw new CorruptDataException("Error in sprite, missing direction");
+		if (rSprite == null) throw new CorruptDataException("Error in sprite, missing sprite id");
+
+		try {
+			Sprite sprite = new Sprite(lib.getSprite((String) rSprite));
+			sprite.direction = FacingDirection.valueOf((String) rDirection);
+			sprite.pos = MapPoint.fromJSON((JSONObject) rPos);
+			return sprite;
+		} catch (ClassCastException e) {
+			throw new CorruptDataException("Type error in sprite", e);
+		} catch (IllegalArgumentException e) {
+			throw new CorruptDataException("Type error in sprite", e);
+		}
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
 		JSONObject r = new JSONObject();
 		r.put("pos", pos.getJSON());
 		r.put("direction", direction.name());
-		r.put("sprite", info.getJSON());
+		r.put("sprite", info.id);
 		return r;
 	}
 
@@ -32,5 +55,4 @@ public class Sprite implements HasJSONRepresentation {
 		this.animation = info.animations.get(animation);
 	}
 }
-
 
