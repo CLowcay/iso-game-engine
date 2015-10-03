@@ -29,12 +29,18 @@ import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import static isogame.GlobalConstants.SCROLL_SPEED;
 import static isogame.GlobalConstants.TILEH;
 
@@ -43,6 +49,8 @@ public class EditorCanvas extends Pane {
 	private Tool tool = null;
 	private final View view;
 	private final Window window;
+	private final Paint[] highlightColors =
+		new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)};
 
 	boolean saved = true;
 	Stage stage = null;
@@ -53,6 +61,56 @@ public class EditorCanvas extends Pane {
 	 * Load a stage from a file.
 	 * */
 	public void loadStage(LibraryPane library, File dataDir) {
+		if (promptSaveContinue(library, dataDir)) {
+			FileChooser fc = new FileChooser();
+			fc.setTitle("Open map file");
+			fc.setInitialDirectory(dataDir);
+			fc.getExtensionFilters().addAll(new ExtensionFilter("Map Files", "*.map"));
+			File r = fc.showOpenDialog(window);
+			if (r != null) {
+				try {
+					Library lib = library.loadLocalLibrary(r, this);
+					try (BufferedReader in =
+						new BufferedReader(
+						new InputStreamReader(
+						new FileInputStream(r), "UTF-8")))
+					{
+						JSONParser parser = new JSONParser();
+						JSONObject json = (JSONObject) parser.parse(in);
+						Object stagejson = json.get("stage");
+						if (stagejson == null) throw new CorruptDataException(
+							"Error in map file, missing stage");
+						stage = Stage.fromJSON((JSONObject) stagejson, lib);
+						stage.setHighlightColors(highlightColors);
+						view.centreOnTile(stage, new MapPoint(3, 3));
+						stageFile = r;
+						localLibrary = lib;
+						saved = true;
+						tool = null;
+					}
+				} catch (IOException e) {
+					Alert d = new Alert(Alert.AlertType.ERROR);
+					d.setHeaderText("Cannot read file " + r.toString());
+					d.setContentText(e.toString());
+					d.show();
+				} catch (CorruptDataException e) {
+					Alert d = new Alert(Alert.AlertType.ERROR);
+					d.setHeaderText("Error in file " + r.toString());
+					d.setContentText(e.toString());
+					d.show();
+				} catch (ParseException e) {
+					Alert d = new Alert(Alert.AlertType.ERROR);
+					d.setHeaderText("Error in file " + r.toString());
+					d.setContentText(e.toString());
+					d.show();
+				} catch (ClassCastException e) {
+					Alert d = new Alert(Alert.AlertType.ERROR);
+					d.setHeaderText("Error in file " + r.toString());
+					d.setContentText(e.toString());
+					d.show();
+				}
+			}
+		}
 	}
 
 	/**
@@ -82,7 +140,7 @@ public class EditorCanvas extends Pane {
 		if (saved || stage == null) return;
 
 		FileChooser fc = new FileChooser();
-		fc.setTitle("Browse for texture file");
+		fc.setTitle("Save map file");
 		fc.setInitialDirectory(dataDir);
 		fc.getExtensionFilters().addAll(new ExtensionFilter("Map Files", "*.map"));
 		File r = fc.showSaveDialog(window);
@@ -141,7 +199,7 @@ public class EditorCanvas extends Pane {
 					stageFile = null;
 					saved = false;
 					localLibrary = library.newLocalLibrary();
-					stage.setHighlightColors(new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)});
+					stage.setHighlightColors(highlightColors);
 					view.centreOnTile(stage, new MapPoint(3, 3));
 				});
 		} catch (CorruptDataException e) {

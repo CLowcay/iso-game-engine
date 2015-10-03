@@ -110,7 +110,7 @@ public class LibraryPane extends VBox {
 	}
 
 	public Library newLocalLibrary() {
-		local = new Library();
+		local = new Library(global);
 		return local;
 	}
 
@@ -134,10 +134,26 @@ public class LibraryPane extends VBox {
 	private void loadGlobalLibrary(File filename, EditorCanvas canvas)
 		throws IOException, CorruptDataException
 	{
-		global = new Library(new FileInputStream(filename), filename.toString());
+		global = new Library(
+			new FileInputStream(filename),
+			filename.toString(), null);
 
 		global.allTerrains().forEach(t -> addTexture(t, canvas));
 		global.allCliffTextures().forEach(t -> addCliffTexture(t, canvas));
+	}
+
+	/**
+	 * To be called when loading a new map file.
+	 * */
+	public Library loadLocalLibrary(File filename, EditorCanvas canvas)
+		throws IOException, CorruptDataException
+	{
+		// TODO: clean up old local library
+		local = new Library(
+			new FileInputStream(filename),
+			filename.toString(), global);
+		// TODO: create new buttons
+		return local;
 	}
 
 	private void addTexture(TerrainTexture tex, EditorCanvas canvas) {

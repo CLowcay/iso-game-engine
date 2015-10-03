@@ -42,7 +42,7 @@ public class StageInfo implements HasJSONRepresentation {
 
 			return new StageInfo(w, h, data);
 		} catch (ClassCastException e) {
-			throw new CorruptDataException("Type error in stage", e);
+			throw new CorruptDataException("Type error in stage info", e);
 		}
 	}
 

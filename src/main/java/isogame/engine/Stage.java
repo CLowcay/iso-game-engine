@@ -64,7 +64,7 @@ public class Stage implements HasJSONRepresentation {
 				r.addSprite(Sprite.fromJSON((JSONObject) s, lib));
 			}
 			return r;
-		} catch (CorruptDataException e) {
+		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in stage", e);
 		}
 	}

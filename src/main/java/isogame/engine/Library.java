@@ -63,32 +63,38 @@ public class Library {
 
 	private CliffTexture defaultCliffTexture = null;
 
+	private final Library parent;
+
 	public Sprite newSprite(String id) throws CorruptDataException {
-		SpriteInfo i = sprites.get(id);
-		if (i == null)
-			throw new CorruptDataException("Missing sprite " + id);
-		else return new Sprite(i);
+		SpriteInfo i = getSprite(id);
+		return new Sprite(i);
 	}
 
 	public SpriteInfo getSprite(String id) throws CorruptDataException {
 		SpriteInfo i = sprites.get(id);
-		if (i == null)
-			throw new CorruptDataException("Missing sprite " + id);
-		else return i;
+		if (i == null) {
+			if (parent == null)
+				throw new CorruptDataException("Missing sprite " + id);
+			else return parent.getSprite(id);
+		} else return i;
 	}
 
 	public TerrainTexture getTerrain(String id) throws CorruptDataException {
 		TerrainTexture r = terrains.get(id);
-		if (r == null)
-			throw new CorruptDataException("Missing terrain texture " + id);
-		else return r;
+		if (r == null) {
+			if (parent == null)
+				throw new CorruptDataException("Missing terrain texture " + id);
+			else return parent.getTerrain(id);
+		} else return r;
 	}
 
 	public CliffTexture getCliffTexture(String id) throws CorruptDataException {
 		CliffTexture r = cliffTextures.get(id);
-		if (r == null)
-			throw new CorruptDataException("Missing cliff texture " + id);
-		else return r;
+		if (r == null) {
+			if (parent == null)
+				throw new CorruptDataException("Missing cliff texture " + id);
+			else return parent.getCliffTexture(id);
+		} else return r;
 	}
 
 	public Collection<SpriteInfo> allSprites() {
@@ -124,16 +130,19 @@ public class Library {
 	/**
 	 * Create an empty library
 	 * */
-	public Library() {
+	public Library(Library parent) {
+		this.parent = parent;
 	}
 
 	/**
 	 * Load the library described in a JSON file.
 	 * @param inStream The input stream.  It will be closed automatically.
 	 * */
-	public Library(InputStream inStream, String url)
+	public Library(InputStream inStream, String url, Library parent)
 		throws IOException, CorruptDataException
 	{
+		this.parent = parent;
+		
 		try (BufferedReader in =
 			new BufferedReader(new InputStreamReader(inStream, "UTF-8"))
 		) {
