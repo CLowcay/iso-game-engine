@@ -9,9 +9,11 @@ import isogame.engine.TerrainTexture;
 import isogame.engine.Tile;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.FlowPane;
@@ -23,16 +25,35 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LibraryPane extends VBox {
-	private FlowPane sprites = new FlowPane();
-	private FlowPane textures = new FlowPane();
-	private FlowPane cliffTextures = new FlowPane();
-	private ScrollPane palette = new ScrollPane();
+	private final FlowPane spritesG = new FlowPane();
+	private final FlowPane spritesL = new FlowPane();
+	private final FlowPane texturesG = new FlowPane();
+	private final FlowPane texturesL = new FlowPane();
+	private final FlowPane cliffTexturesG = new FlowPane();
+	private final FlowPane cliffTexturesL = new FlowPane();
 
-	ToggleGroup spritesGroup = new ToggleGroup();
-	ToggleGroup texturesGroup = new ToggleGroup();
-	ToggleGroup cliffsGroup = new ToggleGroup();
+	private final Accordion sprites = new Accordion();
+	private final Accordion textures = new Accordion();
+	private final Accordion cliffTextures = new Accordion();
+
+	private final ScrollPane palette = new ScrollPane();
+
+	private final ToggleGroup spritesGroup = new ToggleGroup();
+	private final ToggleGroup texturesGroup = new ToggleGroup();
+	private final ToggleGroup cliffsGroup = new ToggleGroup();
+
+	private final Map<String, ToggleButton> textureButtonsG = new HashMap<>();
+	private final Map<String, ToggleButton> spriteButtonsG = new HashMap<>();
+	private final Map<String, List<ToggleButton>> cliffButtonsG = new HashMap<>();
+	private final Map<String, ToggleButton> textureButtonsL = new HashMap<>();
+	private final Map<String, ToggleButton> spriteButtonsL = new HashMap<>();
+	private final Map<String, List<ToggleButton>> cliffButtonsL = new HashMap<>();
 
 	private Library global;
 	private Library local = null;
@@ -58,6 +79,16 @@ public class LibraryPane extends VBox {
 		selectCliffs.setToggleGroup(headerButtons);
 		Button newButton = new Button("New...");
 
+		sprites.getPanes().addAll(
+			new TitledPane("Global", spritesG),
+			new TitledPane("Local", spritesL));
+		textures.getPanes().addAll(
+			new TitledPane("Global", texturesG),
+			new TitledPane("Local", texturesL));
+		cliffTextures.getPanes().addAll(
+			new TitledPane("Global", cliffTexturesG),
+			new TitledPane("Local", cliffTexturesL));
+
 		selectSprites.setOnAction(event -> {
 			if (!selectSprites.isSelected()) selectSprites.setSelected(true);
 			else palette.setContent(sprites);
@@ -79,11 +110,11 @@ public class LibraryPane extends VBox {
 			} else if (selected == textures) {
 				(new NewTextureDialog(dataRoot))
 					.showAndWait()
-					.ifPresent(tex -> addTexture(tex, canvas));
+					.ifPresent(tex -> addTexture(tex, canvas, false));
 			} else if (selected == cliffTextures) {
 				(new NewCliffTextureDialog(dataRoot))
 					.showAndWait()
-					.ifPresent(tex -> addCliffTexture(tex, canvas));
+					.ifPresent(tex -> addCliffTexture(tex, canvas, false));
 			}
 		});
 
@@ -119,6 +150,7 @@ public class LibraryPane extends VBox {
 	 * */
 	public void closeLocal() {
 		local = null;
+		// TODO: clean up local library
 	}
 
 	/**
@@ -138,8 +170,8 @@ public class LibraryPane extends VBox {
 			new FileInputStream(filename),
 			filename.toString(), null);
 
-		global.allTerrains().forEach(t -> addTexture(t, canvas));
-		global.allCliffTextures().forEach(t -> addCliffTexture(t, canvas));
+		global.allTerrains().forEach(t -> addTexture(t, canvas, true));
+		global.allCliffTextures().forEach(t -> addCliffTexture(t, canvas, true));
 	}
 
 	/**
@@ -148,7 +180,7 @@ public class LibraryPane extends VBox {
 	public Library loadLocalLibrary(File filename, EditorCanvas canvas)
 		throws IOException, CorruptDataException
 	{
-		// TODO: clean up old local library
+		closeLocal();
 		local = new Library(
 			new FileInputStream(filename),
 			filename.toString(), global);
@@ -156,7 +188,9 @@ public class LibraryPane extends VBox {
 		return local;
 	}
 
-	private void addTexture(TerrainTexture tex, EditorCanvas canvas) {
+	private void addTexture(
+		TerrainTexture tex, EditorCanvas canvas, boolean isGlobal
+	) {
 		Canvas preview = new Canvas(64, 32);
 		GraphicsContext gc = preview.getGraphicsContext2D();
 		gc.setFill(tex.evenPaint);
@@ -168,10 +202,18 @@ public class LibraryPane extends VBox {
 			if (t.isSelected()) canvas.setTool(new TerrainTextureTool(tex));
 			else canvas.setTool(null);
 		});
-		textures.getChildren().add(t);
+		if (isGlobal) {
+			texturesG.getChildren().add(t);
+			textureButtonsG.put(tex.id, t);
+		} else {
+			texturesL.getChildren().add(t);
+			textureButtonsL.put(tex.id, t);
+		}
 	}
 
-	private void addCliffTexture(CliffTexture tex, EditorCanvas canvas) {
+	private void addCliffTexture(
+		CliffTexture tex, EditorCanvas canvas, boolean isGlobal
+	) {
 		Canvas n = new Canvas(64, 48);
 		Canvas s = new Canvas(64, 48);
 		Canvas w = new Canvas(64, 48);
@@ -211,12 +253,13 @@ public class LibraryPane extends VBox {
 			else canvas.setTool(null);
 		});
 
-		cliffTextures.getChildren().add(bn);
-		cliffTextures.getChildren().add(bs);
-		cliffTextures.getChildren().add(bw);
-		cliffTextures.getChildren().add(be);
-		cliffTextures.getChildren().add(bup);
-		cliffTextures.getChildren().add(bdown);
+		if (isGlobal) {
+			cliffTexturesG.getChildren().addAll(bn, bs, bw, be, bup, bdown);
+			cliffButtonsG.put(tex.id, Arrays.asList(bn, bs, bw, be, bup, bdown));
+		} else {
+			cliffTexturesL.getChildren().addAll(bn, bs, bw, be, bup, bdown);
+			cliffButtonsL.put(tex.id, Arrays.asList(bn, bs, bw, be, bup, bdown));
+		}
 	}
 
 	private ToggleButton makeCliffButton(
@@ -226,7 +269,7 @@ public class LibraryPane extends VBox {
 		gc.translate(0, (1 - elevation) * 16);
 		gc.scale(1.0d/8.0d, 1.0d/8.0d);
 		try {
-			(new Tile(elevation, slope, global.getTerrain("black"), tex))
+			(new Tile(elevation, slope, global.getTerrain("blank"), tex))
 				.render(gc, null, CameraAngle.UL);
 		} catch (CorruptDataException e) {
 			throw new RuntimeException("Missing blank texture");
