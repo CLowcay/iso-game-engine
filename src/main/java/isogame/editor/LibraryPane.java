@@ -10,6 +10,7 @@ import isogame.engine.Tile;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
@@ -55,8 +56,11 @@ public class LibraryPane extends VBox {
 	private final Map<String, ToggleButton> spriteButtonsL = new HashMap<>();
 	private final Map<String, List<ToggleButton>> cliffButtonsL = new HashMap<>();
 
-	private Library global;
+	private final File globalLibraryFile;
+	private final Library global;
 	private Library local = null;
+
+	private final EditorCanvas canvas;
 
 	public Library getGlobalLibrary() {
 		return global;
@@ -67,6 +71,7 @@ public class LibraryPane extends VBox {
 	{
 		super();
 		this.setFocusTraversable(false);
+		this.canvas = canvas;
 
 		HBox header = new HBox();
 		ToggleButton selectTextures = new ToggleButton("Textures");
@@ -110,11 +115,11 @@ public class LibraryPane extends VBox {
 			} else if (selected == textures) {
 				(new NewTextureDialog(dataRoot))
 					.showAndWait()
-					.ifPresent(tex -> addTexture(tex, canvas, false));
+					.ifPresent(tex -> addTextureToLibrary(tex, local == null));
 			} else if (selected == cliffTextures) {
 				(new NewCliffTextureDialog(dataRoot))
 					.showAndWait()
-					.ifPresent(tex -> addCliffTexture(tex, canvas, false));
+					.ifPresent(tex -> addCliffTextureToLibrary(tex, local == null));
 			}
 		});
 
@@ -137,7 +142,13 @@ public class LibraryPane extends VBox {
 
 		this.getChildren().addAll(header, palette);
 
-		loadGlobalLibrary((new File(dataRoot, "global_library.json")), canvas);
+		globalLibraryFile = new File(dataRoot, "global_library.json");
+		global = new Library(
+			new FileInputStream(globalLibraryFile),
+			globalLibraryFile.toString(), null);
+
+		global.allTerrains().forEach(t -> addTexture(t, true));
+		global.allCliffTextures().forEach(t -> addCliffTexture(t, true));
 	}
 
 	public Library newLocalLibrary() {
@@ -156,28 +167,22 @@ public class LibraryPane extends VBox {
 	/**
 	 * Save the global library.  The local library is saved with the stage.
 	 * */
-	public void save(String filename) throws IOException {
-		global.writeToStream(new FileOutputStream(filename));
-	}
-
-	/**
-	 * To be called once at the time when this object is constructed.
-	 * */
-	private void loadGlobalLibrary(File filename, EditorCanvas canvas)
-		throws IOException, CorruptDataException
-	{
-		global = new Library(
-			new FileInputStream(filename),
-			filename.toString(), null);
-
-		global.allTerrains().forEach(t -> addTexture(t, canvas, true));
-		global.allCliffTextures().forEach(t -> addCliffTexture(t, canvas, true));
+	private void saveGlobal() {
+		try {
+			global.writeToStream(new FileOutputStream(globalLibraryFile));
+		} catch (IOException e) {
+			Alert d = new Alert(Alert.AlertType.ERROR);
+			d.setHeaderText("Cannot save global library to " +
+				globalLibraryFile.toString());
+			d.setContentText(e.toString());
+			d.show();
+		}
 	}
 
 	/**
 	 * To be called when loading a new map file.
 	 * */
-	public Library loadLocalLibrary(File filename, EditorCanvas canvas)
+	public Library loadLocalLibrary(File filename)
 		throws IOException, CorruptDataException
 	{
 		closeLocal();
@@ -188,9 +193,29 @@ public class LibraryPane extends VBox {
 		return local;
 	}
 
-	private void addTexture(
-		TerrainTexture tex, EditorCanvas canvas, boolean isGlobal
-	) {
+	public void addTextureToLibrary(TerrainTexture tex, boolean isGlobal) {
+		if (isGlobal) {
+			global.addTerrain(tex);
+			addTexture(tex, isGlobal);
+			saveGlobal();
+		} else if (local != null) {
+			local.addTerrain(tex);
+			addTexture(tex, isGlobal);
+		}
+	}
+
+	public void addCliffTextureToLibrary(CliffTexture tex, boolean isGlobal) {
+		if (isGlobal) {
+			global.addCliffTexture(tex);
+			addCliffTexture(tex, isGlobal);
+			saveGlobal();
+		} else if (local != null) {
+			local.addCliffTexture(tex);
+			addCliffTexture(tex, isGlobal);
+		}
+	}
+
+	private void addTexture(TerrainTexture tex, boolean isGlobal) {
 		Canvas preview = new Canvas(64, 32);
 		GraphicsContext gc = preview.getGraphicsContext2D();
 		gc.setFill(tex.evenPaint);
@@ -211,9 +236,7 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	private void addCliffTexture(
-		CliffTexture tex, EditorCanvas canvas, boolean isGlobal
-	) {
+	private void addCliffTexture(CliffTexture tex, boolean isGlobal) {
 		Canvas n = new Canvas(64, 48);
 		Canvas s = new Canvas(64, 48);
 		Canvas w = new Canvas(64, 48);

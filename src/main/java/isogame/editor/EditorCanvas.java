@@ -69,7 +69,7 @@ public class EditorCanvas extends Pane {
 			File r = fc.showOpenDialog(window);
 			if (r != null) {
 				try {
-					Library lib = library.loadLocalLibrary(r, this);
+					Library lib = library.loadLocalLibrary(r);
 					try (BufferedReader in =
 						new BufferedReader(
 						new InputStreamReader(
