@@ -97,6 +97,21 @@ public class Library {
 		} else return r;
 	}
 
+	public void deleteTerrain(String id) throws CorruptDataException {
+		if (terrains.remove(id) == null) throw
+			new CorruptDataException("No such terrain " + id);
+	}
+
+	public void deleteSprite(String id) throws CorruptDataException {
+		if (sprites.remove(id) == null) throw
+			new CorruptDataException("No such sprite " + id);
+	}
+
+	public void deleteCliffTexture(String id) throws CorruptDataException {
+		if (cliffTextures.remove(id) == null) throw
+			new CorruptDataException("No such cliff texture " + id);
+	}
+
 	public Collection<SpriteInfo> allSprites() {
 		return sprites.values();
 	}

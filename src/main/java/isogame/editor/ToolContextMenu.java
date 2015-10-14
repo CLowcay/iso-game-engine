@@ -1,20 +1,34 @@
 package isogame.editor;
 
+import isogame.engine.AssetType;
+
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 
 public class ToolContextMenu extends ContextMenu {
-	public ToolContextMenu(boolean isGlobal) {
+	public ToolContextMenu(LibraryPane library, AssetType type, String id) {
 		super();
 
 		MenuItem global = new MenuItem("Make global");
-		MenuItem delete = new MenuItem("Delete");
+		global.setOnAction(event -> {
+			switch (type) {
+				case TEXTURE: library.makeTextureGlobal(id); break;
+				case SPRITE: library.makeSpriteGlobal(id); break;
+				case CLIFF_TEXTURE: library.makeCliffTextureGlobal(id); break;
+			}
+		});
 
-		if (isGlobal) {
-			this.getItems().addAll(delete);
-		} else {
-			this.getItems().addAll(global, delete);
-		}
+		MenuItem delete = new MenuItem("Delete");
+		delete.setOnAction(event -> {
+			// TODO: check that the texture is not in use
+			switch (type) {
+				case TEXTURE: library.deleteTexture(id); break;
+				case SPRITE: library.deleteSprite(id); break;
+				case CLIFF_TEXTURE: library.deleteCliffTexture(id); break;
+			}
+		});
+
+		this.getItems().addAll(global, delete);
 	}
 }
 

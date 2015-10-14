@@ -1,5 +1,6 @@
 package isogame.editor;
 
+import isogame.engine.AssetType;
 import isogame.engine.CameraAngle;
 import isogame.engine.CliffTexture;
 import isogame.engine.CorruptDataException;
@@ -32,18 +33,13 @@ import java.util.List;
 import java.util.Map;
 
 public class LibraryPane extends VBox {
-	private final FlowPane spritesG = new FlowPane();
-	private final FlowPane spritesL = new FlowPane();
-	private final FlowPane texturesG = new FlowPane();
-	private final FlowPane texturesL = new FlowPane();
-	private final FlowPane cliffTexturesG = new FlowPane();
-	private final FlowPane cliffTexturesL = new FlowPane();
-
-	private final Accordion sprites = new Accordion();
-	private final Accordion textures = new Accordion();
-	private final Accordion cliffTextures = new Accordion();
+	private final GlobalLocalPane sprites;
+	private final GlobalLocalPane textures;
+	private final GlobalLocalPane cliffTextures;
 
 	private final ScrollPane palette = new ScrollPane();
+
+	private final Button newButton;
 
 	private final ToggleGroup spritesGroup = new ToggleGroup();
 	private final ToggleGroup texturesGroup = new ToggleGroup();
@@ -82,17 +78,11 @@ public class LibraryPane extends VBox {
 		selectTextures.setToggleGroup(headerButtons);
 		selectSprites.setToggleGroup(headerButtons);
 		selectCliffs.setToggleGroup(headerButtons);
-		Button newButton = new Button("New...");
+		newButton = new Button("New...");
 
-		sprites.getPanes().addAll(
-			new TitledPane("Global", spritesG),
-			new TitledPane("Local", spritesL));
-		textures.getPanes().addAll(
-			new TitledPane("Global", texturesG),
-			new TitledPane("Local", texturesL));
-		cliffTextures.getPanes().addAll(
-			new TitledPane("Global", cliffTexturesG),
-			new TitledPane("Local", cliffTexturesL));
+		sprites = new GlobalLocalPane(new FlowPane(), new FlowPane());
+		textures = new GlobalLocalPane(new FlowPane(), new FlowPane());
+		cliffTextures = new GlobalLocalPane(new FlowPane(), new FlowPane());
 
 		selectSprites.setOnAction(event -> {
 			if (!selectSprites.isSelected()) selectSprites.setSelected(true);
@@ -109,17 +99,18 @@ public class LibraryPane extends VBox {
 			palette.setContent(cliffTextures);
 		});
 
+		newButton.setDisable(true);
 		newButton.setOnAction(event -> {
 			Node selected = palette.getContent();
 			if (selected == sprites) {
 			} else if (selected == textures) {
 				(new NewTextureDialog(dataRoot))
 					.showAndWait()
-					.ifPresent(tex -> addTextureToLibrary(tex, local == null));
+					.ifPresent(tex -> addTextureToLibrary(tex, false));
 			} else if (selected == cliffTextures) {
 				(new NewCliffTextureDialog(dataRoot))
 					.showAndWait()
-					.ifPresent(tex -> addCliffTextureToLibrary(tex, local == null));
+					.ifPresent(tex -> addCliffTextureToLibrary(tex, false));
 			}
 		});
 
@@ -128,14 +119,10 @@ public class LibraryPane extends VBox {
 		palette.setContent(textures);
 		palette.setFitToWidth(true);
 
-		selectTextures.setFocusTraversable(false);
-		selectSprites.setFocusTraversable(false);
-		selectCliffs.setFocusTraversable(false);
-		newButton.setFocusTraversable(false);
-		palette.setFocusTraversable(false);
-		sprites.setFocusTraversable(false);
-		textures.setFocusTraversable(false);
-		cliffTextures.setFocusTraversable(false);
+		// This is a nasty hack to prevent the scrollbars from stealing focus
+		palette.focusedProperty().addListener(x -> {
+			if (palette.isFocused()) canvas.requestFocus();
+		});
 
 		header.getChildren().addAll(
 			selectTextures, selectSprites, selectCliffs, newButton);
@@ -153,6 +140,7 @@ public class LibraryPane extends VBox {
 
 	public Library newLocalLibrary() {
 		local = new Library(global);
+		newButton.setDisable(false);
 		return local;
 	}
 
@@ -161,7 +149,15 @@ public class LibraryPane extends VBox {
 	 * */
 	public void closeLocal() {
 		local = null;
-		// TODO: clean up local library
+		newButton.setDisable(true);
+
+		textures.local.getChildren().clear();
+		sprites.local.getChildren().clear();
+		cliffTextures.local.getChildren().clear();
+
+		textureButtonsL.clear();
+		spriteButtonsL.clear();
+		cliffButtonsL.clear();
 	}
 
 	/**
@@ -189,7 +185,12 @@ public class LibraryPane extends VBox {
 		local = new Library(
 			new FileInputStream(filename),
 			filename.toString(), global);
-		// TODO: create new buttons
+
+		newButton.setDisable(false);
+		
+		local.allTerrains().forEach(t -> addTexture(t, false));
+		local.allCliffTextures().forEach(t -> addCliffTexture(t, false));
+
 		return local;
 	}
 
@@ -215,23 +216,82 @@ public class LibraryPane extends VBox {
 		}
 	}
 
+	public void makeTextureGlobal(String id) {
+		try {
+			TerrainTexture tex = local.getTerrain(id);
+			deleteTexture(id);
+			addTextureToLibrary(tex, true);
+		} catch (CorruptDataException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+	}
+
+	public void makeSpriteGlobal(String id) {
+	}
+
+	public void makeCliffTextureGlobal(String id) {
+		try {
+			CliffTexture tex = local.getCliffTexture(id);
+			deleteCliffTexture(id);
+			addCliffTextureToLibrary(tex, true);
+		} catch (CorruptDataException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+	}
+
+	public void deleteTexture(String id) {
+		try {
+			local.deleteTerrain(id);
+			ToggleButton b = textureButtonsL.get(id);
+			if (b != null) textures.local.getChildren().removeAll(b);
+		} catch (CorruptDataException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+	}
+
+	public void deleteSprite(String id) {
+		try {
+			local.deleteSprite(id);
+			ToggleButton b = spriteButtonsL.get(id);
+			if (b != null) sprites.local.getChildren().removeAll(b);
+		} catch (CorruptDataException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+	}
+
+	public void deleteCliffTexture(String id) {
+		try {
+			local.deleteCliffTexture(id);
+			List<ToggleButton> bs = cliffButtonsL.get(id);
+			if (bs != null) cliffTextures.local.getChildren().removeAll(bs);
+		} catch (CorruptDataException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+	}
+
 	private void addTexture(TerrainTexture tex, boolean isGlobal) {
 		Canvas preview = new Canvas(64, 32);
 		GraphicsContext gc = preview.getGraphicsContext2D();
 		gc.setFill(tex.evenPaint);
 		gc.fillRect(0, 0, 64, 32);
+
 		ToggleButton t = new ToggleButton("", preview);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(texturesGroup);
+		if (!isGlobal) {
+			t.setContextMenu(new ToolContextMenu(this, AssetType.TEXTURE, tex.id));
+		}
+
 		t.setOnAction(event -> {
 			if (t.isSelected()) canvas.setTool(new TerrainTextureTool(tex));
 			else canvas.setTool(null);
 		});
+
 		if (isGlobal) {
-			texturesG.getChildren().add(t);
+			textures.global.getChildren().add(t);
 			textureButtonsG.put(tex.id, t);
 		} else {
-			texturesL.getChildren().add(t);
+			textures.local.getChildren().add(t);
 			textureButtonsL.put(tex.id, t);
 		}
 	}
@@ -244,12 +304,15 @@ public class LibraryPane extends VBox {
 		Canvas up = new Canvas(64, 48);
 		Canvas down = new Canvas(64, 48);
 
-		ToggleButton bn = makeCliffButton(tex, n, SlopeType.N, 0);
-		ToggleButton bs = makeCliffButton(tex, s, SlopeType.S, 0);
-		ToggleButton bw = makeCliffButton(tex, w, SlopeType.W, 0);
-		ToggleButton be = makeCliffButton(tex, e, SlopeType.E, 0);
-		ToggleButton bup = makeCliffButton(tex, up, SlopeType.NONE, 1);
-		ToggleButton bdown = makeCliffButton(tex, down, SlopeType.NONE, 0);
+		ToolContextMenu menu = isGlobal? null :
+			new ToolContextMenu(this, AssetType.CLIFF_TEXTURE, tex.id);
+
+		ToggleButton bn = makeCliffButton(tex, n, SlopeType.N, 0, menu);
+		ToggleButton bs = makeCliffButton(tex, s, SlopeType.S, 0, menu);
+		ToggleButton bw = makeCliffButton(tex, w, SlopeType.W, 0, menu);
+		ToggleButton be = makeCliffButton(tex, e, SlopeType.E, 0, menu);
+		ToggleButton bup = makeCliffButton(tex, up, SlopeType.NONE, 1, menu);
+		ToggleButton bdown = makeCliffButton(tex, down, SlopeType.NONE, 0, menu);
 
 		bn.setOnAction(event -> {
 			if (bn.isSelected()) canvas.setTool(new ElevationTool(tex, 0, SlopeType.N));
@@ -277,16 +340,17 @@ public class LibraryPane extends VBox {
 		});
 
 		if (isGlobal) {
-			cliffTexturesG.getChildren().addAll(bn, bs, bw, be, bup, bdown);
+			cliffTextures.global.getChildren().addAll(bn, bs, bw, be, bup, bdown);
 			cliffButtonsG.put(tex.id, Arrays.asList(bn, bs, bw, be, bup, bdown));
 		} else {
-			cliffTexturesL.getChildren().addAll(bn, bs, bw, be, bup, bdown);
+			cliffTextures.local.getChildren().addAll(bn, bs, bw, be, bup, bdown);
 			cliffButtonsL.put(tex.id, Arrays.asList(bn, bs, bw, be, bup, bdown));
 		}
 	}
 
 	private ToggleButton makeCliffButton(
-		CliffTexture tex, Canvas canvas, SlopeType slope, int elevation
+		CliffTexture tex, Canvas canvas,
+		SlopeType slope, int elevation, ToolContextMenu menu
 	) {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.translate(0, (1 - elevation) * 16);
@@ -301,6 +365,9 @@ public class LibraryPane extends VBox {
 		ToggleButton t = new ToggleButton("", canvas);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(cliffsGroup);
+		if (menu != null) {
+			t.setContextMenu(menu);
+		}
 		return t;
 	}
 }
