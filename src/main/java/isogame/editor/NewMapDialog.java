@@ -13,7 +13,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
@@ -21,7 +20,6 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.function.UnaryOperator;
 import java.util.UUID;
 
 /**
@@ -42,10 +40,8 @@ public class NewMapDialog extends Dialog<StageInfo> {
 		grid.setVgap(10);
 		grid.setPadding(new Insets(20, 150, 10, 10));
 
-		TextField width = new TextField();
-		TextField height = new TextField();
-		width.setTextFormatter(new TextFormatter<>(new NumFilter()));
-		height.setTextFormatter(new TextFormatter<>(new NumFilter()));
+		PositiveIntegerField width = new PositiveIntegerField();
+		PositiveIntegerField height = new PositiveIntegerField();
 
 		grid.add(new Label("Width"), 0, 0);
 		grid.add(width, 1, 0);
@@ -56,22 +52,20 @@ public class NewMapDialog extends Dialog<StageInfo> {
 		this.getDialogPane().setContent(grid);
 
 		this.setResultConverter(clickedButton -> {
-			if (clickedButton == ButtonType.OK &&
-				!width.getText().equals("") &&
-				!height.getText().equals("")
-			) {
-				try {
-					int w = Integer.parseUnsignedInt(width.getText());
-					int h = Integer.parseUnsignedInt(height.getText());
-					Tile[] tiles = new Tile[w * h];
-					for (int y = 0; y < w; y++) {
-						for (int x = 0; x < h; x++) {
-							tiles[(y * w) + x] = new Tile(new MapPoint(x, y), blank);
-						}
+			if (clickedButton == ButtonType.OK) {
+				int w = width.getInt();
+				int h = height.getInt();
+				if (w == 0 || h == 0) return null;
+
+				Tile[] tiles = new Tile[w * h];
+				for (int y = 0; y < w; y++) {
+					for (int x = 0; x < h; x++) {
+						tiles[(y * w) + x] = new Tile(new MapPoint(x, y), blank);
 					}
+				}
+
+				try {
 					return new StageInfo(w, h, tiles);
-				} catch (NumberFormatException e) {
-					return null;
 				} catch (CorruptDataException e) {
 					return null;
 				}
@@ -79,20 +73,6 @@ public class NewMapDialog extends Dialog<StageInfo> {
 				return null;
 			}
 		});
-	}
-
-	private class NumFilter implements UnaryOperator<TextFormatter.Change> {
-		@Override
-		public TextFormatter.Change apply(TextFormatter.Change change) {
-			if (change.isAdded() || change.isReplaced()) {
-				try {
-					Integer.parseUnsignedInt(change.getText());
-				} catch (NumberFormatException e) {
-					change.setText("");
-				}
-			}
-			return change;
-		}
 	}
 }
 
