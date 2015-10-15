@@ -103,6 +103,8 @@ public class LibraryPane extends VBox {
 		newButton.setOnAction(event -> {
 			Node selected = palette.getContent();
 			if (selected == sprites) {
+				(new EditSpriteDialog(dataRoot, null))
+					.showAndWait();
 			} else if (selected == textures) {
 				(new NewTextureDialog(dataRoot))
 					.showAndWait()

@@ -2,6 +2,7 @@ package isogame.engine;
 
 import javafx.scene.image.Image;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,7 @@ public class SpriteInfo implements HasJSONRepresentation {
 	public final Map<String, SpriteAnimation> animations;
 	private final List<SpriteAnimation> animationsOrdered;
 
-	public SpriteAnimation defaultAnimation = null;
+	private SpriteAnimation defaultAnimation = null;
 	public final String id;
 
 	public SpriteInfo(String id) {
@@ -46,6 +47,10 @@ public class SpriteInfo implements HasJSONRepresentation {
 		if (defaultAnimation == null)
 			throw new CorruptDataException("No animations defined for sprite " + id);
 		else return defaultAnimation;
+	}
+
+	public Collection<SpriteAnimation> getAllAnimations() {
+		return animations.values();
 	}
 
 	public void addAnimation(SpriteAnimation animation) {
