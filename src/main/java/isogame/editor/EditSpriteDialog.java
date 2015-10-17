@@ -103,7 +103,13 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 
 		this.setResultConverter(clickedButton -> {
 			if (clickedButton == ButtonType.OK) {
-				return baseInfo;
+				if (animList.size() == 0) return null;
+
+				SpriteInfo i = new SpriteInfo(idField.getText());
+				for (SpriteAnimation a : animList) {
+					i.addAnimation(a);
+				}
+				return i;
 			} else {
 				return null;
 			}

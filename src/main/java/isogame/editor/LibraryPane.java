@@ -4,8 +4,11 @@ import isogame.engine.AssetType;
 import isogame.engine.CameraAngle;
 import isogame.engine.CliffTexture;
 import isogame.engine.CorruptDataException;
+import isogame.engine.FacingDirection;
 import isogame.engine.Library;
 import isogame.engine.SlopeType;
+import isogame.engine.SpriteAnimation;
+import isogame.engine.SpriteInfo;
 import isogame.engine.TerrainTexture;
 import isogame.engine.Tile;
 import javafx.scene.canvas.Canvas;
@@ -104,7 +107,8 @@ public class LibraryPane extends VBox {
 			Node selected = palette.getContent();
 			if (selected == sprites) {
 				(new EditSpriteDialog(dataRoot, null))
-					.showAndWait();
+					.showAndWait()
+					.ifPresent(sprite -> addSpriteToLibrary(sprite, false));
 			} else if (selected == textures) {
 				(new NewTextureDialog(dataRoot))
 					.showAndWait()
@@ -207,6 +211,17 @@ public class LibraryPane extends VBox {
 		}
 	}
 
+	public void addSpriteToLibrary(SpriteInfo sprite, boolean isGlobal) {
+		if (isGlobal) {
+			global.addSprite(sprite);
+			addSprite(sprite, isGlobal);
+			saveGlobal();
+		} else if (local != null) {
+			local.addSprite(sprite);
+			addSprite(sprite, isGlobal);
+		}
+	}
+
 	public void addCliffTextureToLibrary(CliffTexture tex, boolean isGlobal) {
 		if (isGlobal) {
 			global.addCliffTexture(tex);
@@ -295,6 +310,40 @@ public class LibraryPane extends VBox {
 		} else {
 			textures.local.getChildren().add(t);
 			textureButtonsL.put(tex.id, t);
+		}
+	}
+	
+	private void addSprite(SpriteInfo sprite, boolean isGlobal) {
+		try {
+			SpriteAnimation anim = sprite.getDefaultAnimation();
+
+			int h = (int) ((((double) anim.h) / ((double) anim.w)) * 32.0d);
+			Canvas preview = new Canvas(h, 32);
+			GraphicsContext gc = preview.getGraphicsContext2D();
+			gc.scale(1.0d/8.0d, 1.0d/8.0d);
+			anim.renderFrame(gc, 0, 0, 0, CameraAngle.UL, FacingDirection.UP);
+
+			ToggleButton t = new ToggleButton("", preview);
+			t.setFocusTraversable(false);
+			t.setToggleGroup(spritesGroup);
+			if (!isGlobal) {
+				t.setContextMenu(new ToolContextMenu(this, AssetType.SPRITE, sprite.id));
+			}
+
+			//t.setOnAction(event -> {
+				//if (t.isSelected()) canvas.setTool(new SpriteTool(sprite));
+				//else canvas.setTool(null);
+			//});
+
+			if (isGlobal) {
+				sprites.global.getChildren().add(t);
+				spriteButtonsG.put(sprite.id, t);
+			} else {
+				sprites.local.getChildren().add(t);
+				spriteButtonsL.put(sprite.id, t);
+			}
+		} catch (CorruptDataException e) {
+			throw new RuntimeException("This cannot happen", e);
 		}
 	}
 
