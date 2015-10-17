@@ -107,4 +107,3 @@ public class NewCliffTextureDialog extends Dialog<CliffTexture> {
 	}
 }
 
-

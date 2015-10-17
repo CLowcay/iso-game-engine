@@ -72,8 +72,20 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 			remove.setDisable(true);
 		}
 
-		anims.getFocusModel().focusedIndexProperty().addListener(i -> {
-			System.err.println(i);
+		anims.getFocusModel().focusedItemProperty().addListener(i -> {
+			// TODO: make the focus work properly
+			remove.setDisable(i == null);
+		});
+
+		add.setOnAction(event -> {
+			(new NewSpriteAnimationDialog(dataRoot))
+				.showAndWait()
+				.ifPresent(a -> animList.add(a));
+		});
+
+		remove.setOnAction(event -> {
+			SpriteAnimation a = anims.getFocusModel().getFocusedItem();
+			if (a != null) animList.remove(a);
 		});
 
 		FlowPane buttons = new FlowPane();

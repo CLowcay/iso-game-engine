@@ -95,7 +95,7 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		}
 		int rotation = (a + d) % 4;
 
-		cx.drawImage(buffer, frame * w, rotation * h, w, h, x, y, w, h);
+		cx.drawImage(buffer, frame * w, rotation * h, w, h, x, y - h, w, h);
 	}
 
 	@Override
@@ -107,6 +107,11 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		r.put("nframes", new Integer(frames));
 		r.put("framerate", new Integer(framerate));
 		return r;
+	}
+
+	@Override
+	public String toString() {
+		return id;
 	}
 }
 

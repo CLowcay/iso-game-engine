@@ -83,6 +83,5 @@ public class MapEditor extends Application {
 
 		return dataDir;
 	}
-
 }
 

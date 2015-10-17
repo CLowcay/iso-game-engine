@@ -75,12 +75,10 @@ public class NewSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 
 		this.setResultConverter(clickedButton -> {
 			if (clickedButton == ButtonType.OK) {
-				String file = spriteFile.getText();
 				int nframes = frames.getInt();
 				int rframerate = framerate.getInt();
 
 				if (nframes == 0 || rframerate == 0) return null;
-				if (!(new File(file)).exists()) return null;
 
 				return new SpriteAnimation(
 					id.getText(), spriteFile.getText(), nframes, rframerate);
