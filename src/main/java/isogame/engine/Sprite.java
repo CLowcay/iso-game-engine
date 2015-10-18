@@ -1,5 +1,6 @@
 package isogame.engine;
 
+import javafx.scene.canvas.GraphicsContext;
 import org.json.simple.JSONObject;
 
 public class Sprite implements HasJSONRepresentation {
@@ -16,6 +17,12 @@ public class Sprite implements HasJSONRepresentation {
 	public Sprite(SpriteInfo info) throws CorruptDataException {
 		this.info = info;
 		setAnimation(info.getDefaultAnimation().id);
+	}
+
+	public void renderFrame(
+		GraphicsContext cx, int x, int y, int frame, CameraAngle angle
+	) {
+		animation.renderFrame(cx, x, y, frame, angle, direction);
 	}
 
 	public static Sprite fromJSON(JSONObject json, Library lib)

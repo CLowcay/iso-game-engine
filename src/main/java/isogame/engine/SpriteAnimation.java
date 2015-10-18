@@ -1,8 +1,12 @@
 package isogame.engine;
 
+import isogame.GlobalConstants;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import org.json.simple.JSONObject;
+
 
 /**
  * Every sprite has four rotations, which are layed out vertically.  Each layer
@@ -20,9 +24,10 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	private final String url;
 	public final int frames;
 	public final int framerate;  // in fps
-	public final int w;  // width of a single frame.  Width of the image is w * frames
-	public final int h;  // height of a single frame.  Height of the image is h * 4
-	private final Image buffer;
+	public final int w;
+	public final int h; 
+
+	private final Paint[] frameTextures;
 
 	public SpriteAnimation(
 		String id,
@@ -32,12 +37,22 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	) {
 		this.frames = frames;
 		this.framerate = framerate;
-		this.buffer = new Image(url);
 		this.id = id;
 		this.url = url;
 
-		w = ((int) buffer.getWidth()) / frames;
-		h = ((int) buffer.getHeight()) / 4;
+		Image buffer = new Image(url);
+		frameTextures = new Paint[frames * 4];
+		for (int d = 0; d < 4; d++) {
+			for (int f = 0; f < frames; f++) {
+				frameTextures[(f * 4) + d] =
+					new ImagePattern(buffer, f, d, frames, 4, true);
+			}
+		}
+
+		double iw = buffer.getWidth() / ((double) frames);
+		double ih = buffer.getHeight() / 4.0d;
+		w = (int) GlobalConstants.TILEW;
+		h = (int) ((GlobalConstants.TILEW / iw) * ih);
 	}
 
 	public static SpriteAnimation fromJSON(JSONObject json)
@@ -71,11 +86,8 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		int frame,
 		CameraAngle angle,
 		FacingDirection direction
-	)
-		throws IndexOutOfBoundsException
-	{
-		if (frame < 0 || frame >= frames)
-			throw new IndexOutOfBoundsException();
+	) {
+		frame = frame % frames;
 
 		// compute the rotation to use, based on the direction the sprite is facing
 		// (from a bird's-eye-view), and the direction the camera is pointing.
@@ -95,7 +107,8 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		}
 		int rotation = (a + d) % 4;
 
-		cx.drawImage(buffer, frame * w, rotation * h, w, h, x, y - h, w, h);
+		cx.setFill(frameTextures[(frame * 4) + rotation]);
+		cx.fillRect(x, y - h + GlobalConstants.TILEH, w, h);
 	}
 
 	@Override

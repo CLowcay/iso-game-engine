@@ -6,7 +6,7 @@ import isogame.engine.TerrainTexture;
 import isogame.engine.Tile;
 
 public class TerrainTextureTool extends Tool {
-	private TerrainTexture texture;
+	private final TerrainTexture texture;
 
 	public TerrainTextureTool(TerrainTexture texture) {
 		this.texture = texture;

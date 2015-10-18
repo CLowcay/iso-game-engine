@@ -7,9 +7,9 @@ import isogame.engine.Stage;
 import isogame.engine.Tile;
 
 public class ElevationTool extends Tool {
-	private CliffTexture texture;
-	private int de;
-	private SlopeType slope;
+	private final CliffTexture texture;
+	private final int de;
+	private final SlopeType slope;
 
 	public ElevationTool(CliffTexture texture, int de, SlopeType slope) {
 		this.texture = texture;

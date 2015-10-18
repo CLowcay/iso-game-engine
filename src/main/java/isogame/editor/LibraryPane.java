@@ -11,6 +11,7 @@ import isogame.engine.SpriteAnimation;
 import isogame.engine.SpriteInfo;
 import isogame.engine.TerrainTexture;
 import isogame.engine.Tile;
+import isogame.GlobalConstants;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Accordion;
@@ -195,6 +196,7 @@ public class LibraryPane extends VBox {
 		newButton.setDisable(false);
 		
 		local.allTerrains().forEach(t -> addTexture(t, false));
+		local.allSprites().forEach(s -> addSprite(s, false));
 		local.allCliffTextures().forEach(t -> addCliffTexture(t, false));
 
 		return local;
@@ -317,11 +319,13 @@ public class LibraryPane extends VBox {
 		try {
 			SpriteAnimation anim = sprite.getDefaultAnimation();
 
-			int h = (int) ((((double) anim.h) / ((double) anim.w)) * 32.0d);
-			Canvas preview = new Canvas(h, 32);
+			int h = anim.h / 8;
+			Canvas preview = new Canvas(64, h);
 			GraphicsContext gc = preview.getGraphicsContext2D();
 			gc.scale(1.0d/8.0d, 1.0d/8.0d);
-			anim.renderFrame(gc, 0, 0, 0, CameraAngle.UL, FacingDirection.UP);
+			anim.renderFrame(gc,
+				0, (h * 8) - (int) GlobalConstants.TILEH,
+				0, CameraAngle.UL, FacingDirection.UP);
 
 			ToggleButton t = new ToggleButton("", preview);
 			t.setFocusTraversable(false);
@@ -330,10 +334,13 @@ public class LibraryPane extends VBox {
 				t.setContextMenu(new ToolContextMenu(this, AssetType.SPRITE, sprite.id));
 			}
 
-			//t.setOnAction(event -> {
-				//if (t.isSelected()) canvas.setTool(new SpriteTool(sprite));
-				//else canvas.setTool(null);
-			//});
+			t.setOnAction(event -> {
+				if (t.isSelected()) {
+					canvas.setTool(new SpriteTool(sprite, FacingDirection.UP));
+				} else {
+					canvas.setTool(null);
+				}
+			});
 
 			if (isGlobal) {
 				sprites.global.getChildren().add(t);
