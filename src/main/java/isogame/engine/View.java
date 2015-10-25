@@ -84,6 +84,10 @@ public class View {
 		angle = angle.nextAnticlockwise();
 	}
 
+	public CameraAngle getCameraAngle() {
+		return angle;
+	}
+
 	public void setScrollPos(Point2D p) {
 		this.x = p.getX();
 		this.y = p.getY();

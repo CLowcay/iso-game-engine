@@ -5,6 +5,7 @@ import isogame.engine.MapPoint;
 import isogame.engine.SlopeType;
 import isogame.engine.Stage;
 import isogame.engine.Tile;
+import isogame.engine.View;
 
 public class ElevationTool extends Tool {
 	private final CliffTexture texture;
@@ -18,7 +19,7 @@ public class ElevationTool extends Tool {
 	}
 
 	@Override
-	public void apply(MapPoint p, Stage stage) {
+	public void apply(MapPoint p, Stage stage, View view) {
 		if (stage.terrain.hasTile(p)) {
 			Tile t = stage.terrain.getTile(p);
 			if (de < 0 && t.slope != SlopeType.NONE) {

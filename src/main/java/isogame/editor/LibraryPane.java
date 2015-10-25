@@ -50,10 +50,10 @@ public class LibraryPane extends VBox {
 	private final ToggleGroup cliffsGroup = new ToggleGroup();
 
 	private final Map<String, ToggleButton> textureButtonsG = new HashMap<>();
-	private final Map<String, ToggleButton> spriteButtonsG = new HashMap<>();
+	private final Map<String, List<ToggleButton>> spriteButtonsG = new HashMap<>();
 	private final Map<String, List<ToggleButton>> cliffButtonsG = new HashMap<>();
 	private final Map<String, ToggleButton> textureButtonsL = new HashMap<>();
-	private final Map<String, ToggleButton> spriteButtonsL = new HashMap<>();
+	private final Map<String, List<ToggleButton>> spriteButtonsL = new HashMap<>();
 	private final Map<String, List<ToggleButton>> cliffButtonsL = new HashMap<>();
 
 	private final File globalLibraryFile;
@@ -271,8 +271,8 @@ public class LibraryPane extends VBox {
 	public void deleteSprite(String id) {
 		try {
 			local.deleteSprite(id);
-			ToggleButton b = spriteButtonsL.get(id);
-			if (b != null) sprites.local.getChildren().removeAll(b);
+			List<ToggleButton> bs = spriteButtonsL.get(id);
+			if (bs != null) sprites.local.getChildren().removeAll(bs);
 		} catch (CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
@@ -318,40 +318,60 @@ public class LibraryPane extends VBox {
 	private void addSprite(SpriteInfo sprite, boolean isGlobal) {
 		try {
 			SpriteAnimation anim = sprite.getDefaultAnimation();
-
-			int h = anim.h / 8;
-			Canvas preview = new Canvas(64, h);
-			GraphicsContext gc = preview.getGraphicsContext2D();
-			gc.scale(1.0d/8.0d, 1.0d/8.0d);
-			anim.renderFrame(gc,
-				0, (h * 8) - (int) GlobalConstants.TILEH,
-				0, CameraAngle.UL, FacingDirection.UP);
-
-			ToggleButton t = new ToggleButton("", preview);
-			t.setFocusTraversable(false);
-			t.setToggleGroup(spritesGroup);
-			if (!isGlobal) {
-				t.setContextMenu(new ToolContextMenu(this, AssetType.SPRITE, sprite.id));
+			ToolContextMenu menu;
+			if (isGlobal) {
+				menu = null;
+			} else {
+				menu = new ToolContextMenu(this, AssetType.SPRITE, sprite.id);
 			}
+			
+			Canvas cu = new Canvas(64, anim.h / 8);
+			Canvas cd = new Canvas(64, anim.h / 8);
+			Canvas cl = new Canvas(64, anim.h / 8);
+			Canvas cr = new Canvas(64, anim.h / 8);
 
-			t.setOnAction(event -> {
-				if (t.isSelected()) {
-					canvas.setTool(new SpriteTool(sprite, FacingDirection.UP));
-				} else {
-					canvas.setTool(null);
-				}
-			});
+			ToggleButton u = makeSpriteButton(sprite, anim, cu, FacingDirection.UP, menu);
+			ToggleButton d = makeSpriteButton(sprite, anim, cd, FacingDirection.DOWN, menu);
+			ToggleButton l = makeSpriteButton(sprite, anim, cl, FacingDirection.LEFT, menu);
+			ToggleButton r = makeSpriteButton(sprite, anim, cr, FacingDirection.RIGHT, menu);
 
 			if (isGlobal) {
-				sprites.global.getChildren().add(t);
-				spriteButtonsG.put(sprite.id, t);
+				sprites.global.getChildren().addAll(u, d, l, r);
+				spriteButtonsG.put(sprite.id, Arrays.asList(u, d, l, r));
 			} else {
-				sprites.local.getChildren().add(t);
-				spriteButtonsL.put(sprite.id, t);
+				sprites.local.getChildren().addAll(u, d, l, r);
+				spriteButtonsL.put(sprite.id, Arrays.asList(u, d, l, r));
 			}
 		} catch (CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
+	}
+
+	private ToggleButton makeSpriteButton(
+		SpriteInfo sprite, SpriteAnimation anim, Canvas preview,
+		FacingDirection direction, ToolContextMenu menu
+	) {
+		GraphicsContext gc = preview.getGraphicsContext2D();
+		gc.scale(1.0d/8.0d, 1.0d/8.0d);
+		anim.renderFrame(gc,
+			0, anim.h - (int) GlobalConstants.TILEH,
+			0, CameraAngle.UL, direction);
+
+		ToggleButton t = new ToggleButton("", preview);
+		t.setFocusTraversable(false);
+		t.setToggleGroup(spritesGroup);
+
+		t.setOnAction(event -> {
+			if (t.isSelected()) {
+				canvas.setTool(new SpriteTool(sprite, direction));
+			} else {
+				canvas.setTool(null);
+			}
+		});
+
+		if (menu != null) t.setContextMenu(menu);
+
+		return t;
 	}
 
 	private void addCliffTexture(CliffTexture tex, boolean isGlobal) {
@@ -423,9 +443,8 @@ public class LibraryPane extends VBox {
 		ToggleButton t = new ToggleButton("", canvas);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(cliffsGroup);
-		if (menu != null) {
-			t.setContextMenu(menu);
-		}
+		if (menu != null) t.setContextMenu(menu);
+
 		return t;
 	}
 }

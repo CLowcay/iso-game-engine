@@ -88,9 +88,14 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		FacingDirection direction
 	) {
 		frame = frame % frames;
+		int rotation = directionTransform(direction, angle);
+		cx.setFill(frameTextures[(frame * 4) + rotation]);
+		cx.fillRect(x, y - h + GlobalConstants.TILEH, w, h);
+	}
 
-		// compute the rotation to use, based on the direction the sprite is facing
-		// (from a bird's-eye-view), and the direction the camera is pointing.
+	public static int directionTransform(
+		FacingDirection direction, CameraAngle angle
+	) {
 		int d = 0;
 		int a = 0;
 		switch (direction) {
@@ -105,10 +110,34 @@ public class SpriteAnimation implements HasJSONRepresentation {
 			case LR: a = 2; break;
 			case LL: a = 3; break;
 		}
-		int rotation = (a + d) % 4;
+		return (d + a) % 4;
+	}
 
-		cx.setFill(frameTextures[(frame * 4) + rotation]);
-		cx.fillRect(x, y - h + GlobalConstants.TILEH, w, h);
+	public static FacingDirection inverseDirectionTransform(
+		FacingDirection direction, CameraAngle angle
+	) {
+		int d = 0;
+		int a = 0;
+		switch (direction) {
+			case UP: d = 0; break;
+			case LEFT: d = 1; break;
+			case DOWN: d = 2; break;
+			case RIGHT: d = 3; break;
+		}
+		switch (angle) {
+			case UL: a = 0; break;
+			case UR: a = 1; break;
+			case LR: a = 2; break;
+			case LL: a = 3; break;
+		}
+
+		switch ((d - a + 4) % 4) {
+			case 0: return FacingDirection.UP;
+			case 1: return FacingDirection.LEFT;
+			case 2: return FacingDirection.DOWN;
+			case 3: return FacingDirection.RIGHT;
+			default: throw new RuntimeException("This cannot happen");
+		}
 	}
 
 	@Override

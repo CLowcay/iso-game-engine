@@ -302,7 +302,7 @@ public class EditorCanvas extends Pane {
 							stage.setHighlight(p, 0);
 
 							if (event.isPrimaryButtonDown() && tool != null) {
-								tool.apply(p, stage);
+								tool.apply(p, stage, view);
 							}
 						}
 					}
@@ -310,7 +310,7 @@ public class EditorCanvas extends Pane {
 					MapPoint p = view.tileAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
-					if (p != null && tool != null) tool.apply(p, stage);
+					if (p != null && tool != null) tool.apply(p, stage, view);
 				}
 			}
 		});
