@@ -41,13 +41,11 @@ public class LibraryPane extends VBox {
 	private final GlobalLocalPane textures;
 	private final GlobalLocalPane cliffTextures;
 
+	private final ToggleGroup toolsGroup;
+
 	private final ScrollPane palette = new ScrollPane();
 
 	private final Button newButton;
-
-	private final ToggleGroup spritesGroup = new ToggleGroup();
-	private final ToggleGroup texturesGroup = new ToggleGroup();
-	private final ToggleGroup cliffsGroup = new ToggleGroup();
 
 	private final Map<String, ToggleButton> textureButtonsG = new HashMap<>();
 	private final Map<String, List<ToggleButton>> spriteButtonsG = new HashMap<>();
@@ -66,12 +64,13 @@ public class LibraryPane extends VBox {
 		return global;
 	}
 
-	public LibraryPane(File dataRoot, EditorCanvas canvas)
-		throws IOException, CorruptDataException
-	{
+	public LibraryPane(
+		File dataRoot, ToggleGroup toolsGroup, EditorCanvas canvas
+	) throws IOException, CorruptDataException {
 		super();
 		this.setFocusTraversable(false);
 		this.canvas = canvas;
+		this.toolsGroup = toolsGroup;
 
 		HBox header = new HBox();
 		ToggleButton selectTextures = new ToggleButton("Textures");
@@ -296,7 +295,7 @@ public class LibraryPane extends VBox {
 
 		ToggleButton t = new ToggleButton("", preview);
 		t.setFocusTraversable(false);
-		t.setToggleGroup(texturesGroup);
+		t.setToggleGroup(toolsGroup);
 		if (!isGlobal) {
 			t.setContextMenu(new ToolContextMenu(this, AssetType.TEXTURE, tex.id));
 		}
@@ -359,7 +358,7 @@ public class LibraryPane extends VBox {
 
 		ToggleButton t = new ToggleButton("", preview);
 		t.setFocusTraversable(false);
-		t.setToggleGroup(spritesGroup);
+		t.setToggleGroup(toolsGroup);
 
 		t.setOnAction(event -> {
 			if (t.isSelected()) {
@@ -442,7 +441,7 @@ public class LibraryPane extends VBox {
 
 		ToggleButton t = new ToggleButton("", canvas);
 		t.setFocusTraversable(false);
-		t.setToggleGroup(cliffsGroup);
+		t.setToggleGroup(toolsGroup);
 		if (menu != null) t.setContextMenu(menu);
 
 		return t;

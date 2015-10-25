@@ -1,8 +1,10 @@
 package isogame.editor;
  
 import javafx.application.Application;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.Scene;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -26,11 +28,18 @@ public class MapEditor extends Application {
 
 		try {
 			File dataDir = getDataDir(primaryStage);
-			EditorCanvas canvas = new EditorCanvas(root, primaryStage);
-			LibraryPane library = new LibraryPane(dataDir, canvas);
-			MainMenu menuBar = new MainMenu(library, dataDir, canvas);
 
-			guiRoot.setTop(menuBar);
+			ToggleGroup toolsGroup = new ToggleGroup();
+			EditorCanvas canvas = new EditorCanvas(root, primaryStage);
+			LibraryPane library = new LibraryPane(dataDir, toolsGroup, canvas);
+			MainMenu menuBar = new MainMenu(library, dataDir, canvas);
+			ToolBar toolBar = new ToolBar(toolsGroup);
+
+			VBox top = new VBox();
+			top.getChildren().addAll(menuBar, toolBar);
+
+			//guiRoot.setTop(menuBar);
+			guiRoot.setTop(top);
 			guiRoot.setLeft(library);
 			root.getChildren().addAll(canvas, guiRoot);
 
