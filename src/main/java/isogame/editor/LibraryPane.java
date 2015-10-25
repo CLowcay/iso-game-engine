@@ -146,6 +146,7 @@ public class LibraryPane extends VBox {
 			globalLibraryFile.toString(), null);
 
 		global.allTerrains().forEach(t -> addTexture(t, true));
+		global.allSprites().forEach(t -> addSprite(t, true));
 		global.allCliffTextures().forEach(t -> addCliffTexture(t, true));
 	}
 
@@ -250,6 +251,13 @@ public class LibraryPane extends VBox {
 	}
 
 	public void makeSpriteGlobal(String id) {
+		try {
+			SpriteInfo sprite = local.getSprite(id);
+			deleteSprite(id);
+			addSpriteToLibrary(sprite, true);
+		} catch (CorruptDataException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
 	}
 
 	public void makeCliffTextureGlobal(String id) {
