@@ -33,7 +33,7 @@ public class MapEditor extends Application {
 			EditorCanvas canvas = new EditorCanvas(root, primaryStage);
 			LibraryPane library = new LibraryPane(dataDir, toolsGroup, canvas);
 			MainMenu menuBar = new MainMenu(library, dataDir, canvas);
-			ToolBar toolBar = new ToolBar(toolsGroup);
+			ToolBar toolBar = new ToolBar(canvas, toolsGroup);
 
 			VBox top = new VBox();
 			top.getChildren().addAll(menuBar, toolBar);

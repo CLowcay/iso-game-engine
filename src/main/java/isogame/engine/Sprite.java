@@ -25,6 +25,10 @@ public class Sprite implements HasJSONRepresentation {
 		animation.renderFrame(cx, x, y, frame, angle, direction);
 	}
 
+	public void rotate() {
+		direction = direction.rotateAntiClockwise();
+	}
+
 	public static Sprite fromJSON(JSONObject json, Library lib)
 		throws CorruptDataException
 	{

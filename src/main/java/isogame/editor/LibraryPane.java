@@ -366,11 +366,8 @@ public class LibraryPane extends VBox {
 		t.setToggleGroup(toolsGroup);
 
 		t.setOnAction(event -> {
-			if (t.isSelected()) {
-				canvas.setTool(new SpriteTool(sprite, direction));
-			} else {
-				canvas.setTool(null);
-			}
+			if (t.isSelected()) canvas.setTool(new SpriteTool(sprite, direction));
+			else canvas.setTool(null);
 		});
 
 		if (menu != null) t.setContextMenu(menu);

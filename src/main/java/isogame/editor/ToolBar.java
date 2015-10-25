@@ -14,7 +14,7 @@ public class ToolBar extends FlowPane {
 	private final ToggleButton rotate =
 		new ToggleButton("", new ImageView("editor_assets/rotate.png"));
 	
-	public ToolBar(ToggleGroup group) {
+	public ToolBar(EditorCanvas canvas, ToggleGroup group) {
 		super();
 
 		pointer.setTooltip(new Tooltip("Pointer tool"));
@@ -28,6 +28,18 @@ public class ToolBar extends FlowPane {
 		pointer.setToggleGroup(group);
 		delete.setToggleGroup(group);
 		rotate.setToggleGroup(group);
+
+		pointer.setOnAction(event -> canvas.setTool(null));
+
+		delete.setOnAction(event -> {
+			if (delete.isSelected()) canvas.setTool(new RemoveSpriteTool());
+			else canvas.setTool(null);
+		});
+
+		rotate.setOnAction(event -> {
+			if (rotate.isSelected()) canvas.setTool(new RotateSpriteTool());
+			else canvas.setTool(null);
+		});
 
 		this.getChildren().addAll(pointer, delete, rotate);
 	}

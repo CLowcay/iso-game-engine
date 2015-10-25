@@ -73,6 +73,15 @@ public class Stage implements HasJSONRepresentation {
 		sprites.put(sprite.pos, sprite);
 	}
 
+	public void removeSprite(MapPoint p) {
+		sprites.remove(p);
+	}
+
+	public void rotateSprite(MapPoint p) {
+		Sprite s = sprites.get(p);
+		if (s != null) s.rotate();
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
