@@ -83,6 +83,11 @@ public class LibraryPane extends VBox {
 		selectCliffs.setToggleGroup(headerButtons);
 		newButton = new Button("New...");
 
+		selectTextures.setFocusTraversable(false);
+		selectSprites.setFocusTraversable(false);
+		selectCliffs.setFocusTraversable(false);
+		newButton.setFocusTraversable(false);
+
 		sprites = new GlobalLocalPane(new FlowPane(), new FlowPane());
 		textures = new GlobalLocalPane(new FlowPane(), new FlowPane());
 		cliffTextures = new GlobalLocalPane(new FlowPane(), new FlowPane());

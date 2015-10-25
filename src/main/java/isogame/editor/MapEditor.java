@@ -38,7 +38,6 @@ public class MapEditor extends Application {
 			VBox top = new VBox();
 			top.getChildren().addAll(menuBar, toolBar);
 
-			//guiRoot.setTop(menuBar);
 			guiRoot.setTop(top);
 			guiRoot.setLeft(library);
 			root.getChildren().addAll(canvas, guiRoot);

@@ -21,6 +21,10 @@ public class ToolBar extends FlowPane {
 		delete.setTooltip(new Tooltip("Delete sprites"));
 		rotate.setTooltip(new Tooltip("Rotate sprites"));
 
+		pointer.setFocusTraversable(false);
+		delete.setFocusTraversable(false);
+		rotate.setFocusTraversable(false);
+
 		pointer.setToggleGroup(group);
 		delete.setToggleGroup(group);
 		rotate.setToggleGroup(group);
