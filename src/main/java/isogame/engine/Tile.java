@@ -110,6 +110,25 @@ public class Tile implements HasJSONRepresentation {
 	}
 
 	/**
+	 * Get a string describing the special properties of this tile
+	 * @return May be null
+	 * */
+	public String specialStatusString() {
+		String r;
+		switch (startZone) {
+			case PLAYER: r = "1"; break;
+			case AI: r = "2"; break;
+			default: r = null;
+		}
+
+		if (isManaZone) {
+			if (r == null) r = "M"; else r += "M"; 
+		}
+
+		return r;
+	}
+
+	/**
 	 * Make a new tile with a different texture
 	 * */
 	public Tile newTexture(TerrainTexture tex) {
@@ -135,6 +154,10 @@ public class Tile implements HasJSONRepresentation {
 	 * */
 	public Tile newStartZone(StartZoneType startZone) {
 		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
+	}
+
+	public Tile clearSpecialProperties() {
+		return new Tile(pos, elevation, slope, false, StartZoneType.NONE, tex, cliffTexture);
 	}
 
 	public SlopeType adjustSlopeForCameraAngle(CameraAngle angle) {

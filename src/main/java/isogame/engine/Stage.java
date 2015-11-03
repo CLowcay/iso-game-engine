@@ -353,6 +353,12 @@ public class Stage implements HasJSONRepresentation {
 				if (s != null) {
 					s.renderFrame(cx, 0, 0, 0, angle);
 				}
+
+				String status = tile.specialStatusString();
+				if (status != null) {
+					cx.fillText(status, TILEW / 2, TILEH / 2);
+				}
+
 				cx.restore();
 			}
 		});
