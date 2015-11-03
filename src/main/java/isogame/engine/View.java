@@ -119,8 +119,13 @@ public class View {
 
 	/**
 	 * Render a single complete frame.
+	 * @param cx The graphics context
+	 * @param stage The stage to render
+	 * @param renderDebug Render debug information
 	 * */
-	public void renderFrame(GraphicsContext cx, Stage stage) {
+	public void renderFrame(
+		GraphicsContext cx, Stage stage, boolean renderDebug
+	) {
 		cx.setFill(Color.WHITE);
 		cx.fillRect(lx, ly, viewportW, viewportH);
 
@@ -128,7 +133,7 @@ public class View {
 		cx.setTransform(screenTransform);
 
 		stage.render(cx, angle, new BoundingBox(x, y - TILEH,
-				ISO_VIEWPORTW, ISO_VIEWPORTH + (2 * TILEH)));
+				ISO_VIEWPORTW, ISO_VIEWPORTH + (2 * TILEH)), renderDebug);
 
 		cx.restore();
 

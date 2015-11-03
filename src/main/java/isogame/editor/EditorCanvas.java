@@ -26,6 +26,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
@@ -233,6 +234,7 @@ public class EditorCanvas extends Pane {
 		scrolling.reset(view.getScrollPos());
 
 		final GraphicsContext cx = canvas.getGraphicsContext2D();
+		cx.setFont(new Font(100));
 
 		animateCanvas = new AnimationTimer() {
 			int count0 = 0;
@@ -251,7 +253,7 @@ public class EditorCanvas extends Pane {
 
 				if (stage != null) {
 					view.setScrollPos(scrolling.valueAt(now));
-					view.renderFrame(cx, stage);
+					view.renderFrame(cx, stage, true);
 				}
 			}
 		};

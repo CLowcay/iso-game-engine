@@ -3,6 +3,7 @@ package isogame.engine;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -326,8 +327,14 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Render the entire stage (skipping the invisible bits for efficiency).
+	 * @param cx The graphics context
+	 * @param angle The camera angle
+	 * @param visible Bounding box for the visible part of the map
+	 * @param renderDebug Render debugging information
 	 * */
-	public void render(GraphicsContext cx, CameraAngle angle, BoundingBox visible) {
+	public void render(GraphicsContext cx, CameraAngle angle,
+		BoundingBox visible, boolean renderDebug
+	) {
 		terrain.iterateTiles(angle).forEachRemaining(tile -> {
 			Point2D p = correctedIsoCoord(tile.pos, angle);
 			double x = p.getX();
@@ -354,9 +361,12 @@ public class Stage implements HasJSONRepresentation {
 					s.renderFrame(cx, 0, 0, 0, angle);
 				}
 
-				String status = tile.specialStatusString();
-				if (status != null) {
-					cx.fillText(status, TILEW / 2, TILEH / 2);
+				if (renderDebug) {
+					cx.setFill(Color.RED);
+					String status = tile.specialStatusString();
+					if (status != null) {
+						cx.fillText(status, TILEW / 3, TILEH / 2);
+					}
 				}
 
 				cx.restore();
