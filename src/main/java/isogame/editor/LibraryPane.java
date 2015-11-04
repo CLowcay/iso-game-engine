@@ -190,21 +190,12 @@ public class LibraryPane extends VBox {
 	/**
 	 * To be called when loading a new map file.
 	 * */
-	public Library loadLocalLibrary(File filename)
-		throws IOException, CorruptDataException
-	{
+	public void setLocalLibrary(Library local) {
 		closeLocal();
-		local = new Library(
-			new FileInputStream(filename),
-			filename.toString(), global);
-
 		newButton.setDisable(false);
-		
 		local.allTerrains().forEach(t -> addTexture(t, false));
 		local.allSprites().forEach(s -> addSprite(s, false));
 		local.allCliffTextures().forEach(t -> addCliffTexture(t, false));
-
-		return local;
 	}
 
 	public void addTextureToLibrary(TerrainTexture tex, boolean isGlobal) {

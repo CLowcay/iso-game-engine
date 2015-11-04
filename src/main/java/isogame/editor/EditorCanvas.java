@@ -70,25 +70,15 @@ public class EditorCanvas extends Pane {
 			File r = fc.showOpenDialog(window);
 			if (r != null) {
 				try {
-					Library lib = library.loadLocalLibrary(r);
-					try (BufferedReader in =
-						new BufferedReader(
-						new InputStreamReader(
-						new FileInputStream(r), "UTF-8")))
-					{
-						JSONParser parser = new JSONParser();
-						JSONObject json = (JSONObject) parser.parse(in);
-						Object stagejson = json.get("stage");
-						if (stagejson == null) throw new CorruptDataException(
-							"Error in map file, missing stage");
-						stage = Stage.fromJSON((JSONObject) stagejson, lib);
-						stage.setHighlightColors(highlightColors);
-						view.centreOnTile(stage, new MapPoint(3, 3));
-						stageFile = r;
-						localLibrary = lib;
-						saved = true;
-						tool = null;
-					}
+					stage = Stage.fromFile(r, library.getGlobalLibrary());
+					library.setLocalLibrary(stage.localLibrary);
+
+					stage.setHighlightColors(highlightColors);
+					view.centreOnTile(stage, new MapPoint(3, 3));
+					stageFile = r;
+					localLibrary = stage.localLibrary;
+					saved = true;
+					tool = null;
 				} catch (IOException e) {
 					Alert d = new Alert(Alert.AlertType.ERROR);
 					d.setHeaderText("Cannot read file " + r.toString());
@@ -196,10 +186,10 @@ public class EditorCanvas extends Pane {
 			(new NewMapDialog(library.getGlobalLibrary().getTerrain("blank")))
 				.showAndWait()
 				.ifPresent(terrain -> {
-					stage = new Stage(terrain);
+					localLibrary = library.newLocalLibrary();
+					stage = new Stage(terrain, localLibrary);
 					stageFile = null;
 					saved = false;
-					localLibrary = library.newLocalLibrary();
 					stage.setHighlightColors(highlightColors);
 					view.centreOnTile(stage, new MapPoint(3, 3));
 				});

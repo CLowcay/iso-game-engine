@@ -8,12 +8,20 @@ import javafx.scene.paint.Paint;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import static isogame.GlobalConstants.ELEVATION_H;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
@@ -21,6 +29,8 @@ import static isogame.GlobalConstants.TILEW;
 public class Stage implements HasJSONRepresentation {
 	public final StageInfo terrain;
 	public final Map<MapPoint, Sprite> sprites;
+	public final Library localLibrary;
+
 	// transformation from map coordinates to iso coordinates
 	private final Affine isoTransform;
 
@@ -29,8 +39,9 @@ public class Stage implements HasJSONRepresentation {
 	private final Rotate rLR;
 	private final Rotate rUR;
 
-	public Stage(StageInfo terrain) {
+	public Stage(StageInfo terrain, Library localLibrary) {
 		this.terrain = terrain;
+		this.localLibrary = localLibrary;
 		sprites = new HashMap<MapPoint, Sprite>();
 
 		// set the camera angle rotations
@@ -49,6 +60,27 @@ public class Stage implements HasJSONRepresentation {
 		isoTransform.appendRotation(45, 0, 0);
 	}
 
+	public static Stage fromFile(File filename, Library global)
+		throws IOException, CorruptDataException, ParseException
+	{
+		Library local = new Library(
+			new FileInputStream(filename),
+			filename.toString(), global);
+
+		try (BufferedReader in =
+			new BufferedReader(
+			new InputStreamReader(
+			new FileInputStream(filename), "UTF-8")))
+		{
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(in);
+			Object stagejson = json.get("stage");
+			if (stagejson == null) throw new CorruptDataException(
+				"Error in map file, missing stage");
+			return Stage.fromJSON((JSONObject) stagejson, local);
+		}
+	}
+
 	public static Stage fromJSON(JSONObject json, Library lib)
 		throws CorruptDataException
 	{
@@ -59,7 +91,7 @@ public class Stage implements HasJSONRepresentation {
 		if (rSprites == null) throw new CorruptDataException("Error in stage, missing sprites");
 
 		try {
-			Stage r = new Stage(StageInfo.fromJSON((JSONObject) rTerrain, lib));
+			Stage r = new Stage(StageInfo.fromJSON((JSONObject) rTerrain, lib), lib);
 			JSONArray sprites = (JSONArray) rSprites;
 			for (Object s : sprites) {
 				r.addSprite(Sprite.fromJSON((JSONObject) s, lib));
