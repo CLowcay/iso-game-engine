@@ -83,6 +83,18 @@ public class Stage implements HasJSONRepresentation {
 		if (s != null) s.rotate();
 	}
 
+	public boolean usesTerrainTexture(TerrainTexture tex) {
+		return terrain.usesTerrainTexture(tex);
+	}
+
+	public boolean usesSprite(SpriteInfo info) {
+		return sprites.values().stream().anyMatch(s -> s.info == info);
+	}
+
+	public boolean usesCliffTexture(CliffTexture tex) {
+		return terrain.usesCliffTexture(tex);
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {

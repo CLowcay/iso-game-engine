@@ -4,7 +4,7 @@ import javafx.scene.canvas.GraphicsContext;
 import org.json.simple.JSONObject;
 
 public class Sprite implements HasJSONRepresentation {
-	private final SpriteInfo info;
+	public final SpriteInfo info;
 
 	// position of the sprite on the map.
 	public MapPoint pos;

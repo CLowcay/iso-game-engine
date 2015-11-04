@@ -12,7 +12,7 @@ import static isogame.GlobalConstants.TILEW;
  * */
 public class Tile implements HasJSONRepresentation {
 	public final int elevation;
-	private final TerrainTexture tex;
+	public final TerrainTexture tex;
 	public final Paint texture;
 	public final CliffTexture cliffTexture;
 	public final SlopeType slope;

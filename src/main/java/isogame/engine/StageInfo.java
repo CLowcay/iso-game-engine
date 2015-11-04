@@ -1,5 +1,6 @@
 package isogame.engine;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import org.json.simple.JSONArray;
@@ -44,6 +45,14 @@ public class StageInfo implements HasJSONRepresentation {
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in stage info", e);
 		}
+	}
+
+	public boolean usesTerrainTexture(TerrainTexture tex) {
+		return Arrays.stream(data).anyMatch(t -> t.tex == tex);
+	}
+
+	public boolean usesCliffTexture(CliffTexture tex) {
+		return Arrays.stream(data).anyMatch(t -> t.cliffTexture == tex);
 	}
 
 	@Override
