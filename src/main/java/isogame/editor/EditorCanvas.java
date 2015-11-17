@@ -243,7 +243,7 @@ public class EditorCanvas extends Pane {
 
 				if (stage != null) {
 					view.setScrollPos(scrolling.valueAt(now));
-					view.renderFrame(cx, stage, true);
+					view.renderFrame(cx, now, stage, true);
 				}
 			}
 		};

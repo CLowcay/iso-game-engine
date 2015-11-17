@@ -2,8 +2,8 @@ package isogame.engine;
 
 public class FrameAnimator {
 	int frame0 = 0;
-	long nframes;
-	long framePeriod;
+	final long nframes;
+	final long framePeriod;
 	long t0 = 0;
 
 	/**

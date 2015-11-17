@@ -377,7 +377,7 @@ public class Stage implements HasJSONRepresentation {
 	 * @param renderDebug Render debugging information
 	 * */
 	public void render(GraphicsContext cx, CameraAngle angle,
-		BoundingBox visible, boolean renderDebug
+		long t, BoundingBox visible, boolean renderDebug
 	) {
 		terrain.iterateTiles(angle).forEachRemaining(tile -> {
 			Point2D p = correctedIsoCoord(tile.pos, angle);
@@ -402,7 +402,7 @@ public class Stage implements HasJSONRepresentation {
 
 				Sprite s = sprites.get(tile.pos);
 				if (s != null) {
-					s.renderFrame(cx, 0, 0, 0, angle);
+					s.renderFrame(cx, 0, 0, t, angle);
 				}
 
 				if (renderDebug) {

@@ -45,7 +45,7 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		for (int d = 0; d < 4; d++) {
 			for (int f = 0; f < frames; f++) {
 				frameTextures[(f * 4) + d] =
-					new ImagePattern(buffer, f, d, frames, 4, true);
+					new ImagePattern(buffer, -f, -d, frames, 4, true);
 			}
 		}
 
