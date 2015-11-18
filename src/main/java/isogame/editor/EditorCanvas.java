@@ -207,6 +207,11 @@ public class EditorCanvas extends Pane {
 		}
 	}
 
+	private boolean enableAnimations = false;
+	public void enableAnimations(boolean enable) {
+		enableAnimations = enable;
+	}
+
 	public EditorCanvas(Node root, Window window) throws CorruptDataException {
 		super();
 		this.setFocusTraversable(true);
@@ -243,7 +248,7 @@ public class EditorCanvas extends Pane {
 
 				if (stage != null) {
 					view.setScrollPos(scrolling.valueAt(now));
-					view.renderFrame(cx, now, stage, true);
+					view.renderFrame(cx, enableAnimations? now : 0, stage, true);
 				}
 			}
 		};
