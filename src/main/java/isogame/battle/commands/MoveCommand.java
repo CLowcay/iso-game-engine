@@ -1,4 +1,4 @@
-package isogame.comptroller;
+package isogame.battle.commands;
 
 import java.util.List;
 
@@ -14,7 +14,8 @@ public class MoveCommand extends Command {
 	}
 
 	@Override
-	public void docmd(Turn turn) {
+	public void doCmd(Turn turn) throws CommandException {
+		if (!turn.canMove(path)) throw new CommandException("Invalid move command");
 		turn.doMove(path);
 	}
 }

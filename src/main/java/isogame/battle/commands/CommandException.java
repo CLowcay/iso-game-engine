@@ -1,4 +1,4 @@
-package isogame.comptroller;
+package isogame.battle.commands;
 
 public class CommandException extends Exception {
 	public CommandException() {

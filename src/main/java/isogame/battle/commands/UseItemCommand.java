@@ -1,4 +1,4 @@
-package isogame.comptroller;
+package isogame.battle.commands;
 
 import isogame.battle.Item;
 import isogame.battle.Turn;
@@ -14,7 +14,9 @@ public class UseItemCommand extends Command {
 	}
 
 	@Override
-	public void docmd(Turn turn) {
+	public void doCmd(Turn turn) throws CommandException {
+		if (!turn.canUseItem(agent, item))
+			throw new CommandException("Invalid item command");
 		turn.doUseItem(agent, item);
 	}
 }
