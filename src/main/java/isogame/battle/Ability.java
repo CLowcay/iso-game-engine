@@ -37,7 +37,7 @@ public class Ability {
 	private final double const_b = 4;
 
 	public DamageToTarget computeDamageToTarget(
-		TurnCharacter a, Targetable t
+		Character a, Targetable t
 	) {
 		double q = effFactor;
 		double buff;
@@ -46,36 +46,39 @@ public class Ability {
 		double attackPower;
 		double defencePower;
 
+		Weapon weapon = a.getWeapon();
+		Stats stats = a.getStats();
+
 		switch (type) {
 			case ATTACK:
 				q = 1;
-				if (a.weapon.physicalAttack > a.weapon.magicalAttack) {
-					buff = 1 + a.stats.physicalBuff - t.getStats().physicalBuff;
-					attack = a.weapon.physicalAttack;
+				if (weapon.physicalAttack > weapon.magicalAttack) {
+					buff = 1 + stats.physicalBuff - t.getStats().physicalBuff;
+					attack = weapon.physicalAttack;
 					defence = t.getPhysicalDefence();
-					attackPower = a.stats.strength;
+					attackPower = stats.strength;
 					defencePower = t.getStats().strength;
 				} else {
-					buff = 1 + a.stats.magicalBuff - t.getStats().magicalBuff;
-					attack = a.weapon.magicalAttack;
+					buff = 1 + stats.magicalBuff - t.getStats().magicalBuff;
+					attack = weapon.magicalAttack;
 					defence = t.getMagicalDefence();
-					attackPower = a.stats.intelligence;
+					attackPower = stats.intelligence;
 					defencePower = t.getStats().intelligence;
 				}
 			case SPECIAL:
 				throw new RuntimeException("Not implemented");
 			case SKILL:
-				buff = 1 + a.stats.physicalBuff - t.getStats().physicalBuff;
-				attack = a.weapon.physicalAttack;
+				buff = 1 + stats.physicalBuff - t.getStats().physicalBuff;
+				attack = weapon.physicalAttack;
 				defence = t.getPhysicalDefence();
-				attackPower = a.stats.strength;
+				attackPower = stats.strength;
 				defencePower = t.getStats().strength;
 				break;
 			case MAGIC:
-				buff = 1 + a.stats.magicalBuff - t.getStats().magicalBuff;
-				attack = a.weapon.magicalAttack;
+				buff = 1 + stats.magicalBuff - t.getStats().magicalBuff;
+				attack = weapon.magicalAttack;
 				defence = t.getMagicalDefence();
-				attackPower = a.stats.intelligence;
+				attackPower = stats.intelligence;
 				defencePower = t.getStats().intelligence;
 				break;
 			default:

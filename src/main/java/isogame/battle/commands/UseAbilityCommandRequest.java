@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import isogame.battle.Ability;
+import isogame.battle.Character;
 import isogame.battle.DamageToTarget;
 import isogame.battle.Turn;
-import isogame.battle.TurnCharacter;
 import isogame.engine.MapPoint;
 
 public class UseAbilityCommandRequest extends CommandRequest {
@@ -24,7 +24,7 @@ public class UseAbilityCommandRequest extends CommandRequest {
 
 	@Override
 	public Command makeCommand(Turn turn) throws CommandException {
-		TurnCharacter a = turn.getTurnCharacterAt(agent);
+		Character a = turn.getCharacterAt(agent);
 		Collection<DamageToTarget> targets =
 			turn.getAbilityTargets(agent, ability, target).stream()
 			.map(t -> ability.computeDamageToTarget(a, t))

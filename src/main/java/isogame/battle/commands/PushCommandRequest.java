@@ -1,9 +1,9 @@
 package isogame.battle.commands;
 
+import isogame.battle.Character;
 import isogame.battle.Stats;
 import isogame.battle.Targetable;
 import isogame.battle.Turn;
-import isogame.battle.TurnCharacter;
 import isogame.engine.MapPoint;
 
 public class PushCommandRequest extends CommandRequest {
@@ -17,14 +17,14 @@ public class PushCommandRequest extends CommandRequest {
 
 	@Override
 	public Command makeCommand(Turn turn) throws CommandException {
-		TurnCharacter a = turn.getTurnCharacterAt(agent);
+		Character a = turn.getCharacterAt(agent);
 		Targetable t = turn.getTargetableAt(target);
 
 		if (a != null && t != null) {
 			boolean effective;
-			if (!t.canPush()) effective = false;
-			else if (a.player == t.getPlayer()) effective = true;
-			else effective = Math.random() <= chanceOfSuccess(a.stats, t.getStats());
+			if (!t.isPushable()) effective = false;
+			else if (a.getPlayer() == t.getPlayer()) effective = true;
+			else effective = Math.random() <= chanceOfSuccess(a.getStats(), t.getStats());
 
 			if (turn.canPush(agent, target, effective)) {
 				return new PushCommand(agent, target, effective);

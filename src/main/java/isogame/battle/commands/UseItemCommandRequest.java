@@ -2,7 +2,6 @@ package isogame.battle.commands;
 
 import isogame.battle.Item;
 import isogame.battle.Turn;
-import isogame.battle.TurnCharacter;
 import isogame.engine.MapPoint;
 
 public class UseItemCommandRequest extends CommandRequest {

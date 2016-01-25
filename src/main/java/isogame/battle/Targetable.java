@@ -8,7 +8,7 @@ public interface Targetable {
 	public int getPhysicalDefence();
 	public int getMagicalDefence();
 	public void dealDamage(int damage);
-	public boolean canPush();
+	public boolean isPushable();
 	public Player getPlayer();
 }
 

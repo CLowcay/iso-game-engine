@@ -12,7 +12,7 @@ public class Turn {
 		return null;
 	}
 
-	public TurnCharacter getTurnCharacterAt(MapPoint x) {
+	public Character getCharacterAt(MapPoint x) {
 		return null;
 	}
 
