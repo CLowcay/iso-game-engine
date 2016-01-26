@@ -47,6 +47,24 @@ public class StageInfo implements HasJSONRepresentation {
 		}
 	}
 
+	/**
+	 * Get start tiles belonging to the human player (or player 1 in PVP)
+	 * */
+	public Collection<MapPoint> getPlayerStartTiles() {
+		return Arrays.stream(data)
+			.filter(t -> t.startZone == StartZoneType.PLAYER)
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Get start tiles belonging to the ai player (or player 2 in PVP)
+	 * */
+	public Collection<MapPoint> getAIStartTiles() {
+		return Arrays.stream(data)
+			.filter(t -> t.startZone == StartZoneType.AI)
+			.collect(Collectors.toList());
+	}
+
 	public boolean usesTerrainTexture(TerrainTexture tex) {
 		return Arrays.stream(data).anyMatch(t -> t.tex == tex);
 	}

@@ -43,6 +43,13 @@ public class Character implements Targetable {
 		this.hp = maxHP;
 	}
 
+	/* Make a clone of the character at a new position.
+	 * The clone is reset to default stats.
+	 * */
+	public Character cloneTo(MapPoint pos) {
+		return this(player, pos, baseStats, weapon, armour);
+	}
+
 	public void turnReset() {
 		turnStats = new Stats();
 		if (buffCounter > 0) {
