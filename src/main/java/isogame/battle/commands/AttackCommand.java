@@ -2,8 +2,8 @@ package isogame.battle.commands;
 
 import java.util.Collection;
 
+import isogame.battle.Battle;
 import isogame.battle.DamageToTarget;
-import isogame.battle.Turn;
 import isogame.engine.MapPoint;
 
 public class AttackCommand extends Command {
@@ -19,10 +19,10 @@ public class AttackCommand extends Command {
 	}
 
 	@Override
-	public void doCmd(Turn turn) throws CommandException {
-		if (!turn.canAttack(agent, targets))
+	public void doCmd(Battle battle) throws CommandException {
+		if (!battle.battleState.canAttack(agent, targets))
 			throw new CommandException("Invalid attack");
-		turn.doAttack(agent, targets);
+		battle.doAttack(agent, targets);
 	}
 }
 

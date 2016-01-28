@@ -2,7 +2,7 @@ package isogame.battle.commands;
 
 import java.util.List;
 
-import isogame.battle.Turn;
+import isogame.battle.BattleState;
 import isogame.engine.MapPoint;
 
 public class MoveCommandRequest extends CommandRequest {
@@ -15,9 +15,9 @@ public class MoveCommandRequest extends CommandRequest {
 	}
 	
 	@Override
-	public Command makeCommand(Turn turn) throws CommandException {
-		List<MapPoint> path = turn.findPath(start, target);
-		if (turn.canMove(path)) {
+	public Command makeCommand(BattleState battleState) throws CommandException {
+		List<MapPoint> path = battleState.findPath(start, target);
+		if (battleState.canMove(path)) {
 			return new MoveCommand(path);
 		} else {
 			throw new CommandException("Bad path command request");

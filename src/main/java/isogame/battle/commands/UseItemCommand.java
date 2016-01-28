@@ -1,7 +1,7 @@
 package isogame.battle.commands;
 
+import isogame.battle.Battle;
 import isogame.battle.Item;
-import isogame.battle.Turn;
 import isogame.engine.MapPoint;
 
 public class UseItemCommand extends Command {
@@ -14,10 +14,10 @@ public class UseItemCommand extends Command {
 	}
 
 	@Override
-	public void doCmd(Turn turn) throws CommandException {
-		if (!turn.canUseItem(agent, item))
+	public void doCmd(Battle battle) throws CommandException {
+		if (!battle.battleState.canUseItem(agent, item))
 			throw new CommandException("Invalid item command");
-		turn.doUseItem(agent, item);
+		battle.doUseItem(agent, item);
 	}
 }
 

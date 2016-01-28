@@ -3,8 +3,8 @@ package isogame.battle.commands;
 import java.util.Collection;
 
 import isogame.battle.Ability;
+import isogame.battle.Battle;
 import isogame.battle.DamageToTarget;
-import isogame.battle.Turn;
 import isogame.engine.MapPoint;
 
 public class UseAbilityCommand extends Command {
@@ -21,10 +21,10 @@ public class UseAbilityCommand extends Command {
 	}
 
 	@Override
-	public void doCmd(Turn turn) throws CommandException {
-		if (!turn.canDoAbility(agent, ability, targets))
+	public void doCmd(Battle battle) throws CommandException {
+		if (!battle.battleState.canDoAbility(agent, ability, targets))
 			throw new CommandException("Invalid ability command");
-		turn.doAbility(agent, ability, targets);
+		battle.doAbility(agent, ability, targets);
 	}
 }
 

@@ -1,6 +1,6 @@
 package isogame.battle.commands;
 
-import isogame.battle.Turn;
+import isogame.battle.Battle;
 import isogame.engine.MapPoint;
 
 public class PushCommand extends Command {
@@ -15,10 +15,10 @@ public class PushCommand extends Command {
 	}
 
 	@Override
-	public void doCmd(Turn turn) throws CommandException {
-		if (!turn.canPush(agent, target, effective))
+	public void doCmd(Battle battle) throws CommandException {
+		if (!battle.battleState.canPush(agent, target, effective))
 			throw new CommandException("Invalid push command");
-		turn.doPush(agent, target, effective);
+		battle.doPush(agent, target, effective);
 	}
 }
 

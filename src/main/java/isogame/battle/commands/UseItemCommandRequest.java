@@ -1,7 +1,7 @@
 package isogame.battle.commands;
 
+import isogame.battle.BattleState;
 import isogame.battle.Item;
-import isogame.battle.Turn;
 import isogame.engine.MapPoint;
 
 public class UseItemCommandRequest extends CommandRequest {
@@ -14,8 +14,8 @@ public class UseItemCommandRequest extends CommandRequest {
 	}
 
 	@Override
-	public Command makeCommand(Turn turn) throws CommandException {
-		if (turn.canUseItem(agent, item)) {
+	public Command makeCommand(BattleState battleState) throws CommandException {
+		if (battleState.canUseItem(agent, item)) {
 			return new UseItemCommand(agent, item);
 		} else {
 			throw new CommandException("Invalid item command request");

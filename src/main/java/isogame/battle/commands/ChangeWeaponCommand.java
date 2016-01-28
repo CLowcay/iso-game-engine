@@ -1,6 +1,6 @@
 package isogame.battle.commands;
 
-import isogame.battle.Turn;
+import isogame.battle.Battle;
 import isogame.battle.Weapon;
 import isogame.engine.MapPoint;
 
@@ -14,10 +14,10 @@ public class ChangeWeaponCommand extends Command {
 	}
 
 	@Override
-	public void doCmd(Turn turn) throws CommandException {
-		if (!turn.canChangeWeapon(agent, weapon))
+	public void doCmd(Battle battle) throws CommandException {
+		if (!battle.battleState.canChangeWeapon(agent, weapon))
 			throw new CommandException("Invalid change command");
-		turn.doChangeWeapon(agent, weapon);
+		battle.doChangeWeapon(agent, weapon);
 	}
 }
 

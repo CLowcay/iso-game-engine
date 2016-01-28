@@ -1,13 +1,16 @@
 package isogame.battle.data;
 
+import java.util.Collection;
+
 import isogame.battle.Character;
+import isogame.battle.InventoryItem;
 
 public class Loadout {
-	private final Character c1;
-	private final Character c2;
-	private final Character c3;
-	private final Character c4;
-	private final Collection<InventoryItem> items;
+	public final Character c1;
+	public final Character c2;
+	public final Character c3;
+	public final Character c4;
+	public final Collection<InventoryItem> items;
 
 	public Loadout(
 		Character c1, Character c2, Character c3, Character c4,

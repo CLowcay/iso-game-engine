@@ -1,8 +1,8 @@
 package isogame.battle.commands;
 
-import isogame.battle.Turn;
+import isogame.battle.Battle;
 
 public abstract class Command {
-	public abstract void doCmd(Turn turn) throws CommandException;
+	public abstract void doCmd(Battle turn) throws CommandException;
 }
 

@@ -1,5 +1,14 @@
 package isogame.battle.commands;
 
+import java.util.ArrayList;
+
+import isogame.battle.Battle;
+import isogame.battle.BattleState;
+import isogame.battle.Character;
+import isogame.battle.data.GameDataFactory;
+import isogame.battle.data.Loadout;
+import isogame.engine.MapPoint;
+
 public class StartBattleCommand {
 	private final String stage;
 	private final Loadout p1;
@@ -32,16 +41,17 @@ public class StartBattleCommand {
 	}
 
 	public Battle doCmd(GameDataFactory factory) {
-		return new Battle(factory.getStage(stage), new ArrayList(
-			p1.c1.cloneTo(p1Start1),
-			p1.c2.cloneTo(p1Start2),
-			p1.c3.cloneTo(p1Start3),
-			p1.c4.cloneTo(p1Start4),
-			p2.c1.cloneTo(p2Start1),
-			p2.c2.cloneTo(p2Start2),
-			p2.c3.cloneTo(p2Start3),
-			p2.c4.cloneTo(p2Start4)
-		));
+		ArrayList<Character> cs = new ArrayList<>();
+		cs.add(p1.c1.cloneTo(p1Start1));
+		cs.add(p1.c2.cloneTo(p1Start2));
+		cs.add(p1.c3.cloneTo(p1Start3));
+		cs.add(p1.c4.cloneTo(p1Start4));
+		cs.add(p2.c1.cloneTo(p2Start1));
+		cs.add(p2.c2.cloneTo(p2Start2));
+		cs.add(p2.c3.cloneTo(p2Start3));
+		cs.add(p2.c4.cloneTo(p2Start4));
+
+		return new Battle(new BattleState(factory.getStage(stage), cs));
 	}
 }
 

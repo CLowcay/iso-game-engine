@@ -4,9 +4,16 @@ import java.util.Collection;
 import java.util.List;
 
 import isogame.engine.MapPoint;
+import isogame.engine.StageInfo;
 
-public class Turn {
-	public Player player;
+public class BattleState {
+	public final StageInfo terrain;
+	public final Collection<Character> characters;
+
+	public BattleState(StageInfo terrain, Collection<Character> characters) {
+		this.terrain = terrain;
+		this.characters = characters;
+	}
 
 	public Targetable getTargetableAt(MapPoint x) {
 		return null;
@@ -14,9 +21,6 @@ public class Turn {
 
 	public Character getCharacterAt(MapPoint x) {
 		return null;
-	}
-
-	public void doMove(List<MapPoint> path) {
 	}
 
 	public boolean canMove(List<MapPoint> path) {
@@ -33,16 +37,8 @@ public class Turn {
 		return null;
 	}
 
-	public void doAttack(MapPoint agent, Collection<DamageToTarget> targets) {
-	}
-
 	public boolean canAttack(MapPoint agent, Collection<DamageToTarget> targets) {
 		return true;
-	}
-
-	public void doAbility(
-		MapPoint agent, Ability ability, Collection<DamageToTarget> targets
-	) {
 	}
 
 	public boolean canDoAbility(
@@ -51,21 +47,12 @@ public class Turn {
 		return true;
 	}
 
-	public void doChangeWeapon(MapPoint agent, Weapon weapon) {
-	}
-
 	public boolean canChangeWeapon(MapPoint agent, Weapon weapon) {
 		return true;
 	}
 
-	public void doUseItem(MapPoint agent, Item item) {
-	}
-
 	public boolean canUseItem(MapPoint agent, Item item) {
 		return true;
-	}
-
-	public void doPush(MapPoint agent, MapPoint target, boolean effective) {
 	}
 
 	public boolean canPush(MapPoint agent, MapPoint target, boolean effective) {

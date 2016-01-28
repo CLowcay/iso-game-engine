@@ -1,6 +1,6 @@
 package isogame.battle.commands;
 
-import isogame.battle.Turn;
+import isogame.battle.BattleState;
 import isogame.battle.Weapon;
 import isogame.engine.MapPoint;
 
@@ -14,8 +14,8 @@ public class ChangeWeaponCommandRequest extends CommandRequest {
 	}
 
 	@Override
-	public Command makeCommand(Turn turn) throws CommandException {
-		if (turn.canChangeWeapon(agent, weapon)) {
+	public Command makeCommand(BattleState battleState) throws CommandException {
+		if (battleState.canChangeWeapon(agent, weapon)) {
 			return new ChangeWeaponCommand(agent, weapon);
 		} else {
 			throw new CommandException("Invalid change command request");

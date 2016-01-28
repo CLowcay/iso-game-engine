@@ -1,8 +1,10 @@
 package isogame.engine;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -53,6 +55,7 @@ public class StageInfo implements HasJSONRepresentation {
 	public Collection<MapPoint> getPlayerStartTiles() {
 		return Arrays.stream(data)
 			.filter(t -> t.startZone == StartZoneType.PLAYER)
+			.map(t -> t.pos)
 			.collect(Collectors.toList());
 	}
 
@@ -62,6 +65,7 @@ public class StageInfo implements HasJSONRepresentation {
 	public Collection<MapPoint> getAIStartTiles() {
 		return Arrays.stream(data)
 			.filter(t -> t.startZone == StartZoneType.AI)
+			.map(t -> t.pos)
 			.collect(Collectors.toList());
 	}
 
