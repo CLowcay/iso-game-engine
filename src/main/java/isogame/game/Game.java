@@ -1,4 +1,4 @@
-package isgame.game;
+package isogame.game;
 
 import javafx.application.Application;
 import javafx.scene.layout.StackPane;

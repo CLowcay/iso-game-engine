@@ -7,3 +7,10 @@ define 'mapeditor' do
 	run.using(:main => 'isogame.editor.MapEditor')
 end
 
+define 'game' do
+	compile.using(:lint => 'all').with('lib/json-simple-1.1.1.jar')
+	project.version = '0.0.1'
+	package(:jar).with(:manifest=>{'Main-Class'=>'isogame.game.Game'})
+	run.using(:main => 'isogame.game.Game')
+end
+
