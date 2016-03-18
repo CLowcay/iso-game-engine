@@ -21,21 +21,13 @@ public class PushCommandRequest extends CommandRequest {
 		Targetable t = battleState.getTargetableAt(target);
 
 		if (a != null && t != null) {
-			boolean effective;
-			if (!t.isPushable()) effective = false;
-			else if (a.getPlayer() == t.getPlayer()) effective = true;
-			else effective = Math.random() <= chanceOfSuccess(a.getStats(), t.getStats());
-
+			boolean effective = t.isPushable();
 			if (battleState.canPush(agent, target, effective)) {
 				return new PushCommand(agent, target, effective);
 			}
 		}
 
 		throw new CommandException("Invalid push command request");
-	}
-
-	public double chanceOfSuccess(Stats a, Stats t) {
-		return a.strength / t.strength * 0.7;
 	}
 }
 

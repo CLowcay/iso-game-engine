@@ -1,6 +1,6 @@
 package isogame.battle;
 
 public enum AbilityType {
-	ATTACK, SPECIAL, SKILL, MAGIC
+	ATTACK, SPECIAL, SKILL, SPELL
 }
 

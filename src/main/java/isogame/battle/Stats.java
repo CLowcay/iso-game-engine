@@ -3,46 +3,64 @@ package isogame.battle;
 public class Stats {
 	public final int ap;
 	public final int mp;
-	public final int strength;
-	public final int intelligence;
+	public final int power;
 	public final int vitality;
+	public final int attack;
+	public final int defence;
+	public final WeaponType weaponType;
 
-	public final double physicalBuff;
-	public final double magicalBuff;
+	public final double buff;
 
 	public Stats() {
 		this.ap = 0;
 		this.mp = 0;
-		this.strength = 0;
-		this.intelligence = 0;
+		this.power = 0;
 		this.vitality = 0;
-		this.physicalBuff = 0;
-		this.magicalBuff = 0;
+		this.attack = 0;
+		this.defence = 0;
+		this.buff = 0;
+		this.weaponType = WeaponType.SWORD;
 	}
 
 	public Stats(
 		int ap, int mp,
-		int strength, int intelligence, int vitality,
-		double physicalBuff, double magicalBuff
+		int power, int vitality,
+		int attack, int defence,
+		double buff, WeaponType weaponType
 	) {
 		this.ap = ap;
 		this.mp = mp;
-		this.strength = strength;
-		this.intelligence = intelligence;
+		this.power = power;
 		this.vitality = vitality;
-		this.physicalBuff = physicalBuff;
-		this.magicalBuff = magicalBuff;
+		this.attack = attack;
+		this.defence = defence;
+		this.buff = buff;
+		this.weaponType = weaponType;
+	}
+
+	public Stats(
+		int ap, int mp,
+		int power, int vitality,
+		int attack, int defence,
+		double buff
+	) {
+		this(
+			ap, mp, power,
+			vitality, attack,
+			defence, buff,
+			WeaponType.SWORD);
 	}
 
 	public Stats add(Stats stats) {
 		return new Stats(
 			ap + stats.ap,
 			mp + stats.mp,
-			strength + stats.strength,
-			intelligence + stats.intelligence,
+			power + stats.power,
 			vitality + stats.vitality,
-			physicalBuff + stats.physicalBuff,
-			magicalBuff + stats.magicalBuff
+			attack + stats.attack,
+			defence + stats.defence,
+			buff + stats.buff,
+			weaponType
 		);
 	}
 }
