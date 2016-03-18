@@ -34,8 +34,8 @@ public class Character implements Targetable {
 	/* Make a clone of the character at a new position.
 	 * The clone is reset to default stats.
 	 * */
-	public Character cloneTo(MapPoint pos) {
-		return new Character (player, pos, baseStats, weapon);
+	public Character cloneTo(MapPoint pos, Player newPlayer) {
+		return new Character (newPlayer, pos, baseStats, weapon);
 	}
 
 	public Weapon getWeapon() {

@@ -35,7 +35,7 @@ public class StartBattleCommandRequest {
 		shuffleN(p2ps, 4);
 
 		return new StartBattleCommand(
-			stage, p1.me, me,
+			stage, Math.random() < 0.5, p1.me, me,
 			p1ps[0], p1ps[1], p1ps[2], p1ps[3],
 			p2ps[0], p2ps[1], p2ps[2], p2ps[3]);
 	}
