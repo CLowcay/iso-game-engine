@@ -45,7 +45,7 @@ import org.json.simple.parser.ParseException;
 import static isogame.GlobalConstants.SCROLL_SPEED;
 import static isogame.GlobalConstants.TILEH;
 
-public class EditorCanvas extends Pane {
+public class EditorCanvas extends Canvas {
 	private final AnimationTimer animateCanvas;
 	private Tool tool = null;
 	private final View view;
@@ -218,17 +218,12 @@ public class EditorCanvas extends Pane {
 
 		this.window = window;
 
-		Canvas canvas = new Canvas();
-		this.getChildren().add(canvas);
-		canvas.widthProperty().bind(this.widthProperty());
-		canvas.heightProperty().bind(this.heightProperty());
-
 		view = new View(960, 540);
 
 		final ContinuousAnimator scrolling = new ContinuousAnimator();
 		scrolling.reset(view.getScrollPos());
 
-		final GraphicsContext cx = canvas.getGraphicsContext2D();
+		final GraphicsContext cx = this.getGraphicsContext2D();
 		cx.setFont(new Font(100));
 
 		animateCanvas = new AnimationTimer() {
@@ -255,10 +250,10 @@ public class EditorCanvas extends Pane {
 
 		// Listen for window resize events
 		this.widthProperty().addListener((obs, w0, w) -> {
-			view.setViewport(w.intValue(), (int) canvas.getHeight());
+			view.setViewport(w.intValue(), (int) this.getHeight());
 		});
 		this.heightProperty().addListener((obs, h0, h) -> {
-			view.setViewport((int) canvas.getWidth(), h.intValue());
+			view.setViewport((int) this.getWidth(), h.intValue());
 		});
 
 		// Listen for keyboard events

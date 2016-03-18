@@ -42,6 +42,9 @@ public class MapEditor extends Application {
 			guiRoot.setLeft(library);
 			root.getChildren().addAll(canvas, guiRoot);
 
+			canvas.widthProperty().bind(root.widthProperty());
+			canvas.heightProperty().bind(root.heightProperty());
+
 			primaryStage.setTitle("isogame map editor");
 			primaryStage.setScene(scene);
 			canvas.startAnimating();
