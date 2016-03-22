@@ -7,7 +7,7 @@ public class Character implements Targetable {
 	private final Player player;
 	private final Stats baseStats;
 
-	private Weapon weapon;
+	private final Weapon weapon;
 
 	private Optional<StatusEffect> statusBuff;
 	private Optional<StatusEffect> statusDebuff;
@@ -40,10 +40,6 @@ public class Character implements Targetable {
 
 	public Weapon getWeapon() {
 		return weapon;
-	}
-
-	public void changeWeapon(Weapon weapon) {
-		this.weapon = weapon;
 	}
 
 	@Override public Stats getStats() {
