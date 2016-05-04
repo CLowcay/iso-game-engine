@@ -1,5 +1,6 @@
 package isogame.battle;
 
+import isogame.battle.data.Stats;
 import isogame.engine.MapPoint;
 
 public interface Targetable {

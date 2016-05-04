@@ -2,7 +2,7 @@ package isogame.battle.commands;
 
 import isogame.battle.BattleState;
 import isogame.battle.Character;
-import isogame.battle.Stats;
+import isogame.battle.data.Stats;
 import isogame.battle.Targetable;
 import isogame.engine.MapPoint;
 

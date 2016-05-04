@@ -153,17 +153,30 @@ public class Library {
 	 * Load the library described in a JSON file.
 	 * @param inStream The input stream.  It will be closed automatically.
 	 * */
-	public Library(InputStream inStream, String url, Library parent)
+	public static Library fromFile(InputStream inStream, String url, Library parent)
 		throws IOException, CorruptDataException
 	{
-		this.parent = parent;
-		
 		try (BufferedReader in =
 			new BufferedReader(new InputStreamReader(inStream, "UTF-8"))
 		) {
 			if (in == null) throw new FileNotFoundException("File not found " + url);
 			JSONParser parser = new JSONParser();
 			JSONObject json = (JSONObject) parser.parse(in);
+			return fromJSON(json, url, parent);
+		} catch (ParseException e) {
+			throw new CorruptDataException(url + " is corrupted");
+		}
+	}
+
+	/**
+	 * Parse a library out of JSON data
+	 * */
+	public static Library fromJSON(JSONObject json, String url, Library parent)
+		throws CorruptDataException
+	{
+		try {
+			Library r = new Library(parent);
+
 			JSONArray sprites = (JSONArray) json.get("sprites");
 			JSONArray terrains = (JSONArray) json.get("terrains");
 			JSONArray cliffTextures = (JSONArray) json.get("cliffTextures");
@@ -180,7 +193,7 @@ public class Library {
 				String id = (String) sprite.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				this.sprites.put(id, SpriteInfo.fromJSON(sprite));
+				r.sprites.put(id, SpriteInfo.fromJSON(sprite));
 			}
 
 			for (Object x : terrains) {
@@ -188,7 +201,7 @@ public class Library {
 				String id = (String) terrain.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				this.terrains.put(id, TerrainTexture.fromJSON(terrain));
+				r.terrains.put(id, TerrainTexture.fromJSON(terrain));
 			}
 
 			for (Object x : cliffTextures) {
@@ -196,12 +209,11 @@ public class Library {
 				String id = (String) cliffTerrain.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				this.cliffTextures.put(id, CliffTexture.fromJSON(cliffTerrain));
+				r.cliffTextures.put(id, CliffTexture.fromJSON(cliffTerrain));
 			}
 
+			return r;
 		} catch (ClassCastException e) {
-			throw new CorruptDataException(url + " is corrupted");
-		} catch (ParseException e) {
 			throw new CorruptDataException(url + " is corrupted");
 		}
 	}

@@ -141,7 +141,7 @@ public class LibraryPane extends VBox {
 		this.getChildren().addAll(header, palette);
 
 		globalLibraryFile = new File(dataRoot, "global_library.json");
-		global = new Library(
+		global = Library.fromFile(
 			new FileInputStream(globalLibraryFile),
 			globalLibraryFile.toString(), null);
 

@@ -21,7 +21,8 @@ public class AttackCommandRequest extends CommandRequest {
 	@Override
 	public Command makeCommand(BattleState battleState) throws CommandException {
 		Character a = battleState.getCharacterAt(agent);
-		Ability ability = a.getWeapon().attack;
+		// TODO: fix this
+		Ability ability = null; //a.getWeapon().info.attack;
 		Collection<DamageToTarget> targets =
 			battleState.getAbilityTargets(agent, ability, target).stream()
 			.map(t -> ability.computeDamageToTarget(a, t))

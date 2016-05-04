@@ -57,7 +57,7 @@ public class MapEditor extends Application {
 
 	public File getDataDir(Stage primaryStage) {
 		File homeDir = new File(System.getProperty("user.home"));
-		File configDir = new File(homeDir, ".isogame_map_editor");
+		File configDir = new File(homeDir, ".inthezone");
 		File configFile = new File(configDir, "config.txt");
 
 		File dataDir;

@@ -4,13 +4,13 @@ import java.util.Collection;
 import java.util.List;
 
 import isogame.engine.MapPoint;
-import isogame.engine.StageInfo;
+import isogame.engine.Stage;
 
 public class BattleState {
-	public final StageInfo terrain;
+	public final Stage terrain;
 	public final Collection<Character> characters;
 
-	public BattleState(StageInfo terrain, Collection<Character> characters) {
+	public BattleState(Stage terrain, Collection<Character> characters) {
 		this.terrain = terrain;
 		this.characters = characters;
 	}

@@ -1,5 +1,9 @@
 package isogame.battle;
 
+import isogame.battle.data.AbilityType;
+import isogame.battle.data.Range;
+import isogame.battle.data.Stats;
+
 public class Ability {
 	public final String name;
 	public final AbilityType type;

@@ -1,5 +1,8 @@
 package isogame.battle;
 
+import isogame.battle.data.Stats;
+import isogame.battle.data.StatusEffectKind;
+
 public class StatusEffect {
 	public final String name;
 	public final Stats buff;

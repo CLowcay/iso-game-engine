@@ -1,16 +1,12 @@
 package isogame.battle;
 
-public class Weapon extends InventoryItem {
-	public final WeaponType type;
-	public final Stats buff;
-	public final Ability attack;
+import isogame.battle.data.WeaponInfo;
 
-	public Weapon(
-		WeaponType type, Stats buff, Ability attack
-	) {
-		this.type = type;
-		this.buff = buff;
-		this.attack = attack;
+public class Weapon extends InventoryItem {
+	public final WeaponInfo info;
+
+	public Weapon(WeaponInfo info) {
+		this.info = info;
 	}
 }
 

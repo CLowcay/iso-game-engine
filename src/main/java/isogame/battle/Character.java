@@ -1,6 +1,8 @@
 package isogame.battle;
 
+import isogame.battle.data.Stats;
 import isogame.engine.MapPoint;
+import java.util.Collection;
 import java.util.Optional;
 
 public class Character implements Targetable {
@@ -8,6 +10,7 @@ public class Character implements Targetable {
 	private final Stats baseStats;
 
 	private final Weapon weapon;
+	private final Collection<Ability> abilities;
 
 	private Optional<StatusEffect> statusBuff;
 	private Optional<StatusEffect> statusDebuff;
@@ -21,7 +24,8 @@ public class Character implements Targetable {
 	}
 
 	public Character(
-		Player player, MapPoint pos, Stats baseStats, Weapon weapon
+		Player player, MapPoint pos, Stats baseStats,
+		Collection<Ability> abilities, Weapon weapon
 	) {
 		this.player = player;
 		this.baseStats = baseStats;
@@ -29,13 +33,14 @@ public class Character implements Targetable {
 		this.weapon = weapon;
 		this.maxHP = getMaxHP(baseStats);
 		this.hp = maxHP;
+		this.abilities = abilities;
 	}
 
 	/* Make a clone of the character at a new position.
 	 * The clone is reset to default stats.
 	 * */
 	public Character cloneTo(MapPoint pos, Player newPlayer) {
-		return new Character (newPlayer, pos, baseStats, weapon);
+		return new Character (newPlayer, pos, baseStats, abilities, weapon);
 	}
 
 	public Weapon getWeapon() {

@@ -27,6 +27,7 @@ import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
 
 public class Stage implements HasJSONRepresentation {
+	public String name;
 	public final StageInfo terrain;
 	public final Map<MapPoint, Sprite> sprites;
 	public final Library localLibrary;
@@ -63,10 +64,6 @@ public class Stage implements HasJSONRepresentation {
 	public static Stage fromFile(File filename, Library global)
 		throws IOException, CorruptDataException, ParseException
 	{
-		Library local = new Library(
-			new FileInputStream(filename),
-			filename.toString(), global);
-
 		try (BufferedReader in =
 			new BufferedReader(
 			new InputStreamReader(
@@ -77,21 +74,29 @@ public class Stage implements HasJSONRepresentation {
 			Object stagejson = json.get("stage");
 			if (stagejson == null) throw new CorruptDataException(
 				"Error in map file, missing stage");
-			return Stage.fromJSON((JSONObject) stagejson, local);
+
+			return Stage.fromJSON((JSONObject) stagejson, global);
 		}
 	}
 
-	public static Stage fromJSON(JSONObject json, Library lib)
+	public static Stage fromJSON(JSONObject json, Library global)
 		throws CorruptDataException
 	{
-		Object rTerrain = json.get("terrain");
-		Object rSprites = json.get("sprites");
-
-		if (rTerrain == null) throw new CorruptDataException("Error in stage, missing terrain");
-		if (rSprites == null) throw new CorruptDataException("Error in stage, missing sprites");
-
 		try {
+			Object rName = json.get("name");
+			if (rName == null) throw new CorruptDataException("Error in stage, missing name");
+			String name = (String) rName;
+
+			Library lib = Library.fromJSON(json, name, global);
+
+			Object rTerrain = json.get("terrain");
+			Object rSprites = json.get("sprites");
+
+			if (rTerrain == null) throw new CorruptDataException("Error in stage, missing terrain");
+			if (rSprites == null) throw new CorruptDataException("Error in stage, missing sprites");
+
 			Stage r = new Stage(StageInfo.fromJSON((JSONObject) rTerrain, lib), lib);
+			r.name = name;
 			JSONArray sprites = (JSONArray) rSprites;
 			for (Object s : sprites) {
 				r.addSprite(Sprite.fromJSON((JSONObject) s, lib));
@@ -136,6 +141,7 @@ public class Stage implements HasJSONRepresentation {
 		}
 
 		JSONObject r = new JSONObject();
+		r.put("name", name);
 		r.put("terrain", terrain.getJSON());
 		r.put("sprites", s);
 		return r;

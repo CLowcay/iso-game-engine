@@ -1,4 +1,4 @@
-package isogame.battle;
+package isogame.battle.data;
 
 public class TargetMode {
 	public final boolean self;

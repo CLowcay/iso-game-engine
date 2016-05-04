@@ -5,7 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import isogame.battle.data.GameDataFactory;
 import isogame.battle.data.Loadout;
 import isogame.engine.MapPoint;
-import isogame.engine.StageInfo;
+import isogame.engine.Stage;
 
 /**
  * This one works a bit different.  Player 1 generates a
@@ -28,9 +28,9 @@ public class StartBattleCommandRequest {
 	public StartBattleCommand makeCommand(
 		StartBattleCommandRequest p1, GameDataFactory factory
 	) {
-		StageInfo si = factory.getStage(stage);
-		MapPoint[] p1ps = si.getPlayerStartTiles().toArray(mapPointArray);
-		MapPoint[] p2ps = si.getAIStartTiles().toArray(mapPointArray);
+		Stage si = factory.getStage(stage);
+		MapPoint[] p1ps = si.terrain.getPlayerStartTiles().toArray(mapPointArray);
+		MapPoint[] p2ps = si.terrain.getAIStartTiles().toArray(mapPointArray);
 		shuffleN(p1ps, 4);
 		shuffleN(p2ps, 4);
 
