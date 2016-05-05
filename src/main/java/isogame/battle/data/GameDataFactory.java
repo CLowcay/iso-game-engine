@@ -158,5 +158,9 @@ public class GameDataFactory {
 	public CharacterInfo getCharacter(String name) {
 		return characters.get(name);
 	}
+
+	public Collection<CharacterInfo> getCharacters() {
+		return characters.values();
+	}
 }
 
