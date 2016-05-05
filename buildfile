@@ -11,7 +11,12 @@ define 'dataeditor' do
 	compile.using(:lint => 'all').with('lib/json-simple-1.1.1.jar')
 	project.version = '0.0.1'
 	package(:jar).with(:manifest=>{'Main-Class'=>'isogame.dataEditor.DataEditor'})
-	run.using(:main => 'isogame.editor.DataEditor')
+	run.using(:main => 'isogame.dataEditor.DataEditor')
+end
+
+define 'uuid-please' do
+	compile.using(:lint => 'all').with('lib/json-simple-1.1.1.jar')
+	run.using(:main => 'isogame.MakeUUID')
 end
 
 define 'game' do
