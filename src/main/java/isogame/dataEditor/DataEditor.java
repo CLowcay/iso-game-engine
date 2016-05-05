@@ -19,9 +19,8 @@ public class DataEditor extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		StackPane root = new StackPane();
+		BorderPane root = new BorderPane();
 		Scene scene = new Scene(root, 960, 540);
-		BorderPane guiRoot = new BorderPane();
 
 		try {
 			File dataDir = getDataDir(primaryStage);
@@ -29,7 +28,7 @@ public class DataEditor extends Application {
 			GameDataFactory factory = new GameDataFactory(Optional.of(dataDir));
 			CharactersPane charactersPane = new CharactersPane(factory);
 
-			guiRoot.setLeft(charactersPane);
+			root.setLeft(charactersPane);
 
 			primaryStage.setTitle("Data editor");
 			primaryStage.setScene(scene);

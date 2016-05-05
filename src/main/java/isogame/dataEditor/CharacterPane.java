@@ -1,6 +1,7 @@
 package isogame.dataEditor;
 
 import isogame.battle.data.CharacterInfo;
+import isogame.gui.PositiveIntegerField;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
@@ -8,16 +9,24 @@ import javafx.scene.layout.GridPane;
 
 public class CharacterPane extends TitledPane {
 	private final GridPane grid = new GridPane();
-	private final TextField name = new TextField();
-	private final TextField ap = new TextField();
-	private final TextField mp = new TextField();
-	private final TextField power = new TextField();
-	private final TextField vitality = new TextField();
-	private final TextField attack = new TextField();
-	private final TextField defence = new TextField();
+	private final TextField name;
+	private final TextField ap;
+	private final TextField mp;
+	private final TextField power;
+	private final TextField vitality;
+	private final TextField attack;
+	private final TextField defence;
 
 	public CharacterPane(CharacterInfo character) {
 		super();
+
+		name = new TextField(character.name);
+		ap = new PositiveIntegerField(character.stats.ap);
+		mp = new PositiveIntegerField(character.stats.mp);
+		power = new PositiveIntegerField(character.stats.power);
+		vitality = new PositiveIntegerField(character.stats.vitality);
+		attack = new PositiveIntegerField(character.stats.attack);
+		defence = new PositiveIntegerField(character.stats.defence);
 
 		grid.addRow(0, new Label("Name"), name);
 		grid.addRow(1, new Label("Base AP"), ap);
@@ -29,6 +38,7 @@ public class CharacterPane extends TitledPane {
 
 		this.setText(character.name);
 		this.setContent(grid);
+		this.textProperty().bind(name.textProperty());
 	}
 }
 
