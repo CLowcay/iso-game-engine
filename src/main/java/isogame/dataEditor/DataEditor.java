@@ -28,7 +28,9 @@ public class DataEditor extends Application {
 			GameDataFactory factory = new GameDataFactory(Optional.of(dataDir));
 			CharactersPane charactersPane = new CharactersPane(factory);
 
+			AbilitiesPane abilitiesPane = new AbilitiesPane(null);
 			root.setLeft(charactersPane);
+			root.setCenter(abilitiesPane);
 
 			primaryStage.setTitle("Data editor");
 			primaryStage.setScene(scene);
