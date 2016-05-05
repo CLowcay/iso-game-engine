@@ -4,7 +4,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import java.util.function.UnaryOperator;
 
-public class PositiveIntegerField extends TextField {
+public class PositiveIntegerField extends TypedTextField<Integer> {
 	public PositiveIntegerField(int init) {
 		this();
 		this.setText((new Integer(init)).toString());
@@ -30,7 +30,13 @@ public class PositiveIntegerField extends TextField {
 		}));
 	}
 
-	public int getInt() {
+	@Override
+	public void setValue(Integer v) {
+		this.setText(v == null? "" : v.toString());
+	}
+
+	@Override
+	public Integer getValue() {
 		try {
 			return Integer.parseUnsignedInt(this.getText());
 		} catch (NumberFormatException e) {

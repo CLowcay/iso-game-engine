@@ -54,8 +54,8 @@ public class NewMapDialog extends Dialog<StageInfo> {
 
 		this.setResultConverter(clickedButton -> {
 			if (clickedButton == ButtonType.OK) {
-				int w = width.getInt();
-				int h = height.getInt();
+				int w = width.getValue();
+				int h = height.getValue();
 				if (w == 0 || h == 0) return null;
 
 				Tile[] tiles = new Tile[w * h];

@@ -76,8 +76,8 @@ public class NewSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 
 		this.setResultConverter(clickedButton -> {
 			if (clickedButton == ButtonType.OK) {
-				int nframes = frames.getInt();
-				int rframerate = framerate.getInt();
+				int nframes = frames.getValue();
+				int rframerate = framerate.getValue();
 
 				if (nframes == 0 || rframerate == 0) return null;
 
