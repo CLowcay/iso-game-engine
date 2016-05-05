@@ -1,6 +1,7 @@
 package isogame.editor;
 
 import isogame.engine.SpriteAnimation;
+import isogame.gui.PositiveIntegerField;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;

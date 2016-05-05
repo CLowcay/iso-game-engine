@@ -5,6 +5,7 @@ import isogame.engine.MapPoint;
 import isogame.engine.StageInfo;
 import isogame.engine.TerrainTexture;
 import isogame.engine.Tile;
+import isogame.gui.PositiveIntegerField;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;

@@ -1,11 +1,21 @@
-package isogame.editor;
+package isogame.gui;
 
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import java.util.function.UnaryOperator;
 
 public class PositiveIntegerField extends TextField {
-	PositiveIntegerField() {
+	public PositiveIntegerField(int init) {
+		this();
+		this.setText((new Integer(init)).toString());
+	}
+
+	public PositiveIntegerField(String text) {
+		this();
+		this.setText(text);
+	}
+
+	public PositiveIntegerField() {
 		super();
 
 		this.setTextFormatter(new TextFormatter<>(change -> {
