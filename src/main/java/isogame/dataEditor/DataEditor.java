@@ -26,9 +26,10 @@ public class DataEditor extends Application {
 			File dataDir = getDataDir(primaryStage);
 			if (dataDir == null) System.exit(1);
 			GameDataFactory factory = new GameDataFactory(Optional.of(dataDir));
-			CharactersPane charactersPane = new CharactersPane(factory);
 
 			AbilitiesPane abilitiesPane = new AbilitiesPane(null);
+			CharactersPane charactersPane = new CharactersPane(factory, abilitiesPane);
+
 			root.setLeft(charactersPane);
 			root.setCenter(abilitiesPane);
 

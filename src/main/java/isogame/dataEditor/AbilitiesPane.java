@@ -6,6 +6,9 @@ import isogame.gui.FloatingField;
 import isogame.gui.PositiveIntegerField;
 import isogame.gui.StringField;
 import isogame.gui.TypedTextFieldTreeTableCell;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -28,7 +31,7 @@ import java.util.stream.Collectors;
 
 public class AbilitiesPane extends VBox {
 	private final TreeTableView<AbilityInfoModel> table;
-	private final TreeItem<AbilityInfoModel> tableRoot;
+	private final ObservableList<Integer> selected;
 
 	private final FlowPane tools = new FlowPane(Orientation.HORIZONTAL);
 	private final Button add = new Button("Add ability");
@@ -52,10 +55,10 @@ public class AbilitiesPane extends VBox {
 	private final TreeTableColumn<AbilityInfoModel, Boolean> piercing = new TreeTableColumn<>("Piercing");
 	private final TreeTableColumn<AbilityInfoModel, Integer> ribbon = new TreeTableColumn<>("Ribbon");
 	private final TreeTableColumn<AbilityInfoModel, String> targetMode = new TreeTableColumn<>("Target");
-	private final TreeTableColumn<AbilityInfoModel, Integer> nTargets = new TreeTableColumn<>("Number of targets");
-	private final TreeTableColumn<AbilityInfoModel, Boolean> los = new TreeTableColumn<>("Requires LOS");
+	private final TreeTableColumn<AbilityInfoModel, Integer> nTargets = new TreeTableColumn<>("Max targets");
+	private final TreeTableColumn<AbilityInfoModel, Boolean> los = new TreeTableColumn<>("LOS required");
 
-	private final TreeTableColumn<AbilityInfoModel, Boolean> useWeaponRange = new TreeTableColumn<>("Use weapon range");
+	private final TreeTableColumn<AbilityInfoModel, Boolean> useWeaponRange = new TreeTableColumn<>("Weapon range");
 	private final TreeTableColumn<AbilityInfoModel, Integer> recursion = new TreeTableColumn<>("Recursion");
 
 	private final TreeTableColumn<AbilityInfoModel, String> instantBefore = new TreeTableColumn<>("Instant before damage");
@@ -79,6 +82,21 @@ public class AbilitiesPane extends VBox {
 	private final Image subsequentIcon = new Image(
 		getClass().getResourceAsStream("/editor_assets/sub_ability.png"));
 
+	private SimpleBooleanProperty isCharacterLoaded =
+		new SimpleBooleanProperty(false);
+	private TreeItem<AbilityInfoModel> tableRoot;
+	public void setAbilities(TreeItem<AbilityInfoModel> abilities) {
+		isCharacterLoaded.setValue(true);
+		tableRoot = abilities;
+		tableRoot.setExpanded(true);
+		table.setRoot(tableRoot);
+		table.setShowRoot(false);
+	}
+	public void clearAbilities() {
+		setAbilities(new TreeItem<>(new AbilityInfoModel(false, false)));
+		isCharacterLoaded.setValue(false);
+	}
+
 	public AbilitiesPane(Collection<AbilityInfo> abilities) {
 		super();
 
@@ -87,38 +105,65 @@ public class AbilitiesPane extends VBox {
 		table = new TreeTableView<AbilityInfoModel>(tableRoot);
 		table.setShowRoot(false);
 		table.setEditable(true);
+		selected = table.getSelectionModel().getSelectedIndices();
 
 		tools.getChildren().addAll(add, remove, addSubsequent, addMana, up, down);
 		this.getChildren().addAll(tools, table);
 
+		add.disableProperty().bind(isCharacterLoaded.not());
+		remove.disableProperty().bind(Bindings.isEmpty(selected));
+		addSubsequent.disableProperty().bind(Bindings.isEmpty(selected));
+		addMana.disableProperty().bind(
+			Bindings.isEmpty(selected)
+			.or(new BooleanBinding() {
+				{
+					super.bind(selected);
+				}
+
+				@Override
+				protected boolean computeValue() {
+					if (selected.size() < 1) return false;
+					TreeItem<AbilityInfoModel> item = table.getTreeItem(selected.get(0));
+					AbilityInfoModel v = item.getValue();
+					AbilityInfoModel pv = item.getParent().getValue();
+					boolean hasMana = item.getChildren().stream()
+						.anyMatch(a -> a.getValue().getIsMana());
+					return hasMana || v.getIsMana() || v.getIsSubsequent() || pv.getIsMana();
+				}
+			}));
+
 		add.setOnAction(event -> {
-			tableRoot.getChildren().add(new TreeItem<>(new AbilityInfoModel(false, false)));
+			if (isCharacterLoaded.getValue()) {
+				tableRoot.getChildren().add(
+					new TreeItem<>(new AbilityInfoModel(false, false)));
+			}
 		});
 
 		remove.setOnAction(event -> {
-			table.getSelectionModel().getSelectedIndices().stream()
+			selected.stream()
 				.sorted((a, b) -> {if (b < a) return -1; else if (b > a) return 1; else return 0;})
 				.forEach(i -> {
 					TreeItem<AbilityInfoModel> item = table.getTreeItem(i);
 					item.getParent().getChildren().remove(item);
 				});
-
 		});
 
 		addMana.setOnAction(event -> {
-			List<Integer> selected = table.getSelectionModel().getSelectedIndices();
 			if (selected.size() >= 1) {
 				TreeItem<AbilityInfoModel> item = table.getTreeItem(selected.get(0));
 				AbilityInfoModel v = item.getValue();
 				AbilityInfoModel pv = item.getParent().getValue();
 				if (!v.getIsMana() && !v.getIsSubsequent() && !pv.getIsMana()) {
-					item.getChildren().add(new TreeItem<>(v.cloneMana(), new ImageView(manaIcon)));
+					TreeItem<AbilityInfoModel> newMana =
+						new TreeItem<>(v.cloneMana(), new ImageView(manaIcon));
+					item.getChildren().add(newMana);
+					item.setExpanded(true);
+					table.getSelectionModel().select(newMana);
 				}
 			}
 		});
 
 		addSubsequent.setOnAction(event -> {
-			List<Integer> selected = table.getSelectionModel().getSelectedIndices();
 			if (selected.size() >= 1) {
 				TreeItem<AbilityInfoModel> item = table.getTreeItem(selected.get(0));
 				TreeItem<AbilityInfoModel> parent;
@@ -138,12 +183,16 @@ public class AbilitiesPane extends VBox {
 						break;
 					}
 				}
-				all.add(i, new TreeItem<>(toClone.cloneSubsequent(), new ImageView(subsequentIcon)));
+
+				parent.setExpanded(true);
+				TreeItem<AbilityInfoModel> newSubsequent =
+					new TreeItem<>(toClone.cloneSubsequent(), new ImageView(subsequentIcon));
+				all.add(i, newSubsequent);
+				table.getSelectionModel().select(newSubsequent);
 			}
 		});
 
 		up.setOnAction(event -> {
-			List<Integer> selected = table.getSelectionModel().getSelectedIndices();
 			if (selected.size() >= 1) {
 				TreeItem<AbilityInfoModel> item = table.getTreeItem(selected.get(0));
 				AbilityInfoModel v = item.getValue();
@@ -153,14 +202,13 @@ public class AbilitiesPane extends VBox {
 					if (i > 0) {
 						all.remove(i);
 						all.add(i - 1, item);
-						table.getSelectionModel().select(selected.get(0) - 1);
+						table.getSelectionModel().select(item);
 					}
 				}
 			}
 		});
 
 		down.setOnAction(event -> {
-			List<Integer> selected = table.getSelectionModel().getSelectedIndices();
 			if (selected.size() >= 1) {
 				TreeItem<AbilityInfoModel> item = table.getTreeItem(selected.get(0));
 				AbilityInfoModel v = item.getValue();
@@ -170,8 +218,7 @@ public class AbilitiesPane extends VBox {
 					if (i < all.size() - 1 && !all.get(i + 1).getValue().getIsMana()) {
 						all.remove(i);
 						all.add(i + 1, item);
-						// TODO: why doesn't this work
-						table.getSelectionModel().select(selected.get(0) + 1);
+						table.getSelectionModel().select(item);
 					}
 				}
 			}
@@ -199,6 +246,7 @@ public class AbilitiesPane extends VBox {
 		statusEffect.setCellValueFactory(new TreeItemPropertyValueFactory<AbilityInfoModel, String>("statusEffect"));
 
 		name.setSortable(false);
+		name.setPrefWidth(240);
 		type.setSortable(false);
 		ap.setSortable(false);
 		mp.setSortable(false);
@@ -212,12 +260,18 @@ public class AbilitiesPane extends VBox {
 		ribbon.setSortable(false);
 		targetMode.setSortable(false);
 		nTargets.setSortable(false);
+		nTargets.setPrefWidth(120);
 		los.setSortable(false);
+		los.setPrefWidth(120);
 		useWeaponRange.setSortable(false);
+		useWeaponRange.setPrefWidth(120);
 		recursion.setSortable(false);
 		instantBefore.setSortable(false);
+		instantBefore.setPrefWidth(180);
 		instantAfter.setSortable(false);
+		instantAfter.setPrefWidth(180);
 		statusEffect.setSortable(false);
+		statusEffect.setPrefWidth(120);
 
 		name.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, String>
 			forTreeTableColumn(StringField::new));

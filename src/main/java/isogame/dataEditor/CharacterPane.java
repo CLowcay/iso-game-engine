@@ -5,6 +5,7 @@ import isogame.gui.PositiveIntegerField;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.TreeItem;
 import javafx.scene.layout.GridPane;
 
 public class CharacterPane extends TitledPane {
@@ -16,9 +17,17 @@ public class CharacterPane extends TitledPane {
 	private final TextField vitality;
 	private final TextField attack;
 	private final TextField defence;
+	private final TreeItem<AbilityInfoModel> abilitiesRoot;
 
-	public CharacterPane(CharacterInfo character) {
+	public String getName() {
+		return name.getText() == null? "" : name.getText();
+	}
+
+	public CharacterPane(CharacterInfo character, AbilitiesPane abilities) {
 		super();
+
+		abilitiesRoot = new TreeItem<>(new AbilityInfoModel(false, false));
+		abilitiesRoot.setExpanded(true);
 
 		name = new TextField(character.name);
 		ap = new PositiveIntegerField(character.stats.ap);
@@ -39,6 +48,10 @@ public class CharacterPane extends TitledPane {
 		this.setText(character.name);
 		this.setContent(grid);
 		this.textProperty().bind(name.textProperty());
+
+		this.expandedProperty().addListener((v, oldv, newv) -> {
+			if (newv) abilities.setAbilities(abilitiesRoot);
+		});
 	}
 }
 
