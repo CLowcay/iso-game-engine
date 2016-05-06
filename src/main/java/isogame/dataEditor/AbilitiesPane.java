@@ -2,6 +2,10 @@ package isogame.dataEditor;
 
 import isogame.battle.data.AbilityInfo;
 import isogame.battle.data.AbilityType;
+import isogame.battle.data.InstantEffectInfo;
+import isogame.battle.data.InstantEffectType;
+import isogame.battle.data.StatusEffectInfo;
+import isogame.battle.data.StatusEffectType;
 import isogame.gui.FloatingField;
 import isogame.gui.PositiveIntegerField;
 import isogame.gui.StringField;
@@ -17,12 +21,15 @@ import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.ChoiceBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.TreeTableView.TreeTableViewSelectionModel;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import java.util.Arrays;
 import java.util.Collection;
@@ -82,6 +89,9 @@ public class AbilitiesPane extends VBox {
 	private final Image subsequentIcon = new Image(
 		getClass().getResourceAsStream("/editor_assets/sub_ability.png"));
 
+	private final Label noCharacterSelectedMessage = new Label("No character selected");
+	private final Label noAbilitiesMessage = new Label("No abilities defined");
+
 	private SimpleBooleanProperty isCharacterLoaded =
 		new SimpleBooleanProperty(false);
 	private TreeItem<AbilityInfoModel> tableRoot;
@@ -91,13 +101,15 @@ public class AbilitiesPane extends VBox {
 		tableRoot.setExpanded(true);
 		table.setRoot(tableRoot);
 		table.setShowRoot(false);
+		table.setPlaceholder(noAbilitiesMessage);
 	}
 	public void clearAbilities() {
 		setAbilities(new TreeItem<>(new AbilityInfoModel(false, false)));
 		isCharacterLoaded.setValue(false);
+		table.setPlaceholder(noCharacterSelectedMessage);
 	}
 
-	public AbilitiesPane(Collection<AbilityInfo> abilities) {
+	public AbilitiesPane() {
 		super();
 
 		tableRoot = new TreeItem<>(new AbilityInfoModel(false, false));
@@ -105,9 +117,13 @@ public class AbilitiesPane extends VBox {
 		table = new TreeTableView<AbilityInfoModel>(tableRoot);
 		table.setShowRoot(false);
 		table.setEditable(true);
-		selected = table.getSelectionModel().getSelectedIndices();
+		table.setPlaceholder(noCharacterSelectedMessage);
+		TreeTableView.TreeTableViewSelectionModel<AbilityInfoModel> selection =
+			table.getSelectionModel();
+		selected = selection.getSelectedIndices();
 
 		tools.getChildren().addAll(add, remove, addSubsequent, addMana, up, down);
+		VBox.setVgrow(table, Priority.ALWAYS);
 		this.getChildren().addAll(tools, table);
 
 		add.disableProperty().bind(isCharacterLoaded.not());
@@ -158,7 +174,7 @@ public class AbilitiesPane extends VBox {
 						new TreeItem<>(v.cloneMana(), new ImageView(manaIcon));
 					item.getChildren().add(newMana);
 					item.setExpanded(true);
-					table.getSelectionModel().select(newMana);
+					selection.select(newMana);
 				}
 			}
 		});
@@ -188,7 +204,7 @@ public class AbilitiesPane extends VBox {
 				TreeItem<AbilityInfoModel> newSubsequent =
 					new TreeItem<>(toClone.cloneSubsequent(), new ImageView(subsequentIcon));
 				all.add(i, newSubsequent);
-				table.getSelectionModel().select(newSubsequent);
+				selection.select(newSubsequent);
 			}
 		});
 
@@ -202,7 +218,7 @@ public class AbilitiesPane extends VBox {
 					if (i > 0) {
 						all.remove(i);
 						all.add(i - 1, item);
-						table.getSelectionModel().select(item);
+						selection.select(item);
 					}
 				}
 			}
@@ -218,7 +234,7 @@ public class AbilitiesPane extends VBox {
 					if (i < all.size() - 1 && !all.get(i + 1).getValue().getIsMana()) {
 						all.remove(i);
 						all.add(i + 1, item);
-						table.getSelectionModel().select(item);
+						selection.select(item);
 					}
 				}
 			}
@@ -271,42 +287,48 @@ public class AbilitiesPane extends VBox {
 		instantAfter.setSortable(false);
 		instantAfter.setPrefWidth(180);
 		statusEffect.setSortable(false);
-		statusEffect.setPrefWidth(120);
+		statusEffect.setPrefWidth(200);
 
 		name.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, String>
-			forTreeTableColumn(StringField::new));
+			forTreeTableColumn(StringField::new, selection));
 		type.setCellFactory(ChoiceBoxTreeTableCell.<AbilityInfoModel, String>
 			forTreeTableColumn(types));
 		ap.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Integer>
-			forTreeTableColumn(PositiveIntegerField::new));
+			forTreeTableColumn(PositiveIntegerField::new, selection));
 		mp.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Integer>
-			forTreeTableColumn(PositiveIntegerField::new));
+			forTreeTableColumn(PositiveIntegerField::new, selection));
 		pp.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Integer>
-			forTreeTableColumn(PositiveIntegerField::new));
+			forTreeTableColumn(PositiveIntegerField::new, selection));
 		eff.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Double>
-			forTreeTableColumn(FloatingField::new));
+			forTreeTableColumn(FloatingField::new, selection));
 		chance.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Double>
-			forTreeTableColumn(FloatingField::new));
+			forTreeTableColumn(FloatingField::new, selection));
 		heal.setCellFactory(CheckBoxTreeTableCell.<AbilityInfoModel>
 			forTreeTableColumn(heal));
 		range.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Integer>
-			forTreeTableColumn(PositiveIntegerField::new));
+			forTreeTableColumn(PositiveIntegerField::new, selection));
 		radius.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Integer>
-			forTreeTableColumn(PositiveIntegerField::new));
+			forTreeTableColumn(PositiveIntegerField::new, selection));
 		piercing.setCellFactory(CheckBoxTreeTableCell.<AbilityInfoModel>
 			forTreeTableColumn(piercing));
 		ribbon.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Integer>
-			forTreeTableColumn(PositiveIntegerField::new));
+			forTreeTableColumn(PositiveIntegerField::new, selection));
 		targetMode.setCellFactory(ChoiceBoxTreeTableCell.<AbilityInfoModel, String>
 			forTreeTableColumn(targetModes));
 		nTargets.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Integer>
-			forTreeTableColumn(PositiveIntegerField::new));
+			forTreeTableColumn(PositiveIntegerField::new, selection));
 		los.setCellFactory(CheckBoxTreeTableCell.<AbilityInfoModel>
 			forTreeTableColumn(los));
 		useWeaponRange.setCellFactory(CheckBoxTreeTableCell.<AbilityInfoModel>
 			forTreeTableColumn(useWeaponRange));
 		recursion.setCellFactory(TypedTextFieldTreeTableCell.<AbilityInfoModel, Integer>
-			forTreeTableColumn(PositiveIntegerField::new));
+			forTreeTableColumn(PositiveIntegerField::new, selection));
+		instantBefore.setCellFactory(EffectField.<AbilityInfoModel>
+			forTreeTableColumn(enumValues(InstantEffectType.class), selection));
+		instantAfter.setCellFactory(EffectField.<AbilityInfoModel>
+			forTreeTableColumn(enumValues(InstantEffectType.class), selection));
+		statusEffect.setCellFactory(EffectField.<AbilityInfoModel>
+			forTreeTableColumn(enumValues(StatusEffectType.class), selection));
 
 		table.getColumns().setAll(
 			name, type, ap, mp, pp, eff, chance, heal, range, radius,

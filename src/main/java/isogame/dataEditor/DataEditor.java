@@ -27,11 +27,13 @@ public class DataEditor extends Application {
 			if (dataDir == null) System.exit(1);
 			GameDataFactory factory = new GameDataFactory(Optional.of(dataDir));
 
-			AbilitiesPane abilitiesPane = new AbilitiesPane(null);
+			AbilitiesPane abilitiesPane = new AbilitiesPane();
 			CharactersPane charactersPane = new CharactersPane(factory, abilitiesPane);
 
+			charactersPane.setStyle("background-color:blue;");
 			root.setLeft(charactersPane);
 			root.setCenter(abilitiesPane);
+			root.setBottom(null);
 
 			primaryStage.setTitle("Data editor");
 			primaryStage.setScene(scene);

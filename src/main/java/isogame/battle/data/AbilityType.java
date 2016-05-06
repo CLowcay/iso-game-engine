@@ -3,13 +3,13 @@ package isogame.battle.data;
 import isogame.engine.CorruptDataException;
 
 public enum AbilityType {
-	ATTACK, SPECIAL, SKILL, SPELL;
+	WEAPON, SPECIAL, SKILL, SPELL;
 
 	public static AbilityType parse(String s)
 		throws CorruptDataException
 	{
 		switch (s.toLowerCase()) {
-			case "attack": return ATTACK;
+			case "weapon": return WEAPON;
 			case "special": return SPECIAL;
 			case "skill": return SKILL;
 			case "spell": return SPELL;

@@ -57,7 +57,7 @@ public class Ability {
 	public double damageFormula(
 		double attackBuff, double defenceBuff, Stats a, Stats t
 	) {
-		double q = type == AbilityType.ATTACK? 1 : effFactor;
+		double q = type == AbilityType.WEAPON? 1 : effFactor;
 		return
 			q * (1 + attackBuff - defenceBuff) *
 			(0.9 + (0.2 * Math.random())) *

@@ -52,14 +52,17 @@ public class AbilityInfoModel {
 		this.isMana = new SimpleBooleanProperty(isMana);
 		this.isSubsequent = new SimpleBooleanProperty(isSubsequent);
 		this.recursion = new SimpleIntegerProperty(0);
-		this.instantBefore = new SimpleStringProperty("");
-		this.instantAfter = new SimpleStringProperty("");
-		this.statusEffect = new SimpleStringProperty("");
+		this.instantBefore = new SimpleStringProperty("none");
+		this.instantAfter = new SimpleStringProperty("none");
+		this.statusEffect = new SimpleStringProperty("none");
 	}
 
 	public AbilityInfoModel cloneMana() {
 		AbilityInfoModel r = this.clone(true, false);
 		r.name.setValue(name.getValue() + " + Mana");
+		r.ap.setValue(0);
+		r.mp.setValue(0);
+		r.pp.setValue(0);
 		return r;
 	}
 
@@ -67,6 +70,9 @@ public class AbilityInfoModel {
 		AbilityInfoModel r = this.clone(false, true);
 		String oldName = name.getValue();
 		r.name.setValue(oldName.endsWith("I")? oldName + "I" : oldName + " II");
+		r.ap.setValue(0);
+		r.mp.setValue(0);
+		r.pp.setValue(0);
 		return r;
 	}
 
