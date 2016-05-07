@@ -13,19 +13,19 @@ import isogame.gui.TypedTextFieldTreeTableCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.ChoiceBoxTreeTableCell;
-import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.control.TreeTableView.TreeTableViewSelectionModel;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -90,21 +90,27 @@ public class AbilitiesPane extends VBox {
 		getClass().getResourceAsStream("/editor_assets/sub_ability.png"));
 
 	private final Label noCharacterSelectedMessage = new Label("No character selected");
-	private final Label noAbilitiesMessage = new Label("No abilities defined");
+	private final Label noAbilitiesMessage = new Label();
 
 	private SimpleBooleanProperty isCharacterLoaded =
 		new SimpleBooleanProperty(false);
 	private TreeItem<AbilityInfoModel> tableRoot;
-	public void setAbilities(TreeItem<AbilityInfoModel> abilities) {
+	public void setAbilities(
+		ObservableValue<String> name, TreeItem<AbilityInfoModel> abilities
+	) {
 		isCharacterLoaded.setValue(true);
 		tableRoot = abilities;
 		tableRoot.setExpanded(true);
 		table.setRoot(tableRoot);
 		table.setShowRoot(false);
 		table.setPlaceholder(noAbilitiesMessage);
+		noAbilitiesMessage.textProperty().bind(
+			Bindings.concat("No abilities defined for ", name));
 	}
 	public void clearAbilities() {
-		setAbilities(new TreeItem<>(new AbilityInfoModel(false, false)));
+		setAbilities(
+			new SimpleStringProperty(""),
+			new TreeItem<>(new AbilityInfoModel(false, false)));
 		isCharacterLoaded.setValue(false);
 		table.setPlaceholder(noCharacterSelectedMessage);
 	}

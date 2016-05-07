@@ -18,13 +18,18 @@ public class CharactersPane extends VBox {
 	private final Button remove = new Button("Remove");
 	private final Accordion characters;
 
-	public CharactersPane(GameDataFactory data, AbilitiesPane abilities) {
+	public CharactersPane(
+		GameDataFactory data,
+		AbilitiesPane abilities,
+		WeaponsDialog weapons
+	) {
 		super();
 
 		this.tools.getChildren().addAll(add, remove);
 
 		this.characters = new Accordion(
-			data.getCharacters().stream().map(c -> new CharacterPane(c, abilities))
+			data.getCharacters().stream().map(c ->
+				new CharacterPane(c, abilities, weapons))
 			.collect(Collectors.toList()).toArray(new CharacterPane[0]));
 
 		this.getChildren().addAll(tools, characters);
@@ -32,7 +37,7 @@ public class CharactersPane extends VBox {
 		add.setOnAction(event -> {
 			Stats s = new Stats(3, 3, 1, 1, 1, 1);
 			CharacterInfo c = new CharacterInfo("New character", s, new LinkedList<>());
-			CharacterPane pane = new CharacterPane(c, abilities);
+			CharacterPane pane = new CharacterPane(c, abilities, weapons);
 			characters.getPanes().add(pane);
 			characters.setExpandedPane(pane);
 		});

@@ -27,10 +27,11 @@ public class DataEditor extends Application {
 			if (dataDir == null) System.exit(1);
 			GameDataFactory factory = new GameDataFactory(Optional.of(dataDir));
 
+			WeaponsDialog weaponsDialog = new WeaponsDialog();
 			AbilitiesPane abilitiesPane = new AbilitiesPane();
-			CharactersPane charactersPane = new CharactersPane(factory, abilitiesPane);
+			CharactersPane charactersPane =
+				new CharactersPane(factory, abilitiesPane, weaponsDialog);
 
-			charactersPane.setStyle("background-color:blue;");
 			root.setLeft(charactersPane);
 			root.setCenter(abilitiesPane);
 			root.setBottom(null);

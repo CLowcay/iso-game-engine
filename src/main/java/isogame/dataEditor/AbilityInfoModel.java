@@ -6,31 +6,31 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 public class AbilityInfoModel {
-	private SimpleStringProperty name;
-	private SimpleStringProperty type;
-	private SimpleIntegerProperty ap;
-	private SimpleIntegerProperty mp;
-	private SimpleIntegerProperty pp;
-	private SimpleDoubleProperty eff;
-	private SimpleDoubleProperty chance;
-	private SimpleBooleanProperty heal;
+	private final SimpleStringProperty name;
+	private final SimpleStringProperty type;
+	private final SimpleIntegerProperty ap;
+	private final SimpleIntegerProperty mp;
+	private final SimpleIntegerProperty pp;
+	private final SimpleDoubleProperty eff;
+	private final SimpleDoubleProperty chance;
+	private final SimpleBooleanProperty heal;
 
-	private SimpleIntegerProperty range;
-	private SimpleIntegerProperty radius;
-	private SimpleBooleanProperty piercing;
-	private SimpleIntegerProperty ribbon;
-	private SimpleStringProperty targetMode;
-	private SimpleIntegerProperty nTargets;
-	private SimpleBooleanProperty los;
+	private final SimpleIntegerProperty range;
+	private final SimpleIntegerProperty radius;
+	private final SimpleBooleanProperty piercing;
+	private final SimpleIntegerProperty ribbon;
+	private final SimpleStringProperty targetMode;
+	private final SimpleIntegerProperty nTargets;
+	private final SimpleBooleanProperty los;
 
-	private SimpleBooleanProperty useWeaponRange;
-	private SimpleBooleanProperty isMana;
-	private SimpleBooleanProperty isSubsequent;
-	private SimpleIntegerProperty recursion;
+	private final SimpleBooleanProperty useWeaponRange;
+	private final SimpleBooleanProperty isMana;
+	private final SimpleBooleanProperty isSubsequent;
+	private final SimpleIntegerProperty recursion;
 
-	private SimpleStringProperty instantBefore;
-	private SimpleStringProperty instantAfter;
-	private SimpleStringProperty statusEffect;
+	private final SimpleStringProperty instantBefore;
+	private final SimpleStringProperty instantAfter;
+	private final SimpleStringProperty statusEffect;
 
 	public AbilityInfoModel(boolean isMana, boolean isSubsequent) {
 		this.name = new SimpleStringProperty("New ability");
@@ -104,8 +104,16 @@ public class AbilityInfoModel {
 		return name;
 	}
 
+	public String getName() {
+		return name.getValue();
+	}
+
 	public SimpleStringProperty typeProperty() {
 		return type;
+	}
+
+	public String getType() {
+		return type.getValue();
 	}
 
 	public SimpleIntegerProperty apProperty() {
