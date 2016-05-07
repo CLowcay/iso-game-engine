@@ -10,6 +10,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
@@ -45,13 +46,14 @@ public class WeaponsPane extends VBox {
 		ObservableList<TreeItem<AbilityInfoModel>> abilitiesList
 	) {
 		weaponsList =
-			new MappedList<>(new FilteredList<>(abilitiesList,
-				i -> i.getValue().getType() == "weapon"), 
+			new MappedList<>(
+				abilitiesList.filtered(i -> i.getValue().getType().equals("weapon")),
 					i -> i.getValue().getName());
 		attack.setCellFactory(ChoiceBoxTreeTableCell.<WeaponInfoModel, String>
 			forTreeTableColumn(weaponsList));
 	}
 
+	private final Label noCharacterMessage = new Label("No message selected");
 	private final Label noWeaponsMessage = new Label();
 
 	private SimpleBooleanProperty isCharacterLoaded =
@@ -63,6 +65,7 @@ public class WeaponsPane extends VBox {
 	) {
 		setAbilities(abilities.getChildren());
 		isCharacterLoaded.setValue(true);
+		table.setPlaceholder(noWeaponsMessage);
 		noWeaponsMessage.textProperty().bind(
 			Bindings.concat("No weapons defined for ", name));
 		tableRoot = weapons;
@@ -76,6 +79,7 @@ public class WeaponsPane extends VBox {
 			new TreeItem<>(new WeaponInfoModel()),
 			new TreeItem<>(new AbilityInfoModel(false, false)));
 		isCharacterLoaded.setValue(false);
+		table.setPlaceholder(noCharacterMessage);
 	}
 
 	public WeaponsPane() {
@@ -86,7 +90,7 @@ public class WeaponsPane extends VBox {
 		table = new TreeTableView<WeaponInfoModel>(tableRoot);
 		table.setShowRoot(false);
 		table.setEditable(true);
-		table.setPlaceholder(noWeaponsMessage);
+		table.setPlaceholder(noCharacterMessage);
 
 		TreeTableView.TreeTableViewSelectionModel<WeaponInfoModel> selection =
 			table.getSelectionModel();
@@ -112,6 +116,23 @@ public class WeaponsPane extends VBox {
 			forTreeTableColumn(PositiveIntegerField::new, selection));
 		attack.setCellFactory(ChoiceBoxTreeTableCell.<WeaponInfoModel, String>
 			forTreeTableColumn(weaponsList));
+
+		add.disableProperty().bind(isCharacterLoaded.not());
+		remove.disableProperty().bind(Bindings.isEmpty(selected));
+
+		add.setOnAction(event -> {
+			if (isCharacterLoaded.getValue()) {
+				tableRoot.getChildren().add(new TreeItem<>(new WeaponInfoModel()));
+			}
+		});
+		remove.setOnAction(event -> {
+			selected.stream()
+				.sorted((a, b) -> {if (b < a) return -1; else if (b > a) return 1; else return 0;})
+				.forEach(i -> {
+					TreeItem<WeaponInfoModel> item = table.getTreeItem(i);
+					item.getParent().getChildren().remove(item);
+				});
+		});
 
 		table.getColumns().setAll(name, range, attack);
 	}

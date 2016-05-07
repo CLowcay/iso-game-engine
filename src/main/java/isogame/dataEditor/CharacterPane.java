@@ -68,7 +68,9 @@ public class CharacterPane extends TitledPane {
 		});
 
 		weaponsButton.setOnAction(event -> {
-			weapons.show();
+			if (!weapons.isShowing()) {
+				weapons.show();
+			}
 		});
 	}
 }

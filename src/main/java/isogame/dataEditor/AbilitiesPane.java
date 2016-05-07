@@ -156,8 +156,11 @@ public class AbilitiesPane extends VBox {
 
 		add.setOnAction(event -> {
 			if (isCharacterLoaded.getValue()) {
-				tableRoot.getChildren().add(
-					new TreeItem<>(new AbilityInfoModel(false, false)));
+				TreeItem<AbilityInfoModel> item =
+					new TreeItem<>(new AbilityInfoModel(false, false));
+				ObservableList<TreeItem<AbilityInfoModel>> children = tableRoot.getChildren();
+				children.add(item);
+				item.getValue().typeProperty().addListener(c -> children.set(children.indexOf(item), item));
 			}
 		});
 

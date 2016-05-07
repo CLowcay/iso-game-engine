@@ -34,7 +34,7 @@ public class AbilityInfoModel {
 
 	public AbilityInfoModel(boolean isMana, boolean isSubsequent) {
 		this.name = new SimpleStringProperty("New ability");
-		this.type = new SimpleStringProperty("Skill");
+		this.type = new SimpleStringProperty("skill");
 		this.ap = new SimpleIntegerProperty(2);
 		this.mp = new SimpleIntegerProperty(0);
 		this.pp = new SimpleIntegerProperty(1);
