@@ -12,6 +12,7 @@ import isogame.battle.data.TargetMode;
 import isogame.battle.data.WeaponInfo;
 import isogame.engine.CorruptDataException;
 import isogame.gui.PositiveIntegerField;
+import javafx.beans.value.WritableValue;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -158,19 +159,20 @@ public class CharacterPane extends TitledPane {
 	}
 
 	private static void decodeAbility(
-		AbilityInfo a, boolean isSubsequent,
+		AbilityInfo a, boolean isMana, boolean isSubsequent,
 		TreeItem<AbilityInfoModel> parent
 	) {
-		AbilityInfoModel base = new AbilityInfoModel(false, false);
+		AbilityInfoModel base = new AbilityInfoModel(isMana, isSubsequent);
 		base.init(a);
 		TreeItem<AbilityInfoModel> baseItem = new TreeItem<>(base);
+		AbilitiesPane.setItemGraphic(baseItem);
 		parent.getChildren().add(baseItem);
 
 		if (a.subsequent.isPresent())
-			decodeAbility(a.subsequent.get(), true, isSubsequent? parent : baseItem);
+			decodeAbility(a.subsequent.get(), false, true, isSubsequent? parent : baseItem);
 
 		if (a.mana.isPresent())
-			decodeAbility(a.mana.get(), false, baseItem);
+			decodeAbility(a.mana.get(), true, false, baseItem);
 	}
 
 	private static TreeItem<WeaponInfoModel> decodeWeapon(WeaponInfo w) {
@@ -181,6 +183,7 @@ public class CharacterPane extends TitledPane {
 
 	public CharacterPane(
 		CharacterInfo character,
+		WritableValue<Boolean> changed,
 		AbilitiesPane abilities,
 		Collection<WeaponInfo> characterWeapons,
 		WeaponsDialog weapons
@@ -193,7 +196,7 @@ public class CharacterPane extends TitledPane {
 		weaponsRoot.setExpanded(true);
 
 		for (AbilityInfo i : character.abilities) {
-			decodeAbility(i, false, abilitiesRoot);
+			decodeAbility(i, false, false, abilitiesRoot);
 		}
 		for (WeaponInfo i : characterWeapons) {
 			weaponsRoot.getChildren().add(decodeWeapon(i));
@@ -217,6 +220,14 @@ public class CharacterPane extends TitledPane {
 		grid.addRow(5, new Label("Base Attack"), attack);
 		grid.addRow(6, new Label("Base Defence"), defence);
 		grid.add(weaponsButton, 1, 7);
+
+		name.textProperty().addListener(c -> changed.setValue(true));
+		ap.textProperty().addListener(c -> changed.setValue(true));
+		mp.textProperty().addListener(c -> changed.setValue(true));
+		power.textProperty().addListener(c -> changed.setValue(true));
+		vitality.textProperty().addListener(c -> changed.setValue(true));
+		attack.textProperty().addListener(c -> changed.setValue(true));
+		defence.textProperty().addListener(c -> changed.setValue(true));
 
 		this.setText(character.name);
 		this.setContent(grid);

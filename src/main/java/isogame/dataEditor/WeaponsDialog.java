@@ -2,6 +2,7 @@ package isogame.dataEditor;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WritableValue;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TreeItem;
@@ -9,11 +10,11 @@ import javafx.stage.Modality;
 
 public class WeaponsDialog extends Dialog<Void> {
 	private final WeaponsPane weapons;
-	public WeaponsDialog() {
+	public WeaponsDialog(WritableValue<Boolean> changed) {
 		super();
 		initModality(Modality.NONE);
 
-		weapons = new WeaponsPane();
+		weapons = new WeaponsPane(changed);
 		weapons.setPrefWidth(400);
 		weapons.setPrefHeight(300);
 		weapons.setMinHeight(300);

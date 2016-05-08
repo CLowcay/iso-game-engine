@@ -8,10 +8,12 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
 import javafx.scene.control.cell.ChoiceBoxTreeTableCell;
@@ -82,7 +84,7 @@ public class WeaponsPane extends VBox {
 		table.setPlaceholder(noCharacterMessage);
 	}
 
-	public WeaponsPane() {
+	public WeaponsPane(WritableValue<Boolean> changed) {
 		super();
 
 		tableRoot = new TreeItem<>(new WeaponInfoModel());
@@ -117,12 +119,17 @@ public class WeaponsPane extends VBox {
 		attack.setCellFactory(ChoiceBoxTreeTableCell.<WeaponInfoModel, String>
 			forTreeTableColumn(weaponsList));
 
+		hookOnEditCommit(name, changed);
+		hookOnEditCommit(range, changed);
+		hookOnEditCommit(attack, changed);
+
 		add.disableProperty().bind(isCharacterLoaded.not());
 		remove.disableProperty().bind(Bindings.isEmpty(selected));
 
 		add.setOnAction(event -> {
 			if (isCharacterLoaded.getValue()) {
 				tableRoot.getChildren().add(new TreeItem<>(new WeaponInfoModel()));
+				changed.setValue(true);
 			}
 		});
 		remove.setOnAction(event -> {
@@ -132,9 +139,20 @@ public class WeaponsPane extends VBox {
 					TreeItem<WeaponInfoModel> item = table.getTreeItem(i);
 					item.getParent().getChildren().remove(item);
 				});
+				changed.setValue(true);
 		});
 
 		table.getColumns().setAll(name, range, attack);
+	}
+
+	private static <S, T> void hookOnEditCommit(
+		TreeTableColumn<S, T> column, WritableValue<Boolean> changed
+	) {
+		EventHandler<TreeTableColumn.CellEditEvent<S,T>> oldHandler = column.getOnEditCommit();
+		column.setOnEditCommit(e -> {
+			changed.setValue(true);
+			oldHandler.handle(e);
+		});
 	}
 }
 

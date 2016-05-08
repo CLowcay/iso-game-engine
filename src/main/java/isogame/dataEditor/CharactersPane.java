@@ -6,7 +6,8 @@ import isogame.battle.data.GameDataFactory;
 import isogame.battle.data.Stats;
 import isogame.battle.data.WeaponInfo;
 import isogame.engine.CorruptDataException;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -28,8 +29,6 @@ public class CharactersPane extends VBox {
 	private final Button remove = new Button("Remove");
 	private final Accordion characters;
 
-	private final SimpleBooleanProperty changed = new SimpleBooleanProperty(false);
-
 	private List<File> getStages(File baseDir) {
 		List<File> r = Arrays.stream(baseDir.listFiles())
 			.filter(f -> f.getName().endsWith(".map"))
@@ -44,17 +43,21 @@ public class CharactersPane extends VBox {
 	public CharactersPane(
 		GameDataFactory data,
 		File dataDir,
+		BooleanProperty changed,
 		AbilitiesPane abilities,
 		WeaponsDialog weapons
 	) {
 		super();
 
 		this.tools.getChildren().addAll(save, add, remove);
+
 		save.disableProperty().bind(changed.not());
+		save.textProperty().bind(Bindings.concat("Save",
+			Bindings.when(changed).then("").otherwise("d")));
 
 		this.characters = new Accordion(
 			data.getCharacters().stream()
-				.map(c -> new CharacterPane(c, abilities,
+				.map(c -> new CharacterPane(c, changed, abilities,
 					data.characterWeapons(c), weapons))
 				.collect(Collectors.toList()).toArray(new CharacterPane[0]));
 
@@ -96,7 +99,7 @@ public class CharactersPane extends VBox {
 			Stats s = new Stats(3, 3, 1, 1, 1, 1);
 			CharacterInfo c = new CharacterInfo("New character", s, new LinkedList<>());
 			CharacterPane pane =
-				new CharacterPane(c, abilities, new LinkedList<>(), weapons);
+				new CharacterPane(c, changed, abilities, new LinkedList<>(), weapons);
 			characters.getPanes().add(pane);
 			characters.setExpandedPane(pane);
 			changed.setValue(true);

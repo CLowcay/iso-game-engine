@@ -15,8 +15,10 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
@@ -84,10 +86,19 @@ public class AbilitiesPane extends VBox {
 			.collect(Collectors.toList()).toArray(new String[0]);
 	}
 
-	private final Image manaIcon = new Image(
-		getClass().getResourceAsStream("/editor_assets/mana_ability.png"));
-	private final Image subsequentIcon = new Image(
-		getClass().getResourceAsStream("/editor_assets/sub_ability.png"));
+	private final static Image manaIcon = new Image(
+		AbilitiesPane.class.getResourceAsStream("/editor_assets/mana_ability.png"));
+	private final static Image subsequentIcon = new Image(
+		AbilitiesPane.class.getResourceAsStream("/editor_assets/sub_ability.png"));
+	
+	public static void setItemGraphic(TreeItem<AbilityInfoModel> item) {
+		AbilityInfoModel v = item.getValue();
+		if (v.getIsMana()) {
+			item.setGraphic(new ImageView(manaIcon));
+		} else if (v.getIsSubsequent()) {
+			item.setGraphic(new ImageView(subsequentIcon));
+		}
+	}
 
 	private final Label noCharacterSelectedMessage = new Label("No character selected");
 	private final Label noAbilitiesMessage = new Label();
@@ -115,7 +126,7 @@ public class AbilitiesPane extends VBox {
 		table.setPlaceholder(noCharacterSelectedMessage);
 	}
 
-	public AbilitiesPane() {
+	public AbilitiesPane(WritableValue<Boolean> changed) {
 		super();
 
 		tableRoot = new TreeItem<>(new AbilityInfoModel(false, false));
@@ -160,7 +171,12 @@ public class AbilitiesPane extends VBox {
 					new TreeItem<>(new AbilityInfoModel(false, false));
 				ObservableList<TreeItem<AbilityInfoModel>> children = tableRoot.getChildren();
 				children.add(item);
-				item.getValue().typeProperty().addListener(c -> children.set(children.indexOf(item), item));
+				changed.setValue(true);
+
+				// force a change event in the list of abilities when the type is
+				// changed, so that the weapons dialog box can detect it
+				item.getValue().typeProperty().addListener(
+					c -> children.set(children.indexOf(item), item));
 			}
 		});
 
@@ -171,6 +187,7 @@ public class AbilitiesPane extends VBox {
 					TreeItem<AbilityInfoModel> item = table.getTreeItem(i);
 					item.getParent().getChildren().remove(item);
 				});
+				changed.setValue(true);
 		});
 
 		addMana.setOnAction(event -> {
@@ -179,11 +196,12 @@ public class AbilitiesPane extends VBox {
 				AbilityInfoModel v = item.getValue();
 				AbilityInfoModel pv = item.getParent().getValue();
 				if (!v.getIsMana() && !v.getIsSubsequent() && !pv.getIsMana()) {
-					TreeItem<AbilityInfoModel> newMana =
-						new TreeItem<>(v.cloneMana(), new ImageView(manaIcon));
+					TreeItem<AbilityInfoModel> newMana = new TreeItem<>(v.cloneMana());
+					setItemGraphic(newMana);
 					item.getChildren().add(newMana);
 					item.setExpanded(true);
 					selection.select(newMana);
+					changed.setValue(true);
 				}
 			}
 		});
@@ -211,9 +229,11 @@ public class AbilitiesPane extends VBox {
 
 				parent.setExpanded(true);
 				TreeItem<AbilityInfoModel> newSubsequent =
-					new TreeItem<>(toClone.cloneSubsequent(), new ImageView(subsequentIcon));
+					new TreeItem<>(toClone.cloneSubsequent());
+				setItemGraphic(newSubsequent);
 				all.add(i, newSubsequent);
 				selection.select(newSubsequent);
+				changed.setValue(true);
 			}
 		});
 
@@ -228,6 +248,7 @@ public class AbilitiesPane extends VBox {
 						all.remove(i);
 						all.add(i - 1, item);
 						selection.select(item);
+						changed.setValue(true);
 					}
 				}
 			}
@@ -244,6 +265,7 @@ public class AbilitiesPane extends VBox {
 						all.remove(i);
 						all.add(i + 1, item);
 						selection.select(item);
+						changed.setValue(true);
 					}
 				}
 			}
@@ -339,10 +361,41 @@ public class AbilitiesPane extends VBox {
 		statusEffect.setCellFactory(EffectField.<AbilityInfoModel>
 			forTreeTableColumn(enumValues(StatusEffectType.class), selection));
 
+		hookOnEditCommit(name, changed);
+		hookOnEditCommit(type, changed);
+		hookOnEditCommit(ap, changed);
+		hookOnEditCommit(mp, changed);
+		hookOnEditCommit(pp, changed);
+		hookOnEditCommit(eff, changed);
+		hookOnEditCommit(chance, changed);
+		hookOnEditCommit(heal, changed);
+		hookOnEditCommit(range, changed);
+		hookOnEditCommit(radius, changed);
+		hookOnEditCommit(piercing, changed);
+		hookOnEditCommit(ribbon, changed);
+		hookOnEditCommit(targetMode, changed);
+		hookOnEditCommit(nTargets, changed);
+		hookOnEditCommit(los, changed);
+		hookOnEditCommit(useWeaponRange, changed);
+		hookOnEditCommit(recursion, changed);
+		hookOnEditCommit(instantBefore, changed);
+		hookOnEditCommit(instantAfter, changed);
+		hookOnEditCommit(statusEffect, changed);
+
 		table.getColumns().setAll(
 			name, type, ap, mp, pp, eff, chance, heal, range, radius,
 			piercing, ribbon, targetMode, nTargets, los, useWeaponRange,
 			recursion, instantBefore, instantAfter, statusEffect);
+	}
+
+	private static <S, T> void hookOnEditCommit(
+		TreeTableColumn<S, T> column, WritableValue<Boolean> changed
+	) {
+		EventHandler<TreeTableColumn.CellEditEvent<S,T>> oldHandler = column.getOnEditCommit();
+		column.setOnEditCommit(e -> {
+			changed.setValue(true);
+			oldHandler.handle(e);
+		});
 	}
 }
 

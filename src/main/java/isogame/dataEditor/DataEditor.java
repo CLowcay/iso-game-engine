@@ -2,6 +2,7 @@ package isogame.dataEditor;
 
 import isogame.battle.data.GameDataFactory;
 import javafx.application.Application;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -27,10 +28,13 @@ public class DataEditor extends Application {
 			if (dataDir == null) System.exit(1);
 			GameDataFactory factory = new GameDataFactory(Optional.of(dataDir));
 
-			WeaponsDialog weaponsDialog = new WeaponsDialog();
-			AbilitiesPane abilitiesPane = new AbilitiesPane();
-			CharactersPane charactersPane =
-				new CharactersPane(factory, dataDir, abilitiesPane, weaponsDialog);
+			// used to detect changes in the data so we know if it is necessary to save
+			final SimpleBooleanProperty changed = new SimpleBooleanProperty(false);
+
+			WeaponsDialog weaponsDialog = new WeaponsDialog(changed);
+			AbilitiesPane abilitiesPane = new AbilitiesPane(changed);
+			CharactersPane charactersPane = new CharactersPane(
+				factory, dataDir, changed, abilitiesPane, weaponsDialog);
 
 			root.setLeft(charactersPane);
 			root.setCenter(abilitiesPane);
