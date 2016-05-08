@@ -91,16 +91,20 @@ public class GameDataFactory {
 
 	private void loadGameData(JSONObject json) throws CorruptDataException {
 		Object oVersion = json.get("version");
+		Object oVersionNumber = json.get("versionNumber");
 		Object oStages = json.get("stages");
 		Object oWeapons = json.get("weapons");
 		Object oCharacters = json.get("characters");
 
+		if (oVersion == null) throw new CorruptDataException("No version in game data");
 		if (oStages == null) throw new CorruptDataException("No stages in game data");
 		if (oWeapons == null) throw new CorruptDataException("No weapons in game data");
 		if (oCharacters == null) throw new CorruptDataException("No characters in game data");
 
 		try {
 			this.version = UUID.fromString((String) oVersion);
+			this.versionNumber = oVersionNumber == null?
+				0 : ((Number) oVersionNumber).intValue();
 
 			JSONArray aStages = (JSONArray) oStages;
 			JSONArray aWeapons = (JSONArray) oWeapons;
@@ -129,12 +133,17 @@ public class GameDataFactory {
 	}
 
 	private UUID version;
+	private int versionNumber;
 	private Map<String, Stage> stages = new HashMap<>();
 	private Map<String, WeaponInfo> weapons = new HashMap<>();
 	private Map<String, CharacterInfo> characters = new HashMap<>();
 
 	public UUID getVersion() {
 		return version;
+	}
+
+	public int getVersionNumber() {
+		return versionNumber;
 	}
 
 	/**
@@ -203,6 +212,7 @@ public class GameDataFactory {
 				w.add(weapon.getJSON());
 			}
 			o.put("version", UUID.randomUUID().toString());
+			o.put("versionNumber", ++versionNumber);
 			o.put("stages", s);
 			o.put("characters", c);
 			o.put("weapons", w);
