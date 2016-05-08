@@ -1,5 +1,6 @@
 package isogame.dataEditor;
 
+import isogame.battle.data.AbilityInfo;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -55,6 +56,29 @@ public class AbilityInfoModel {
 		this.instantBefore = new SimpleStringProperty("none");
 		this.instantAfter = new SimpleStringProperty("none");
 		this.statusEffect = new SimpleStringProperty("none");
+	}
+
+	public void init(AbilityInfo i) {
+		this.name.setValue(i.name);
+		this.type.setValue(i.type.toString().toLowerCase());
+		this.ap.setValue(i.ap);
+		this.mp.setValue(i.mp);
+		this.pp.setValue(i.pp);
+		this.eff.setValue(i.eff);
+		this.chance.setValue(i.chance);
+		this.heal.setValue(i.heal);
+		this.range.setValue(i.range.range);
+		this.radius.setValue(i.range.radius);
+		this.piercing.setValue(i.range.piercing);
+		this.ribbon.setValue(i.range.ribbon);
+		this.targetMode.setValue(i.range.targetMode.toString());
+		this.nTargets.setValue(i.range.nTargets);
+		this.los.setValue(i.range.los);
+		this.useWeaponRange.setValue(i.useWeaponRange);
+		this.recursion.setValue(i.recursion);
+		this.instantBefore.setValue(i.instantBefore.map(x -> x.toString().toLowerCase()).orElse("none"));
+		this.instantAfter.setValue(i.instantAfter.map(x -> x.toString().toLowerCase()).orElse("none"));
+		this.statusEffect.setValue(i.statusEffect.map(x -> x.toString().toLowerCase()).orElse("none"));
 	}
 
 	public AbilityInfoModel cloneMana() {

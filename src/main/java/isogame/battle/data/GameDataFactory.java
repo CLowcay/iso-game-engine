@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.UUID;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -152,6 +153,16 @@ public class GameDataFactory {
 	 * */
 	public WeaponInfo getWeapon(String name) {
 		return weapons.get(name);
+	}
+
+	public Collection<WeaponInfo> weapons() {
+		return weapons.values();
+	}
+
+	public Collection<WeaponInfo> characterWeapons(CharacterInfo c) {
+		return weapons.values().stream()
+			.filter(w -> w.character.equals(c.name))
+			.collect(Collectors.toList());
 	}
 
 	/**

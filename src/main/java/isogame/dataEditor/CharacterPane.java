@@ -157,9 +157,32 @@ public class CharacterPane extends TitledPane {
 			.collect(Collectors.toList());
 	}
 
+	private static void decodeAbility(
+		AbilityInfo a, boolean isSubsequent,
+		TreeItem<AbilityInfoModel> parent
+	) {
+		AbilityInfoModel base = new AbilityInfoModel(false, false);
+		base.init(a);
+		TreeItem<AbilityInfoModel> baseItem = new TreeItem<>(base);
+		parent.getChildren().add(baseItem);
+
+		if (a.subsequent.isPresent())
+			decodeAbility(a.subsequent.get(), true, isSubsequent? parent : baseItem);
+
+		if (a.mana.isPresent())
+			decodeAbility(a.mana.get(), false, baseItem);
+	}
+
+	private static TreeItem<WeaponInfoModel> decodeWeapon(WeaponInfo w) {
+		WeaponInfoModel base = new WeaponInfoModel();
+		base.init(w);
+		return new TreeItem<>(base);
+	}
+
 	public CharacterPane(
 		CharacterInfo character,
 		AbilitiesPane abilities,
+		Collection<WeaponInfo> characterWeapons,
 		WeaponsDialog weapons
 	) {
 		super();
@@ -168,6 +191,13 @@ public class CharacterPane extends TitledPane {
 		weaponsRoot = new TreeItem<>(new WeaponInfoModel());
 		abilitiesRoot.setExpanded(true);
 		weaponsRoot.setExpanded(true);
+
+		for (AbilityInfo i : character.abilities) {
+			decodeAbility(i, false, abilitiesRoot);
+		}
+		for (WeaponInfo i : characterWeapons) {
+			weaponsRoot.getChildren().add(decodeWeapon(i));
+		}
 
 		name = new TextField(character.name);
 		ap = new PositiveIntegerField(character.stats.ap);

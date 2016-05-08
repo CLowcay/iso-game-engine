@@ -1,5 +1,6 @@
 package isogame.dataEditor;
 
+import isogame.battle.data.WeaponInfo;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -12,6 +13,12 @@ public class WeaponInfoModel {
 		this.name = new SimpleStringProperty("New weapon");
 		this.range = new SimpleIntegerProperty(1);
 		this.attack = new SimpleStringProperty("none");
+	}
+
+	public void init(WeaponInfo w) {
+		this.name.setValue(w.name);
+		this.range.setValue(w.range);
+		this.attack.setValue(w.attack.name);
 	}
 
 	public SimpleStringProperty nameProperty() { return name; }

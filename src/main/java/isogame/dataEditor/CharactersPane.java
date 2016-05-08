@@ -53,9 +53,10 @@ public class CharactersPane extends VBox {
 		save.disableProperty().bind(changed.not());
 
 		this.characters = new Accordion(
-			data.getCharacters().stream().map(c ->
-				new CharacterPane(c, abilities, weapons))
-			.collect(Collectors.toList()).toArray(new CharacterPane[0]));
+			data.getCharacters().stream()
+				.map(c -> new CharacterPane(c, abilities,
+					data.characterWeapons(c), weapons))
+				.collect(Collectors.toList()).toArray(new CharacterPane[0]));
 
 		this.getChildren().addAll(tools, characters);
 
@@ -94,7 +95,8 @@ public class CharactersPane extends VBox {
 		add.setOnAction(event -> {
 			Stats s = new Stats(3, 3, 1, 1, 1, 1);
 			CharacterInfo c = new CharacterInfo("New character", s, new LinkedList<>());
-			CharacterPane pane = new CharacterPane(c, abilities, weapons);
+			CharacterPane pane =
+				new CharacterPane(c, abilities, new LinkedList<>(), weapons);
 			characters.getPanes().add(pane);
 			characters.setExpandedPane(pane);
 			changed.setValue(true);
