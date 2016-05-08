@@ -1,9 +1,10 @@
 package isogame.battle.data;
 
 import isogame.engine.CorruptDataException;
+import isogame.engine.HasJSONRepresentation;
 import org.json.simple.JSONObject;
 
-public class Stats {
+public class Stats implements HasJSONRepresentation {
 	public final int ap;
 	public final int mp;
 	public final int power;
@@ -41,6 +42,19 @@ public class Stats {
 			vitality + stats.vitality,
 			attack + stats.attack,
 			defence + stats.defence);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONObject r = new JSONObject();
+		r.put("ap", ap);
+		r.put("mp", mp);
+		r.put("power", power);
+		r.put("vitality", vitality);
+		r.put("attack", attack);
+		r.put("defence", defence);
+		return r;
 	}
 
 	public static Stats fromJSON(JSONObject json)

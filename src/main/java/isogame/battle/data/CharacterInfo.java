@@ -1,12 +1,13 @@
 package isogame.battle.data;
 
 import isogame.engine.CorruptDataException;
+import isogame.engine.HasJSONRepresentation;
 import java.util.Collection;
 import java.util.LinkedList;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class CharacterInfo {
+public class CharacterInfo implements HasJSONRepresentation {
 	public final String name;
 	public final Stats stats;
 	public final Collection<AbilityInfo> abilities;
@@ -18,6 +19,20 @@ public class CharacterInfo {
 		this.name = name;
 		this.stats = stats;
 		this.abilities = abilities;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONObject r = new JSONObject();
+		r.put("name", name);
+		r.put("stats", stats.getJSON());
+		JSONArray as = new JSONArray();
+		for (AbilityInfo a : abilities) {
+			as.add(a.getJSON());
+		}
+		r.put("abilities", as);
+		return r;
 	}
 
 	public static CharacterInfo fromJSON(JSONObject json)
@@ -49,6 +64,5 @@ public class CharacterInfo {
 			throw new CorruptDataException("Type error in character", e);
 		}
 	}
-
 }
 

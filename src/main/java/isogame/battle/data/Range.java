@@ -1,9 +1,10 @@
 package isogame.battle.data;
 
 import isogame.engine.CorruptDataException;
+import isogame.engine.HasJSONRepresentation;
 import org.json.simple.JSONObject;
 
-public class Range {
+public class Range implements HasJSONRepresentation {
 	public final int range;
 	public final int radius;
 	public final boolean piercing; // ignore for now
@@ -25,6 +26,20 @@ public class Range {
 		this.targetMode = targetMode;
 		this.nTargets = nTargets;
 		this.los = los;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONObject r = new JSONObject();
+		r.put("range", range);
+		r.put("piercing", piercing);
+		r.put("ribbon", ribbon);
+		r.put("radius", radius);
+		r.put("targetMode", targetMode.toString());
+		r.put("nTargets", nTargets);
+		r.put("los", los);
+		return r;
 	}
 
 	public static Range fromJSON(JSONObject json)

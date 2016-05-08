@@ -1,10 +1,11 @@
 package isogame.battle.data;
 
 import isogame.engine.CorruptDataException;
+import isogame.engine.HasJSONRepresentation;
 import java.util.Optional;
 import org.json.simple.JSONObject;
 
-public class AbilityInfo {
+public class AbilityInfo implements HasJSONRepresentation {
 	public final String name;
 	public final AbilityType type;
 	public final int ap;
@@ -56,6 +57,29 @@ public class AbilityInfo {
 		this.instantBefore = instantBefore;
 		this.instantAfter = instantAfter;
 		this.statusEffect = statusEffect;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONObject r = new JSONObject();
+		r.put("name", name);
+		r.put("type", type.toString());
+		r.put("ap", ap);
+		r.put("mp", mp);
+		r.put("pp", pp);
+		r.put("eff", eff);
+		r.put("chance", chance);
+		r.put("heal", heal);
+		r.put("range", range.getJSON());
+		r.put("useWeaponRange", useWeaponRange);
+		mana.ifPresent(m -> r.put("mana", m.getJSON()));
+		subsequent.ifPresent(s -> r.put("subsequent", s.getJSON()));
+		r.put("recursion", recursion);
+		instantBefore.ifPresent(e -> r.put("instantBefore", e.toString()));
+		instantAfter.ifPresent(e -> r.put("instantAfter", e.toString()));
+		statusEffect.ifPresent(e -> r.put("statusEffect", e.toString()));
+		return r;
 	}
 
 	public static AbilityInfo fromJSON(JSONObject json)

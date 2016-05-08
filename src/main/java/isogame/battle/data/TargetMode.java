@@ -10,5 +10,13 @@ public class TargetMode {
 		this.enemies = mode.contains("E");
 		this.allies = mode.contains("A");
 	}
+
+	@Override
+	public String toString() {
+		return
+			(self? "S" : "") +
+			(enemies? "E" : "") +
+			(allies? "A" : "");
+	}
 }
 

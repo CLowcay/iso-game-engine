@@ -14,16 +14,13 @@ public class WeaponInfoModel {
 		this.attack = new SimpleStringProperty("none");
 	}
 
-	public SimpleStringProperty nameProperty() {
-		return name;
-	}
+	public SimpleStringProperty nameProperty() { return name; }
+	public String getName() { return name.getValue(); }
 
-	public SimpleIntegerProperty rangeProperty() {
-		return range;
-	}
+	public SimpleIntegerProperty rangeProperty() { return range; }
+	public int getRange() { return range.getValue(); }
 
-	public SimpleStringProperty attackProperty() {
-		return attack;
-	}
+	public SimpleStringProperty attackProperty() { return attack; }
+	public String getAttack() { return attack.getValue(); }
 }
 

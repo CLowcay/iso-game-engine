@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,9 +26,9 @@ import org.json.simple.parser.ParseException;
 
 public class GameDataFactory {
 	private final Library globalLibrary;
-	private static final String globalLibraryName = "global_library.json";
-	private static final String gameDataName = "game_data.json";
-	private static final File gameDataCacheDir =
+	public static final String globalLibraryName = "global_library.json";
+	public static final String gameDataName = "game_data.json";
+	public static final File gameDataCacheDir =
 		new File(System.getProperty("user.home"), ".inthezone");
 
 	public GameDataFactory(Optional<File> baseDir)
@@ -103,7 +105,7 @@ public class GameDataFactory {
 			JSONArray aWeapons = (JSONArray) oWeapons;
 			JSONArray aCharacters = (JSONArray) oCharacters;
 
-			for (Object x : aWeapons) {
+			for (Object x : aStages) {
 				Stage i = Stage.fromJSON((JSONObject) x, globalLibrary);
 				stages.put(i.name, i);
 			}
@@ -161,6 +163,54 @@ public class GameDataFactory {
 
 	public Collection<CharacterInfo> getCharacters() {
 		return characters.values();
+	}
+
+	/**
+	 * Write game data out to a file
+	 * */
+	@SuppressWarnings("unchecked")
+	public void writeToStream(
+		OutputStream outStream,
+		Collection<File> stages,
+		Collection<CharacterInfo> characters,
+		Collection<WeaponInfo> weapons
+	) throws IOException {
+		try (PrintWriter out =
+			new PrintWriter(new OutputStreamWriter(outStream, "UTF-8"));
+		) {
+			JSONObject o = new JSONObject();
+			JSONArray s = new JSONArray();
+			JSONArray c = new JSONArray();
+			JSONArray w = new JSONArray();
+			for (File stage : stages) {
+				s.add(parseStage(stage));
+			}
+			for (CharacterInfo character : characters) {
+				c.add(character.getJSON());
+			}
+			for (WeaponInfo weapon : weapons) {
+				w.add(weapon.getJSON());
+			}
+			o.put("version", UUID.randomUUID().toString());
+			o.put("stages", s);
+			o.put("characters", c);
+			o.put("weapons", w);
+			out.print(o);
+		}
+	}
+
+	private JSONObject parseStage(File stage) throws IOException {
+		try (BufferedReader in =
+			new BufferedReader(new InputStreamReader(new FileInputStream(stage), "UTF-8"))
+		) {
+			if (in == null) throw new FileNotFoundException(
+				"File not found " + stage.toString());
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(in);
+			return json;
+		} catch (ParseException e) {
+			throw new IOException("stage file \"" + stage + "\" is corrupted");
+		}
 	}
 }
 

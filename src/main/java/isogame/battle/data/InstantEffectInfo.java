@@ -6,7 +6,7 @@ public class InstantEffectInfo {
 	public final InstantEffectType type;
 	public final int param;
 
-	private static final int DEFAULT_PARAMETER = 1;
+	private static final int DEFAULT_PARAMETER = 0;
 
 	public InstantEffectInfo(String effect)
 		throws CorruptDataException
@@ -24,6 +24,15 @@ public class InstantEffectInfo {
 			}
 		}
 		this.param = paramv;
+	}
+
+	@Override
+	public String toString() {
+		if (param == DEFAULT_PARAMETER) {
+			return type.toString();
+		} else {
+			return type.toString() + " " + (new Integer(param)).toString();
+		}
 	}
 }
 

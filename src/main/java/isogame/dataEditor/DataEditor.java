@@ -30,7 +30,7 @@ public class DataEditor extends Application {
 			WeaponsDialog weaponsDialog = new WeaponsDialog();
 			AbilitiesPane abilitiesPane = new AbilitiesPane();
 			CharactersPane charactersPane =
-				new CharactersPane(factory, abilitiesPane, weaponsDialog);
+				new CharactersPane(factory, dataDir, abilitiesPane, weaponsDialog);
 
 			root.setLeft(charactersPane);
 			root.setCenter(abilitiesPane);

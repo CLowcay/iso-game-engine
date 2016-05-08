@@ -100,109 +100,71 @@ public class AbilityInfoModel {
 		return r;
 	}
 
-	public SimpleStringProperty nameProperty() {
-		return name;
-	}
+	public SimpleStringProperty nameProperty() { return name; }
+	public String getName() { return name.getValue(); }
 
-	public String getName() {
-		return name.getValue();
-	}
+	public SimpleStringProperty typeProperty() { return type; }
+	public String getType() { return type.getValue(); }
 
-	public SimpleStringProperty typeProperty() {
-		return type;
-	}
+	public SimpleIntegerProperty apProperty() { return ap; }
+	public int getAP() { return ap.getValue(); }
 
-	public String getType() {
-		return type.getValue();
-	}
+	public SimpleIntegerProperty mpProperty() { return mp; }
+	public int getMP() { return mp.getValue(); }
 
-	public SimpleIntegerProperty apProperty() {
-		return ap;
-	}
+	public SimpleIntegerProperty ppProperty() { return pp; }
+	public int getPP() { return pp.getValue(); }
 
-	public SimpleIntegerProperty mpProperty() {
-		return mp;
-	}
+	public SimpleDoubleProperty effProperty() { return eff; }
+	public double getEff() { return eff.getValue(); }
 
-	public SimpleIntegerProperty ppProperty() {
-		return pp;
-	}
+	public SimpleDoubleProperty chanceProperty() { return chance; }
+	public double getChance() { return chance.getValue(); }
 
-	public SimpleDoubleProperty effProperty() {
-		return eff;
-	}
+	public SimpleBooleanProperty healProperty() { return heal; }
+	public boolean getHeal() { return heal.getValue(); }
 
-	public SimpleDoubleProperty chanceProperty() {
-		return chance;
-	}
+	public SimpleIntegerProperty rangeProperty() { return range; }
+	public int getRange() { return range.getValue(); }
 
-	public SimpleBooleanProperty healProperty() {
-		return heal;
-	}
+	public SimpleIntegerProperty radiusProperty() { return radius; }
+	public int getRadius() { return radius.getValue(); }
 
-	public SimpleIntegerProperty rangeProperty() {
-		return range;
-	}
+	public SimpleBooleanProperty piercingProperty() { return piercing; }
+	public boolean getPiercing() { return piercing.getValue(); }
 
-	public SimpleIntegerProperty radiusProperty() {
-		return radius;
-	}
+	public SimpleIntegerProperty ribbonProperty() { return ribbon; }
+	public int getRibbon() { return ribbon.getValue(); }
 
-	public SimpleBooleanProperty piercingProperty() {
-		return piercing;
-	}
+	public SimpleStringProperty targetModeProperty() { return targetMode; }
+	public String getTargetMode() { return targetMode.getValue(); }
 
-	public SimpleIntegerProperty ribbonProperty() {
-		return ribbon;
-	}
+	public SimpleIntegerProperty nTargetsProperty() { return nTargets; }
+	public int getnTargets() { return nTargets.getValue(); }
 
-	public SimpleStringProperty targetModeProperty() {
-		return targetMode;
-	}
+	public SimpleBooleanProperty losProperty() { return los; }
+	public boolean getLOS() { return los.getValue(); }
 
-	public SimpleIntegerProperty nTargetsProperty() {
-		return nTargets;
-	}
+	public SimpleBooleanProperty useWeaponRangeProperty() { return useWeaponRange; }
+	public boolean getUseWeaponRange() { return useWeaponRange.getValue(); }
 
-	public SimpleBooleanProperty losProperty() {
-		return los;
-	}
+	public SimpleBooleanProperty isManaProperty() { return isMana; }
+	public boolean getIsMana() { return isMana.getValue(); }
 
-	public SimpleBooleanProperty useWeaponRangeProperty() {
-		return useWeaponRange;
-	}
+	public SimpleBooleanProperty isSubsequentProperty() { return isSubsequent; }
+	public boolean getIsSubsequent() { return isSubsequent.getValue(); }
 
-	public SimpleBooleanProperty isManaProperty() {
-		return isMana;
-	}
+	public SimpleIntegerProperty recursionProperty() { return recursion; }
+	public int getRecursion() { return recursion.getValue(); }
 
-	public boolean getIsMana() {
-		return isMana.getValue();
-	}
+	public SimpleStringProperty instantBeforeProperty() { return instantBefore; }
+	public String getInstantBefore() { return instantBefore.getValue(); }
 
-	public boolean getIsSubsequent() {
-		return isSubsequent.getValue();
-	}
+	public SimpleStringProperty instantAfterProperty() { return instantAfter; }
+	public String getInstantAfter() { return instantAfter.getValue(); }
 
-	public SimpleBooleanProperty isSubsequentProperty() {
-		return isSubsequent;
-	}
-
-	public SimpleIntegerProperty recursionProperty() {
-		return recursion;
-	}
-
-	public SimpleStringProperty instantBeforeProperty() {
-		return instantBefore;
-	}
-
-	public SimpleStringProperty instantAfterProperty() {
-		return instantAfter;
-	}
-
-	public SimpleStringProperty statusEffectProperty() {
-		return statusEffect;
-	}
+	public SimpleStringProperty statusEffectProperty() { return statusEffect; }
+	public String getStatusEffect() { return statusEffect.getValue(); }
 
 }
 
