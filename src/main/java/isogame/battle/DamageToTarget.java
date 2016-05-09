@@ -1,20 +1,22 @@
 package isogame.battle;
 
 import isogame.engine.MapPoint;
+import isogame.battle.data.StatusEffectInfo;
+import isogame.battle.data.InstantEffectInfo;
 
 public class DamageToTarget {
 	public final MapPoint target;
 	public final int damage;
-	public final StatusEffect statusEffect;
-	public final InstantEffect pre;
-	public final InstantEffect post;
+	public final StatusEffectInfo statusEffect;
+	public final InstantEffectInfo pre;
+	public final InstantEffectInfo post;
 
 	public DamageToTarget(
 		MapPoint target,
 		int damage,
-		StatusEffect statusEffect,
-		InstantEffect pre,
-		InstantEffect post
+		StatusEffectInfo statusEffect,
+		InstantEffectInfo pre,
+		InstantEffectInfo post
 	) {
 		this.target = target;
 		this.damage = damage;

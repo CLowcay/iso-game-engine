@@ -1,52 +1,15 @@
 package isogame.battle;
 
+import isogame.battle.data.AbilityInfo;
 import isogame.battle.data.AbilityType;
 import isogame.battle.data.Range;
 import isogame.battle.data.Stats;
 
 public class Ability {
-	public final String name;
-	public final AbilityType type;
-	public final int ap;
-	public final int pp;
-	public final double effFactor;
-	public final double chance;
-	public final boolean heal;
-	public final Range range;
-	public final boolean isMana;
-	public final Ability replacement;
-	public final InstantEffect instantBefore;
-	public final InstantEffect instantAfter;
-	public final StatusEffect statusEffect;
+	public final AbilityInfo info;
 
-	public Ability(
-		String name,
-		AbilityType type,
-		int ap,
-		int pp,
-		double effFactor,
-		double chance,
-		boolean heal,
-		Range range,
-		boolean isMana,
-		Ability replacement,
-		InstantEffect instantBefore,
-		InstantEffect instantAfter,
-		StatusEffect statusEffect
-	) {
-		this.name = name;
-		this.type = type;
-		this.ap = ap;
-		this.pp = pp;
-		this.effFactor = effFactor;
-		this.chance = chance;
-		this.heal = heal;
-		this.range = range;
-		this.isMana = isMana;
-		this.replacement = replacement;
-		this.instantBefore = instantBefore;
-		this.instantAfter = instantAfter;
-		this.statusEffect = statusEffect;
+	public Ability(AbilityInfo info) {
+		this.info = info;
 	}
 
 	private final double const_a = 3;
@@ -57,7 +20,7 @@ public class Ability {
 	public double damageFormula(
 		double attackBuff, double defenceBuff, Stats a, Stats t
 	) {
-		double q = type == AbilityType.WEAPON? 1 : effFactor;
+		double q = info.type == AbilityType.WEAPON? 1 : info.eff;
 		return
 			q * (1 + attackBuff - defenceBuff) *
 			(0.9 + (0.2 * Math.random())) *
@@ -68,7 +31,7 @@ public class Ability {
 	public double healingFormula(
 		double attackBuff, double defenceBuff, Stats a, Stats t
 	) {
-		return (effFactor * const_h *
+		return (info.eff * const_h *
 			(0.9 + (0.2 * Math.random())) *
 			(double) t.vitality) / const_i;
 	}
@@ -79,14 +42,14 @@ public class Ability {
 		Stats aStats = a.getStats();
 		Stats tStats = t.getStats();
 
-		double damage = heal?
+		double damage = info.heal?
 			healingFormula(a.getAttackBuff(), t.getDefenceBuff(), aStats, tStats) :
 			damageFormula(a.getAttackBuff(), t.getDefenceBuff(), aStats, tStats);
 
 		return new DamageToTarget(t.getPos(), (int) damage,
-			imposeEffect(chance, statusEffect),
-			imposeEffect(chance, instantBefore),
-			imposeEffect(chance, instantAfter));
+			imposeEffect(info.chance, info.statusEffect.orElse(null)),
+			imposeEffect(info.chance, info.instantBefore.orElse(null)),
+			imposeEffect(info.chance, info.instantAfter.orElse(null)));
 	}
 
 	public <T> T imposeEffect(double p, T effect) {
