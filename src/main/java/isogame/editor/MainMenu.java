@@ -1,6 +1,6 @@
 package isogame.editor;
 
-import isogame.engine.ResourceLocator;
+import isogame.resource.ResourceLocator;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -8,7 +8,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import java.io.File;
-import java.util.function.Function;
 
 public class MainMenu extends MenuBar {
 	public MainMenu(

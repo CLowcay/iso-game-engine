@@ -1,5 +1,6 @@
 package isogame.engine;
 
+import isogame.resource.ResourceLocator;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.InputStream;

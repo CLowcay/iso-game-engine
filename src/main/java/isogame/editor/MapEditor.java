@@ -1,6 +1,7 @@
 package isogame.editor;
  
-import isogame.engine.ResourceLocator;
+import isogame.resource.DevelopmentResourceLocator;
+import isogame.resource.ResourceLocator;
 import javafx.application.Application;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;

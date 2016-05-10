@@ -2,7 +2,7 @@ package isogame.editor;
 
 import isogame.engine.CliffTexture;
 import isogame.engine.CorruptDataException;
-import isogame.engine.ResourceLocator;
+import isogame.resource.ResourceLocator;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;

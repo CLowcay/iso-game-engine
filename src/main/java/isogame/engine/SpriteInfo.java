@@ -1,5 +1,6 @@
 package isogame.engine;
 
+import isogame.resource.ResourceLocator;
 import javafx.scene.image.Image;
 import java.util.ArrayList;
 import java.util.Collection;

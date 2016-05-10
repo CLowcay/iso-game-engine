@@ -1,6 +1,7 @@
 package isogame.engine;
 
 import isogame.GlobalConstants;
+import isogame.resource.ResourceLocator;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;

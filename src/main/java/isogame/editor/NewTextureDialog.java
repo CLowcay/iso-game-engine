@@ -1,8 +1,8 @@
 package isogame.editor;
 
 import isogame.engine.CorruptDataException;
-import isogame.engine.ResourceLocator;
 import isogame.engine.TerrainTexture;
+import isogame.resource.ResourceLocator;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;

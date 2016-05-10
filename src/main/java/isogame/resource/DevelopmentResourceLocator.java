@@ -1,6 +1,5 @@
-package isogame.editor;
+package isogame.resource;
 
-import isogame.engine.ResourceLocator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -25,12 +24,22 @@ public class DevelopmentResourceLocator implements ResourceLocator {
 
 	@Override
 	public InputStream gameData() throws IOException {
-		return new FileInputStream(new File(dataDir, "game_data.json"));
+		return new FileInputStream(gameDataFilename());
 	}
 
 	@Override
 	public InputStream globalLibrary() throws IOException {
-		return new FileInputStream(new File(dataDir, "global_library.json"));
+		return new FileInputStream(globalLibraryFilename());
+	}
+
+	@Override
+	public String gameDataFilename() {
+		return (new File(dataDir, "game_data.json")).toString();
+	}
+
+	@Override
+	public String globalLibraryFilename() {
+		return (new File(dataDir, "global_library.json")).toString();
 	}
 }
 

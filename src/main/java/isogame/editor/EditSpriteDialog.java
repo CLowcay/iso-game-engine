@@ -1,8 +1,8 @@
 package isogame.editor;
 
-import isogame.engine.ResourceLocator;
 import isogame.engine.SpriteAnimation;
 import isogame.engine.SpriteInfo;
+import isogame.resource.ResourceLocator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
