@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.function.Function;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -61,8 +62,9 @@ public class Stage implements HasJSONRepresentation {
 		isoTransform.appendRotation(45, 0, 0);
 	}
 
-	public static Stage fromFile(File filename, Library global)
-		throws IOException, CorruptDataException, ParseException
+	public static Stage fromFile(
+		File filename, Function<String, String> urlConverter, Library global
+	) throws IOException, CorruptDataException, ParseException
 	{
 		try (BufferedReader in =
 			new BufferedReader(
@@ -75,19 +77,20 @@ public class Stage implements HasJSONRepresentation {
 			if (stagejson == null) throw new CorruptDataException(
 				"Error in map file, missing stage");
 
-			return Stage.fromJSON((JSONObject) stagejson, global);
+			return Stage.fromJSON((JSONObject) stagejson, urlConverter, global);
 		}
 	}
 
-	public static Stage fromJSON(JSONObject json, Library global)
-		throws CorruptDataException
+	public static Stage fromJSON(
+		JSONObject json, Function<String, String> urlConverter, Library global
+	) throws CorruptDataException
 	{
 		try {
 			Object rName = json.get("name");
 			if (rName == null) throw new CorruptDataException("Error in stage, missing name");
 			String name = (String) rName;
 
-			Library lib = Library.fromJSON(json, name, global);
+			Library lib = Library.fromJSON(json, name, urlConverter, global);
 
 			Object rTerrain = json.get("terrain");
 			Object rSprites = json.get("sprites");

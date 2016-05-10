@@ -3,6 +3,7 @@ package isogame.engine;
 import javafx.scene.image.Image;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +23,9 @@ public class SpriteInfo implements HasJSONRepresentation {
 		animationsOrdered = new ArrayList<>();
 	}
 
-	public static SpriteInfo fromJSON(JSONObject json)
-		throws CorruptDataException
+	public static SpriteInfo fromJSON(
+		JSONObject json, Function<String, String> urlConverter
+	) throws CorruptDataException
 	{
 		Object rId = json.get("id");
 		Object rAnimations = json.get("animations");
@@ -35,7 +37,8 @@ public class SpriteInfo implements HasJSONRepresentation {
 			SpriteInfo info = new SpriteInfo((String) rId);
 			JSONArray animations = (JSONArray) rAnimations;
 			for (Object a : animations) {
-				info.addAnimation(SpriteAnimation.fromJSON((JSONObject) a));
+				info.addAnimation(SpriteAnimation.fromJSON(
+					(JSONObject) a, urlConverter));
 			}
 			return info;
 		} catch (ClassCastException e) {

@@ -7,9 +7,15 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import java.io.File;
+import java.util.function.Function;
 
 public class MainMenu extends MenuBar {
-	public MainMenu(LibraryPane libraryPane, File dataDir, EditorCanvas canvas) {
+	public MainMenu(
+		LibraryPane libraryPane,
+		File dataDir,
+		Function<String, String> urlConverter,
+		EditorCanvas canvas
+	) {
 		super();
 
 		Menu menuFile = new Menu("File");
@@ -20,7 +26,8 @@ public class MainMenu extends MenuBar {
 
 		MenuItem fileOpen = new MenuItem("Open");
 		fileOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
-		fileOpen.setOnAction(event -> canvas.loadStage(libraryPane, dataDir));
+		fileOpen.setOnAction(event -> canvas.loadStage(
+			libraryPane, urlConverter, dataDir));
 
 		MenuItem fileSave = new MenuItem("Save");
 		fileSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));

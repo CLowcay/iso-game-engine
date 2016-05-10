@@ -3,6 +3,7 @@ package isogame.engine;
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
+import java.util.function.Function;
 import org.json.simple.JSONObject;
 
 /**
@@ -16,11 +17,12 @@ public class TerrainTexture implements HasJSONRepresentation {
 	public final String id;
 	private final String url;
 
-	public TerrainTexture(String id, String url) {
+	public TerrainTexture(String id, String url) throws CorruptDataException {
 		this.id = id;
 		this.url = url;
 
 		Image texture = new Image(url, false);
+		if (texture == null) throw new CorruptDataException("Missing texture " + url);
 		int w = (int) texture.getWidth();
 		int h = (int) texture.getHeight();
 
@@ -28,8 +30,9 @@ public class TerrainTexture implements HasJSONRepresentation {
 		this.oddPaint = new ImagePattern(texture, -0.5, -0.5, 1, 1, true);
 	}
 
-	public static TerrainTexture fromJSON(JSONObject json)
-		throws CorruptDataException
+	public static TerrainTexture fromJSON(
+		JSONObject json, Function<String, String> urlConverter
+	) throws CorruptDataException
 	{
 		Object rId = json.get("id");
 		Object rUrl = json.get("url");
@@ -38,7 +41,9 @@ public class TerrainTexture implements HasJSONRepresentation {
 		if (rUrl == null) throw new CorruptDataException("Error in texture, missing url");
 
 		try {
-			return new TerrainTexture((String) rId, (String) rUrl);
+			return new TerrainTexture(
+				urlConverter.apply((String) rId),
+				urlConverter.apply((String) rUrl));
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in texture", e);
 		} catch (IllegalArgumentException e) {

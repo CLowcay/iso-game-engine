@@ -1,8 +1,10 @@
 package isogame.editor;
 
+import isogame.engine.CorruptDataException;
 import isogame.engine.SpriteAnimation;
 import isogame.gui.PositiveIntegerField;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -81,8 +83,16 @@ public class NewSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 
 				if (nframes == 0 || rframerate == 0) return null;
 
-				return new SpriteAnimation(
-					id.getText(), spriteFile.getText(), nframes, rframerate);
+				try {
+					return new SpriteAnimation(
+						id.getText(), spriteFile.getText(), nframes, rframerate);
+				} catch (CorruptDataException e) {
+					Alert err = new Alert(Alert.AlertType.ERROR);
+					err.setTitle("Cannot load sprite image");
+					err.setContentText(e.getMessage());
+					err.showAndWait();
+					return null;
+				}
 			} else {
 				return null;
 			}

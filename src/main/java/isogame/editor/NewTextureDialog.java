@@ -1,7 +1,9 @@
 package isogame.editor;
 
+import isogame.engine.CorruptDataException;
 import isogame.engine.TerrainTexture;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -64,7 +66,15 @@ public class NewTextureDialog extends Dialog<TerrainTexture> {
 
 		this.setResultConverter(clickedButton -> {
 			if (clickedButton == ButtonType.OK && !texture.getText().equals("")) {
-				return new TerrainTexture(id.getText(), texture.getText());
+				try {
+					return new TerrainTexture(id.getText(), texture.getText());
+				} catch (CorruptDataException e) {
+					Alert err = new Alert(Alert.AlertType.ERROR);
+					err.setTitle("Cannot load texture image");
+					err.setContentText(e.getMessage());
+					err.showAndWait();
+					return null;
+				}
 			} else {
 				return null;
 			}

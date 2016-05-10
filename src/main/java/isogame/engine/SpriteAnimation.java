@@ -5,6 +5,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
+import java.util.function.Function;
 import org.json.simple.JSONObject;
 
 
@@ -34,13 +35,16 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		String url,
 		int frames,
 		int framerate
-	) {
+	) throws CorruptDataException
+	{
 		this.frames = frames;
 		this.framerate = framerate;
 		this.id = id;
 		this.url = url;
 
 		Image buffer = new Image(url);
+		if (buffer == null) throw new CorruptDataException("Missing texture " + url);
+
 		frameTextures = new Paint[frames * 4];
 		for (int d = 0; d < 4; d++) {
 			for (int f = 0; f < frames; f++) {
@@ -55,8 +59,9 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		h = (int) ((GlobalConstants.TILEW / iw) * ih);
 	}
 
-	public static SpriteAnimation fromJSON(JSONObject json)
-		throws CorruptDataException
+	public static SpriteAnimation fromJSON(
+		JSONObject json, Function<String, String> urlConverter
+	) throws CorruptDataException
 	{
 		Object rId = json.get("id");
 		Object rUrl = json.get("url");
@@ -71,7 +76,7 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		try {
 			return new SpriteAnimation(
 				(String) rId,
-				(String) rUrl,
+				urlConverter.apply((String) rUrl),
 				((Number) rFrames).intValue(),
 				((Number) rFramerate).intValue());
 		} catch (ClassCastException e) {

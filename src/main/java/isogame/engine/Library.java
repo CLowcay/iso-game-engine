@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.function.Function;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -153,8 +154,10 @@ public class Library {
 	 * Load the library described in a JSON file.
 	 * @param inStream The input stream.  It will be closed automatically.
 	 * */
-	public static Library fromFile(InputStream inStream, String url, Library parent)
-		throws IOException, CorruptDataException
+	public static Library fromFile(
+		InputStream inStream, String url,
+		Function<String, String> urlConverter, Library parent
+	) throws IOException, CorruptDataException
 	{
 		try (BufferedReader in =
 			new BufferedReader(new InputStreamReader(inStream, "UTF-8"))
@@ -162,7 +165,7 @@ public class Library {
 			if (in == null) throw new FileNotFoundException("File not found " + url);
 			JSONParser parser = new JSONParser();
 			JSONObject json = (JSONObject) parser.parse(in);
-			return fromJSON(json, url, parent);
+			return fromJSON(json, url, urlConverter, parent);
 		} catch (ParseException e) {
 			throw new CorruptDataException(url + " is corrupted");
 		}
@@ -171,8 +174,10 @@ public class Library {
 	/**
 	 * Parse a library out of JSON data
 	 * */
-	public static Library fromJSON(JSONObject json, String url, Library parent)
-		throws CorruptDataException
+	public static Library fromJSON(
+		JSONObject json, String url,
+		Function<String, String> urlConverter, Library parent
+	) throws CorruptDataException
 	{
 		try {
 			Library r = new Library(parent);
@@ -193,7 +198,7 @@ public class Library {
 				String id = (String) sprite.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				r.sprites.put(id, SpriteInfo.fromJSON(sprite));
+				r.sprites.put(id, SpriteInfo.fromJSON(sprite, urlConverter));
 			}
 
 			for (Object x : terrains) {
@@ -201,7 +206,7 @@ public class Library {
 				String id = (String) terrain.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				r.terrains.put(id, TerrainTexture.fromJSON(terrain));
+				r.terrains.put(id, TerrainTexture.fromJSON(terrain, urlConverter));
 			}
 
 			for (Object x : cliffTextures) {
@@ -209,7 +214,7 @@ public class Library {
 				String id = (String) cliffTerrain.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				r.cliffTextures.put(id, CliffTexture.fromJSON(cliffTerrain));
+				r.cliffTextures.put(id, CliffTexture.fromJSON(cliffTerrain, urlConverter));
 			}
 
 			return r;

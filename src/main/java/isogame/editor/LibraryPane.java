@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,7 @@ public class LibraryPane extends VBox {
 	private final Map<String, List<ToggleButton>> cliffButtonsL = new HashMap<>();
 
 	private final File globalLibraryFile;
+	private final Function<String, String> urlConverter;
 	private final Library global;
 	private Library local = null;
 
@@ -65,12 +67,16 @@ public class LibraryPane extends VBox {
 	}
 
 	public LibraryPane(
-		File dataRoot, ToggleGroup toolsGroup, EditorCanvas canvas
+		File dataRoot, Function<String, String> urlConverter,
+		ToggleGroup toolsGroup, EditorCanvas canvas
 	) throws IOException, CorruptDataException {
 		super();
+		this.urlConverter = urlConverter;
 		this.setFocusTraversable(false);
 		this.canvas = canvas;
 		this.toolsGroup = toolsGroup;
+
+		final File gfxRoot = new File(dataRoot, "gfx");
 
 		HBox header = new HBox();
 		ToggleButton selectTextures = new ToggleButton("Textures");
@@ -111,15 +117,15 @@ public class LibraryPane extends VBox {
 		newButton.setOnAction(event -> {
 			Node selected = palette.getContent();
 			if (selected == sprites) {
-				(new EditSpriteDialog(dataRoot, null))
+				(new EditSpriteDialog(gfxRoot, null))
 					.showAndWait()
 					.ifPresent(sprite -> addSpriteToLibrary(sprite, false));
 			} else if (selected == textures) {
-				(new NewTextureDialog(dataRoot))
+				(new NewTextureDialog(gfxRoot))
 					.showAndWait()
 					.ifPresent(tex -> addTextureToLibrary(tex, false));
 			} else if (selected == cliffTextures) {
-				(new NewCliffTextureDialog(dataRoot))
+				(new NewCliffTextureDialog(gfxRoot))
 					.showAndWait()
 					.ifPresent(tex -> addCliffTextureToLibrary(tex, false));
 			}
@@ -143,7 +149,7 @@ public class LibraryPane extends VBox {
 		globalLibraryFile = new File(dataRoot, "global_library.json");
 		global = Library.fromFile(
 			new FileInputStream(globalLibraryFile),
-			globalLibraryFile.toString(), null);
+				globalLibraryFile.toString(), urlConverter, null);
 
 		global.allTerrains().forEach(t -> addTexture(t, true));
 		global.allSprites().forEach(t -> addSprite(t, true));

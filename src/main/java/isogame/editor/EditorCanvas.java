@@ -37,6 +37,7 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.function.Function;
 import java.util.Optional;
 import java.util.Set;
 import org.json.simple.JSONObject;
@@ -61,7 +62,9 @@ public class EditorCanvas extends Canvas {
 	/**
 	 * Load a stage from a file.
 	 * */
-	public void loadStage(LibraryPane library, File dataDir) {
+	public void loadStage(LibraryPane library,
+		Function<String, String> urlConverter, File dataDir
+	) {
 		if (promptSaveContinue(library, dataDir)) {
 			FileChooser fc = new FileChooser();
 			fc.setTitle("Open map file");
@@ -70,7 +73,8 @@ public class EditorCanvas extends Canvas {
 			File r = fc.showOpenDialog(window);
 			if (r != null) {
 				try {
-					stage = Stage.fromFile(r, library.getGlobalLibrary());
+					stage = Stage.fromFile(r,
+						urlConverter, library.getGlobalLibrary());
 					library.setLocalLibrary(stage.localLibrary);
 
 					stage.setHighlightColors(highlightColors);

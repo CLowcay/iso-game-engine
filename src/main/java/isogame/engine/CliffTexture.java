@@ -3,6 +3,7 @@ package isogame.engine;
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
+import java.util.function.Function;
 import org.json.simple.JSONObject;
 
 public class CliffTexture implements HasJSONRepresentation {
@@ -15,20 +16,28 @@ public class CliffTexture implements HasJSONRepresentation {
 	private final String urlWide;
 	private final String urlNarrow;
 
-	public CliffTexture(String id, String urlWide, String urlNarrow) {
+	public CliffTexture(String id, String urlWide, String urlNarrow)
+		throws CorruptDataException
+	{
 		this.id = id;
 		this.urlWide = urlWide;
 		this.urlNarrow = urlNarrow;
 
 		Image imgWide = new Image(urlWide, false);
 		Image imgNarrow = new Image(urlNarrow, false);
+
+		if (imgWide == null) throw new CorruptDataException("Missing texture " + urlWide);
+		if (imgNarrow == null) throw new CorruptDataException("Missing texture " + urlNarrow);
+
 		ul = new ImagePattern(imgNarrow, -1, 0, 2, 1, true);
 		ur = new ImagePattern(imgNarrow,  0, 0, 2, 1, true);
 		flat = new ImagePattern(imgWide,  0, 0, 1, 1, true);
 	}
 
-	public static CliffTexture fromJSON(JSONObject json)
-		throws CorruptDataException
+	public static CliffTexture fromJSON(
+		JSONObject json,
+		Function<String, String> urlConverter
+	) throws CorruptDataException
 	{
 		Object rId = json.get("id");
 		Object rUrlWide = json.get("urlWide");
@@ -41,8 +50,8 @@ public class CliffTexture implements HasJSONRepresentation {
 		try {
 			return new CliffTexture(
 				(String) rId,
-				(String) rUrlWide,
-				(String) rUrlNarrow);
+				urlConverter.apply((String) rUrlWide),
+				urlConverter.apply((String) rUrlNarrow));
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in cliff texture", e);
 		} catch (IllegalArgumentException e) {

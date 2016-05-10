@@ -1,9 +1,11 @@
 package isogame.editor;
 
 import isogame.engine.CliffTexture;
+import isogame.engine.CorruptDataException;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -70,8 +72,16 @@ public class NewCliffTextureDialog extends Dialog<CliffTexture> {
 				!wide.getText().equals("") &&
 				!narrow.getText().equals("")
 			) {
-				return new CliffTexture(id.getText(),
-					wide.getText(), narrow.getText());
+				try {
+					return new CliffTexture(id.getText(),
+						wide.getText(), narrow.getText());
+				} catch (CorruptDataException e) {
+					Alert err = new Alert(Alert.AlertType.ERROR);
+					err.setTitle("Cannot load texture image");
+					err.setContentText(e.getMessage());
+					err.showAndWait();
+					return null;
+				}
 			} else {
 				return null;
 			}

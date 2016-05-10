@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.util.function.Function;
  
 public class MapEditor extends Application {
 	public static void main(final String[] arguments) {
@@ -25,10 +26,14 @@ public class MapEditor extends Application {
 			File dataDir = getDataDir(primaryStage);
 			if (dataDir == null) System.exit(1);
 
+			Function<String, String> urlConverter = url ->
+				(new File(dataDir, "gfx/" + url)).toURI().toString();
+
 			ToggleGroup toolsGroup = new ToggleGroup();
 			EditorCanvas canvas = new EditorCanvas(root, primaryStage);
-			LibraryPane library = new LibraryPane(dataDir, toolsGroup, canvas);
-			MainMenu menuBar = new MainMenu(library, dataDir, canvas);
+			LibraryPane library = new LibraryPane(
+				dataDir, urlConverter, toolsGroup, canvas);
+			MainMenu menuBar = new MainMenu(library, dataDir, urlConverter, canvas);
 			ToolBar toolBar = new ToolBar(canvas, toolsGroup);
 
 			VBox top = new VBox();
