@@ -1,5 +1,6 @@
 package isogame.editor;
 
+import isogame.engine.ResourceLocator;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -13,7 +14,7 @@ public class MainMenu extends MenuBar {
 	public MainMenu(
 		LibraryPane libraryPane,
 		File dataDir,
-		Function<String, String> urlConverter,
+		ResourceLocator loc,
 		EditorCanvas canvas
 	) {
 		super();
@@ -27,7 +28,7 @@ public class MainMenu extends MenuBar {
 		MenuItem fileOpen = new MenuItem("Open");
 		fileOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
 		fileOpen.setOnAction(event -> canvas.loadStage(
-			libraryPane, urlConverter, dataDir));
+			libraryPane, loc, dataDir));
 
 		MenuItem fileSave = new MenuItem("Save");
 		fileSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));

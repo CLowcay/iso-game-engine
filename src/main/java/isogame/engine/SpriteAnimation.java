@@ -5,7 +5,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
-import java.util.function.Function;
+import java.io.IOException;
 import org.json.simple.JSONObject;
 
 
@@ -31,6 +31,7 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	private final Paint[] frameTextures;
 
 	public SpriteAnimation(
+		ResourceLocator loc,
 		String id,
 		String url,
 		int frames,
@@ -42,25 +43,29 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		this.id = id;
 		this.url = url;
 
-		Image buffer = new Image(url);
-		if (buffer == null) throw new CorruptDataException("Missing texture " + url);
+		try {
+			Image buffer = new Image(loc.gfx(url));
 
-		frameTextures = new Paint[frames * 4];
-		for (int d = 0; d < 4; d++) {
-			for (int f = 0; f < frames; f++) {
-				frameTextures[(f * 4) + d] =
-					new ImagePattern(buffer, -f, -d, frames, 4, true);
+			frameTextures = new Paint[frames * 4];
+			for (int d = 0; d < 4; d++) {
+				for (int f = 0; f < frames; f++) {
+					frameTextures[(f * 4) + d] =
+						new ImagePattern(buffer, -f, -d, frames, 4, true);
+				}
 			}
-		}
 
-		double iw = buffer.getWidth() / ((double) frames);
-		double ih = buffer.getHeight() / 4.0d;
-		w = (int) GlobalConstants.TILEW;
-		h = (int) ((GlobalConstants.TILEW / iw) * ih);
+			double iw = buffer.getWidth() / ((double) frames);
+			double ih = buffer.getHeight() / 4.0d;
+			w = (int) GlobalConstants.TILEW;
+			h = (int) ((GlobalConstants.TILEW / iw) * ih);
+		} catch (IOException e) {
+			throw new CorruptDataException(
+				"Cannot locate resource " + url, e);
+		}
 	}
 
 	public static SpriteAnimation fromJSON(
-		JSONObject json, Function<String, String> urlConverter
+		JSONObject json, ResourceLocator loc
 	) throws CorruptDataException
 	{
 		Object rId = json.get("id");
@@ -74,9 +79,9 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		if (rFramerate == null) throw new CorruptDataException("Error in animation, missing framerate");
 
 		try {
-			return new SpriteAnimation(
+			return new SpriteAnimation(loc,
 				(String) rId,
-				urlConverter.apply((String) rUrl),
+				((String) rUrl),
 				((Number) rFrames).intValue(),
 				((Number) rFramerate).intValue());
 		} catch (ClassCastException e) {

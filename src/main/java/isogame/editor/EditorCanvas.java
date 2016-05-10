@@ -5,6 +5,7 @@ import isogame.engine.ContinuousAnimator;
 import isogame.engine.CorruptDataException;
 import isogame.engine.Library;
 import isogame.engine.MapPoint;
+import isogame.engine.ResourceLocator;
 import isogame.engine.SlopeType;
 import isogame.engine.Stage;
 import isogame.engine.StageInfo;
@@ -63,7 +64,7 @@ public class EditorCanvas extends Canvas {
 	 * Load a stage from a file.
 	 * */
 	public void loadStage(LibraryPane library,
-		Function<String, String> urlConverter, File dataDir
+		ResourceLocator loc, File dataDir
 	) {
 		if (promptSaveContinue(library, dataDir)) {
 			FileChooser fc = new FileChooser();
@@ -74,7 +75,7 @@ public class EditorCanvas extends Canvas {
 			if (r != null) {
 				try {
 					stage = Stage.fromFile(r,
-						urlConverter, library.getGlobalLibrary());
+						loc, library.getGlobalLibrary());
 					library.setLocalLibrary(stage.localLibrary);
 
 					stage.setHighlightColors(highlightColors);

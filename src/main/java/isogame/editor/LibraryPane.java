@@ -6,6 +6,7 @@ import isogame.engine.CliffTexture;
 import isogame.engine.CorruptDataException;
 import isogame.engine.FacingDirection;
 import isogame.engine.Library;
+import isogame.engine.ResourceLocator;
 import isogame.engine.SlopeType;
 import isogame.engine.SpriteAnimation;
 import isogame.engine.SpriteInfo;
@@ -32,7 +33,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.function.Function;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +56,7 @@ public class LibraryPane extends VBox {
 	private final Map<String, List<ToggleButton>> cliffButtonsL = new HashMap<>();
 
 	private final File globalLibraryFile;
-	private final Function<String, String> urlConverter;
+	private final ResourceLocator loc;
 	private final Library global;
 	private Library local = null;
 
@@ -67,11 +67,11 @@ public class LibraryPane extends VBox {
 	}
 
 	public LibraryPane(
-		File dataRoot, Function<String, String> urlConverter,
+		File dataRoot, ResourceLocator loc,
 		ToggleGroup toolsGroup, EditorCanvas canvas
 	) throws IOException, CorruptDataException {
 		super();
-		this.urlConverter = urlConverter;
+		this.loc = loc;
 		this.setFocusTraversable(false);
 		this.canvas = canvas;
 		this.toolsGroup = toolsGroup;
@@ -117,15 +117,15 @@ public class LibraryPane extends VBox {
 		newButton.setOnAction(event -> {
 			Node selected = palette.getContent();
 			if (selected == sprites) {
-				(new EditSpriteDialog(gfxRoot, null))
+				(new EditSpriteDialog(gfxRoot, loc, null))
 					.showAndWait()
 					.ifPresent(sprite -> addSpriteToLibrary(sprite, false));
 			} else if (selected == textures) {
-				(new NewTextureDialog(gfxRoot))
+				(new NewTextureDialog(gfxRoot, loc))
 					.showAndWait()
 					.ifPresent(tex -> addTextureToLibrary(tex, false));
 			} else if (selected == cliffTextures) {
-				(new NewCliffTextureDialog(gfxRoot))
+				(new NewCliffTextureDialog(gfxRoot, loc))
 					.showAndWait()
 					.ifPresent(tex -> addCliffTextureToLibrary(tex, false));
 			}
@@ -149,7 +149,7 @@ public class LibraryPane extends VBox {
 		globalLibraryFile = new File(dataRoot, "global_library.json");
 		global = Library.fromFile(
 			new FileInputStream(globalLibraryFile),
-				globalLibraryFile.toString(), urlConverter, null);
+				globalLibraryFile.toString(), loc, null);
 
 		global.allTerrains().forEach(t -> addTexture(t, true));
 		global.allSprites().forEach(t -> addSprite(t, true));

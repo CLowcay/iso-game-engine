@@ -1,5 +1,6 @@
 package isogame.editor;
  
+import isogame.engine.ResourceLocator;
 import javafx.application.Application;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
@@ -26,14 +27,13 @@ public class MapEditor extends Application {
 			File dataDir = getDataDir(primaryStage);
 			if (dataDir == null) System.exit(1);
 
-			Function<String, String> urlConverter = url ->
-				(new File(dataDir, "gfx/" + url)).toURI().toString();
+			ResourceLocator loc = new DevelopmentResourceLocator(dataDir);
 
 			ToggleGroup toolsGroup = new ToggleGroup();
 			EditorCanvas canvas = new EditorCanvas(root, primaryStage);
 			LibraryPane library = new LibraryPane(
-				dataDir, urlConverter, toolsGroup, canvas);
-			MainMenu menuBar = new MainMenu(library, dataDir, urlConverter, canvas);
+				dataDir, loc, toolsGroup, canvas);
+			MainMenu menuBar = new MainMenu(library, dataDir, loc, canvas);
 			ToolBar toolBar = new ToolBar(canvas, toolsGroup);
 
 			VBox top = new VBox();

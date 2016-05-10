@@ -1,6 +1,7 @@
 package isogame.editor;
 
 import isogame.engine.CorruptDataException;
+import isogame.engine.ResourceLocator;
 import isogame.engine.SpriteAnimation;
 import isogame.gui.PositiveIntegerField;
 import javafx.geometry.Insets;
@@ -22,7 +23,7 @@ import java.util.UUID;
  * Dialog box to create new sprites
  * */
 public class NewSpriteAnimationDialog extends Dialog<SpriteAnimation> {
-	public NewSpriteAnimationDialog(File dataDirectory) {
+	public NewSpriteAnimationDialog(File dataDirectory, ResourceLocator loc) {
 		super();
 
 		// Set up the header and footer
@@ -84,7 +85,7 @@ public class NewSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 				if (nframes == 0 || rframerate == 0) return null;
 
 				try {
-					return new SpriteAnimation(
+					return new SpriteAnimation(loc,
 						id.getText(), spriteFile.getText(), nframes, rframerate);
 				} catch (CorruptDataException e) {
 					Alert err = new Alert(Alert.AlertType.ERROR);

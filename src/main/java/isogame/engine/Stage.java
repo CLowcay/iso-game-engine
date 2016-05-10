@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.util.function.Function;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -63,7 +62,7 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	public static Stage fromFile(
-		File filename, Function<String, String> urlConverter, Library global
+		File filename, ResourceLocator loc, Library global
 	) throws IOException, CorruptDataException, ParseException
 	{
 		try (BufferedReader in =
@@ -77,12 +76,12 @@ public class Stage implements HasJSONRepresentation {
 			if (stagejson == null) throw new CorruptDataException(
 				"Error in map file, missing stage");
 
-			return Stage.fromJSON((JSONObject) stagejson, urlConverter, global);
+			return Stage.fromJSON((JSONObject) stagejson, loc, global);
 		}
 	}
 
 	public static Stage fromJSON(
-		JSONObject json, Function<String, String> urlConverter, Library global
+		JSONObject json, ResourceLocator loc, Library global
 	) throws CorruptDataException
 	{
 		try {
@@ -90,7 +89,7 @@ public class Stage implements HasJSONRepresentation {
 			if (rName == null) throw new CorruptDataException("Error in stage, missing name");
 			String name = (String) rName;
 
-			Library lib = Library.fromJSON(json, name, urlConverter, global);
+			Library lib = Library.fromJSON(json, name, loc, global);
 
 			Object rTerrain = json.get("terrain");
 			Object rSprites = json.get("sprites");

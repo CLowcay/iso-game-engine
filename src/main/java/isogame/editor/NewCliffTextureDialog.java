@@ -2,6 +2,7 @@ package isogame.editor;
 
 import isogame.engine.CliffTexture;
 import isogame.engine.CorruptDataException;
+import isogame.engine.ResourceLocator;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -24,7 +25,7 @@ import java.util.UUID;
  * Dialog box to create new terrain textures
  * */
 public class NewCliffTextureDialog extends Dialog<CliffTexture> {
-	public NewCliffTextureDialog(File dataDirectory) {
+	public NewCliffTextureDialog(File dataDirectory, ResourceLocator loc) {
 		super();
 
 		// Set up the header and footer
@@ -73,7 +74,7 @@ public class NewCliffTextureDialog extends Dialog<CliffTexture> {
 				!narrow.getText().equals("")
 			) {
 				try {
-					return new CliffTexture(id.getText(),
+					return new CliffTexture(loc, id.getText(),
 						wide.getText(), narrow.getText());
 				} catch (CorruptDataException e) {
 					Alert err = new Alert(Alert.AlertType.ERROR);

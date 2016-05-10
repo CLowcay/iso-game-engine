@@ -1,6 +1,7 @@
 package isogame.editor;
 
 import isogame.engine.CorruptDataException;
+import isogame.engine.ResourceLocator;
 import isogame.engine.TerrainTexture;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
@@ -21,7 +22,7 @@ import java.util.UUID;
  * Dialog box to create new terrain textures
  * */
 public class NewTextureDialog extends Dialog<TerrainTexture> {
-	public NewTextureDialog(File dataDirectory) {
+	public NewTextureDialog(File dataDirectory, ResourceLocator loc) {
 		super();
 
 		// Set up the header and footer
@@ -67,7 +68,7 @@ public class NewTextureDialog extends Dialog<TerrainTexture> {
 		this.setResultConverter(clickedButton -> {
 			if (clickedButton == ButtonType.OK && !texture.getText().equals("")) {
 				try {
-					return new TerrainTexture(id.getText(), texture.getText());
+					return new TerrainTexture(loc, id.getText(), texture.getText());
 				} catch (CorruptDataException e) {
 					Alert err = new Alert(Alert.AlertType.ERROR);
 					err.setTitle("Cannot load texture image");

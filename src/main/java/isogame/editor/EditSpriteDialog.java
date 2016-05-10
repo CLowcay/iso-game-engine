@@ -1,5 +1,6 @@
 package isogame.editor;
 
+import isogame.engine.ResourceLocator;
 import isogame.engine.SpriteAnimation;
 import isogame.engine.SpriteInfo;
 import javafx.collections.FXCollections;
@@ -31,7 +32,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 	/**
 	 * @param info The sprite to edit or null to create a new sprite
 	 * */
-	public EditSpriteDialog(File dataRoot, SpriteInfo info) {
+	public EditSpriteDialog(File dataRoot, ResourceLocator loc, SpriteInfo info) {
 		super();
 
 		boolean isNew;
@@ -78,7 +79,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 		});
 
 		add.setOnAction(event -> {
-			(new NewSpriteAnimationDialog(dataRoot))
+			(new NewSpriteAnimationDialog(dataRoot, loc))
 				.showAndWait()
 				.ifPresent(a -> animList.add(a));
 		});

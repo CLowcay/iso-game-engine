@@ -3,7 +3,7 @@ package isogame.engine;
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
-import java.util.function.Function;
+import java.io.IOException;
 import org.json.simple.JSONObject;
 
 public class CliffTexture implements HasJSONRepresentation {
@@ -16,27 +16,30 @@ public class CliffTexture implements HasJSONRepresentation {
 	private final String urlWide;
 	private final String urlNarrow;
 
-	public CliffTexture(String id, String urlWide, String urlNarrow)
-		throws CorruptDataException
-	{
+	public CliffTexture(
+		ResourceLocator loc,
+		String id, String urlWide, String urlNarrow
+	) throws CorruptDataException {
 		this.id = id;
 		this.urlWide = urlWide;
 		this.urlNarrow = urlNarrow;
 
-		Image imgWide = new Image(urlWide, false);
-		Image imgNarrow = new Image(urlNarrow, false);
+		try {
+			Image imgWide = new Image(loc.gfx(urlWide));
+			Image imgNarrow = new Image(loc.gfx(urlNarrow));
 
-		if (imgWide == null) throw new CorruptDataException("Missing texture " + urlWide);
-		if (imgNarrow == null) throw new CorruptDataException("Missing texture " + urlNarrow);
-
-		ul = new ImagePattern(imgNarrow, -1, 0, 2, 1, true);
-		ur = new ImagePattern(imgNarrow,  0, 0, 2, 1, true);
-		flat = new ImagePattern(imgWide,  0, 0, 1, 1, true);
+			ul = new ImagePattern(imgNarrow, -1, 0, 2, 1, true);
+			ur = new ImagePattern(imgNarrow,  0, 0, 2, 1, true);
+			flat = new ImagePattern(imgWide,  0, 0, 1, 1, true);
+		} catch (IOException e) {
+			throw new CorruptDataException(
+				"Cannot locate resource " + urlWide + " or " + urlNarrow, e);
+		}
 	}
 
 	public static CliffTexture fromJSON(
 		JSONObject json,
-		Function<String, String> urlConverter
+		ResourceLocator loc
 	) throws CorruptDataException
 	{
 		Object rId = json.get("id");
@@ -48,10 +51,10 @@ public class CliffTexture implements HasJSONRepresentation {
 		if (rUrlNarrow == null) throw new CorruptDataException("Error in cliff texture, missing urlNarrow");
 
 		try {
-			return new CliffTexture(
+			return new CliffTexture(loc,
 				(String) rId,
-				urlConverter.apply((String) rUrlWide),
-				urlConverter.apply((String) rUrlNarrow));
+				(String) rUrlWide,
+				(String) rUrlNarrow);
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in cliff texture", e);
 		} catch (IllegalArgumentException e) {
