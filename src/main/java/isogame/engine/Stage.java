@@ -332,7 +332,7 @@ public class Stage implements HasJSONRepresentation {
 	 * @param p The tile to highlight
 	 * @param priority The highlighter to use.  A tile map be under several
 	 * highlights at once, but only the highest priority highlight is actually
-	 * rendered.
+	 * rendered.  Lower number == lower priority
 	 * */
 	public void setHighlight(MapPoint p, int priority) {
 		if (priority < 0 || priority >= highlightColors.length) {
@@ -347,6 +347,8 @@ public class Stage implements HasJSONRepresentation {
 			highlights = new LinkedList<>();
 			highlights.add(priority);
 			highlighting.put(p, highlights);
+		} else if (highlights.isEmpty()) {
+			highlights.add(priority);
 		} else {
 			int i = 0;
 			for (int h : highlights) {
@@ -363,7 +365,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Clear a highlighting level.
 	 * */
-	public void clearHighlighting(int priority) {
+	public void clearHighlighting(Integer priority) {
 		highlighting.values().forEach(h -> h.remove(priority));
 	}
 

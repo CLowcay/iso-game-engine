@@ -1,29 +1,14 @@
 package isogame.editor;
 
-import isogame.engine.CliffTexture;
-import isogame.engine.ContinuousAnimator;
 import isogame.engine.CorruptDataException;
 import isogame.engine.Library;
 import isogame.engine.MapPoint;
-import isogame.engine.SlopeType;
+import isogame.engine.MapView;
 import isogame.engine.Stage;
-import isogame.engine.StageInfo;
-import isogame.engine.StartZoneType;
-import isogame.engine.TerrainTexture;
-import isogame.engine.Tile;
-import isogame.engine.View;
 import isogame.resource.ResourceLocator;
-import javafx.animation.AnimationTimer;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
-import javafx.geometry.Point2D;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -37,26 +22,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.util.EnumSet;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import static isogame.GlobalConstants.SCROLL_SPEED;
-import static isogame.GlobalConstants.TILEH;
 
-public class EditorCanvas extends Canvas {
-	private final AnimationTimer animateCanvas;
+public class EditorCanvas extends MapView {
 	private Tool tool = null;
-	private final View view;
 	private final Window window;
-	private final Paint[] highlightColors =
-		new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)};
 
 	boolean saved = true;
-	Stage stage = null;
 	File stageFile = null;
 	Library localLibrary = null;
 
@@ -74,12 +51,13 @@ public class EditorCanvas extends Canvas {
 			File r = fc.showOpenDialog(window);
 			if (r != null) {
 				try {
-					stage = Stage.fromFile(r,
+					Stage stage = Stage.fromFile(r,
 						loc, library.getGlobalLibrary());
 					library.setLocalLibrary(stage.localLibrary);
 
-					stage.setHighlightColors(highlightColors);
-					view.centreOnTile(stage, new MapPoint(3, 3));
+					setStage(stage);
+					setAllSelectable();
+
 					stageFile = r;
 					localLibrary = stage.localLibrary;
 					saved = true;
@@ -113,6 +91,7 @@ public class EditorCanvas extends Canvas {
 	 * Save the current stage.
 	 * */
 	public void saveStage(File dataDir) {
+		Stage stage = getStage();
 		if (saved || stage == null) return;
 		if (stageFile == null) {
 			saveStageAs(dataDir);
@@ -133,6 +112,7 @@ public class EditorCanvas extends Canvas {
 	 * Save the current stage under a new name.
 	 * */
 	public void saveStageAs(File dataDir) {
+		Stage stage = getStage();
 		if (saved || stage == null) return;
 
 		FileChooser fc = new FileChooser();
@@ -192,11 +172,10 @@ public class EditorCanvas extends Canvas {
 				.showAndWait()
 				.ifPresent(terrain -> {
 					localLibrary = library.newLocalLibrary();
-					stage = new Stage(terrain, localLibrary);
+					setStage(new Stage(terrain, localLibrary));
+					setAllSelectable();
 					stageFile = null;
 					saved = false;
-					stage.setHighlightColors(highlightColors);
-					view.centreOnTile(stage, new MapPoint(3, 3));
 				});
 		} catch (CorruptDataException e) {
 			Alert d = new Alert(Alert.AlertType.ERROR);
@@ -205,7 +184,7 @@ public class EditorCanvas extends Canvas {
 				"You may be missing some textures.\n\nException was:\n" +
 				e.toString());
 			d.show();
-			stage = null;
+			setStage(null);
 			stageFile = null;
 			saved = true;
 			localLibrary = null;
@@ -218,156 +197,29 @@ public class EditorCanvas extends Canvas {
 	}
 
 	public EditorCanvas(Node root, Window window) throws CorruptDataException {
-		super();
+		super(root, null, true,
+			new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)});
+
 		this.setFocusTraversable(true);
 
 		this.window = window;
 
-		view = new View(960, 540);
-
-		final ContinuousAnimator scrolling = new ContinuousAnimator();
-		scrolling.reset(view.getScrollPos());
-
 		final GraphicsContext cx = this.getGraphicsContext2D();
 		cx.setFont(new Font(100));
 
-		animateCanvas = new AnimationTimer() {
-			int count0 = 0;
-			int count = 0;
-			long now0 = 0;
+		final Collection<MapPoint> emptyList = new ArrayList<>();
+		final Collection<MapPoint> oneList = new ArrayList<>();
 
-			@Override
-			public void handle(long now) {
-				count++;
-				if (now0 == 0) now0 = now;
-				if ((now - now0) >= 5000000000l) {
-					System.err.println("fps: " + ((count - count0) / 5));
-					now0 = now0 + 5000000000l;
-					count0 = count;
-				}
-
-				if (stage != null) {
-					view.setScrollPos(scrolling.valueAt(now));
-					view.renderFrame(cx, enableAnimations? now : 0, stage, true);
-				}
-			}
-		};
-
-		// Listen for window resize events
-		this.widthProperty().addListener((obs, w0, w) -> {
-			view.setViewport(w.intValue(), (int) this.getHeight());
+		this.doOnMouseOut(() -> super.setHighlight(emptyList, 0));
+		this.doOnMouseOver(p -> {
+			oneList.clear(); oneList.add(p);
+			super.setHighlight(oneList, 0);
 		});
-		this.heightProperty().addListener((obs, h0, h) -> {
-			view.setViewport((int) this.getWidth(), h.intValue());
-		});
-
-		// Listen for keyboard events
-		final Set<KeyCode> keys = EnumSet.noneOf(KeyCode.class);
-		root.setOnKeyPressed(event -> {
-			KeyCode k = event.getCode();
-			keys.add(k);
-			setScrollingAnimation(scrolling, keys);
-			switch (k) {
-				case A: view.rotateLeft(); break;
-				case D: view.rotateRight(); break;
-			}
-		});
-		root.setOnKeyReleased(event -> {
-			keys.remove(event.getCode());
-			setScrollingAnimation(scrolling, keys);
-		});
-
-		// Listen for mouse events
-		root.addEventHandler(MouseEvent.ANY, new EventHandler<MouseEvent>() {
-			MapPoint p0 = null;
-
-			@Override
-			public void handle(MouseEvent event) {
-				if (stage == null) return;
-
-				EventType etype = event.getEventType();
-				if (etype == MouseEvent.MOUSE_MOVED ||
-					etype == MouseEvent.MOUSE_DRAGGED
-				) {
-					MapPoint p = view.tileAtMouse(
-						new Point2D(event.getX(), event.getY()), stage);
-
-					if (p != p0) {
-						p0 = p;
-						stage.clearAllHighlighting();
-						if (p != null) {
-							stage.setHighlight(p, 0);
-
-							if (event.isPrimaryButtonDown() && tool != null) {
-								tool.apply(p, stage, view);
-							}
-						}
-					}
-				} else if (etype == MouseEvent.MOUSE_PRESSED) {
-					MapPoint p = view.tileAtMouse(
-						new Point2D(event.getX(), event.getY()), stage);
-
-					if (p != null && tool != null) tool.apply(p, stage, view);
-				}
-			}
-		});
+		this.doOnSelection(p -> tool.apply(p, getStage(), view));
 	}
 
 	public void setTool(Tool tool) {
 		this.tool = tool;
-	}
-
-	private void setScrollingAnimation(
-		ContinuousAnimator scrolling, Set<KeyCode> keys
-	) {
-		boolean kup = keys.contains(KeyCode.UP);
-		boolean kdown = keys.contains(KeyCode.DOWN);
-		boolean kleft = keys.contains(KeyCode.LEFT);
-		boolean kright = keys.contains(KeyCode.RIGHT);
-
-		if (kup && !kdown) {
-			if (kleft && !kright) {
-				scrolling.setAnimation(new Point2D(-TILEH, -TILEH), SCROLL_SPEED);
-				scrolling.start();
-			} else if (kright && !kleft) {
-				scrolling.setAnimation(new Point2D(TILEH, -TILEH), SCROLL_SPEED);
-				scrolling.start();
-			} else if (!kleft && !kright) {
-				scrolling.setAnimation(new Point2D(0, -TILEH), SCROLL_SPEED);
-				scrolling.start();
-			}
-		} else if (kdown && !kup) {
-			if (kleft && !kright) {
-				scrolling.setAnimation(new Point2D(-TILEH, TILEH), SCROLL_SPEED);
-				scrolling.start();
-			} else if (kright && !kleft) {
-				scrolling.setAnimation(new Point2D(TILEH, TILEH), SCROLL_SPEED);
-				scrolling.start();
-			} else if (!kleft && !kright) {
-				scrolling.setAnimation(new Point2D(0, TILEH), SCROLL_SPEED);
-				scrolling.start();
-			}
-		} else if (!kdown && !kup) {
-			if (kleft && !kright) {
-				scrolling.setAnimation(new Point2D(-TILEH, 0), SCROLL_SPEED);
-				scrolling.start();
-			} else if (kright && !kleft) {
-				scrolling.setAnimation(new Point2D(TILEH, 0), SCROLL_SPEED);
-				scrolling.start();
-			} else {
-				scrolling.stop();
-			}
-		} else {
-			scrolling.stop();
-		}
-	}
-
-	public void startAnimating() {
-		animateCanvas.start();
-	}
-
-	public void stopAnimating() {
-		animateCanvas.stop();
 	}
 }
 
