@@ -73,11 +73,8 @@ public class Stage implements HasJSONRepresentation {
 		{
 			JSONParser parser = new JSONParser();
 			JSONObject json = (JSONObject) parser.parse(in);
-			Object stagejson = json.get("stage");
-			if (stagejson == null) throw new CorruptDataException(
-				"Error in map file, missing stage");
 
-			return Stage.fromJSON((JSONObject) stagejson, loc, global);
+			return Stage.fromJSON(json, loc, global);
 		}
 	}
 
@@ -86,14 +83,20 @@ public class Stage implements HasJSONRepresentation {
 	) throws CorruptDataException
 	{
 		try {
-			Object rName = json.get("name");
+			Object oStageJSON = json.get("stage");
+			if (oStageJSON == null) throw new CorruptDataException(
+				"Error in map file, missing stage");
+
+			JSONObject stageJSON = (JSONObject) oStageJSON;
+
+			Object rName = stageJSON.get("name");
 			if (rName == null) throw new CorruptDataException("Error in stage, missing name");
 			String name = (String) rName;
 
 			Library lib = Library.fromJSON(json, name, loc, global);
 
-			Object rTerrain = json.get("terrain");
-			Object rSprites = json.get("sprites");
+			Object rTerrain = stageJSON.get("terrain");
+			Object rSprites = stageJSON.get("sprites");
 
 			if (rTerrain == null) throw new CorruptDataException("Error in stage, missing terrain");
 			if (rSprites == null) throw new CorruptDataException("Error in stage, missing sprites");

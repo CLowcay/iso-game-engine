@@ -6,6 +6,7 @@ import isogame.engine.MapPoint;
 import isogame.engine.MapView;
 import isogame.engine.Stage;
 import isogame.resource.ResourceLocator;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -33,7 +34,7 @@ public class EditorCanvas extends MapView {
 	private Tool tool = null;
 	private final Window window;
 
-	boolean saved = true;
+	SimpleBooleanProperty saved = new SimpleBooleanProperty(true);
 	File stageFile = null;
 	Library localLibrary = null;
 
@@ -60,7 +61,7 @@ public class EditorCanvas extends MapView {
 
 					stageFile = r;
 					localLibrary = stage.localLibrary;
-					saved = true;
+					saved.setValue(true);
 					tool = null;
 				} catch (IOException e) {
 					Alert d = new Alert(Alert.AlertType.ERROR);
@@ -92,13 +93,13 @@ public class EditorCanvas extends MapView {
 	 * */
 	public void saveStage(File dataDir) {
 		Stage stage = getStage();
-		if (saved || stage == null) return;
+		if (saved.getValue() || stage == null) return;
 		if (stageFile == null) {
 			saveStageAs(dataDir);
 		} else {
 			try {
 				localLibrary.writeToStream(new FileOutputStream(stageFile), stage);
-				saved = true;
+				saved.setValue(true);
 			} catch (IOException e) {
 				Alert d = new Alert(Alert.AlertType.ERROR);
 				d.setHeaderText("Cannot save file as " + stageFile.toString());
@@ -113,7 +114,7 @@ public class EditorCanvas extends MapView {
 	 * */
 	public void saveStageAs(File dataDir) {
 		Stage stage = getStage();
-		if (saved || stage == null) return;
+		if (saved.getValue() || stage == null) return;
 
 		FileChooser fc = new FileChooser();
 		fc.setTitle("Save map file");
@@ -139,7 +140,7 @@ public class EditorCanvas extends MapView {
 	 * @return true if the close action should continue, otherwise false.
 	 * */
 	public boolean promptSaveContinue(LibraryPane library, File dataDir) {
-		if (saved) {
+		if (saved.getValue()) {
 			return true;
 		} else {
 			Alert d = new Alert(Alert.AlertType.CONFIRMATION, null, 
@@ -177,7 +178,7 @@ public class EditorCanvas extends MapView {
 					setStage(new Stage(terrain, localLibrary));
 					setAllSelectable();
 					stageFile = null;
-					saved = false;
+					saved.setValue(false);
 				});
 		} catch (CorruptDataException e) {
 			Alert d = new Alert(Alert.AlertType.ERROR);
@@ -188,7 +189,7 @@ public class EditorCanvas extends MapView {
 			d.show();
 			setStage(null);
 			stageFile = null;
-			saved = true;
+			saved.setValue(true);
 			localLibrary = null;
 		}
 	}
@@ -217,7 +218,10 @@ public class EditorCanvas extends MapView {
 			oneList.clear(); oneList.add(p);
 			super.setHighlight(oneList, 0);
 		});
-		this.doOnSelection(p -> tool.apply(p, getStage(), view));
+		this.doOnSelection(p -> {
+			tool.apply(p, getStage(), view);
+			saved.setValue(false);
+		});
 	}
 
 	public void setTool(Tool tool) {

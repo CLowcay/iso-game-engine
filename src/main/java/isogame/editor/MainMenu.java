@@ -32,6 +32,7 @@ public class MainMenu extends MenuBar {
 		MenuItem fileSave = new MenuItem("Save");
 		fileSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
 		fileSave.setOnAction(event -> canvas.saveStage(dataDir));
+		fileSave.disableProperty().bind(canvas.saved);
 
 		MenuItem fileSaveAs = new MenuItem("Save As...");
 		fileSaveAs.setAccelerator(KeyCombination.keyCombination("Shift+Ctrl+S"));
