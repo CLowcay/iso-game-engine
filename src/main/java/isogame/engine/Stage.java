@@ -28,7 +28,7 @@ import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
 
 public class Stage implements HasJSONRepresentation {
-	public String name;
+	public String name = null;
 	public final StageInfo terrain;
 	public final Map<MapPoint, Sprite> sprites;
 	public final Library localLibrary;

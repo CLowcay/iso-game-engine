@@ -128,6 +128,8 @@ public class EditorCanvas extends MapView {
 				r = new File(p, name + ".map");
 			}
 			stageFile = r;
+			String n = r.getName();
+			getStage().name = n.substring(0, n.lastIndexOf('.'));
 			saveStage(dataDir);
 		}
 	}
