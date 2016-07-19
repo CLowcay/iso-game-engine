@@ -5,6 +5,7 @@ import javafx.scene.image.Image;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.json.simple.JSONArray;
@@ -14,13 +15,20 @@ public class SpriteInfo implements HasJSONRepresentation {
 	public final Map<String, SpriteAnimation> animations;
 	private final List<SpriteAnimation> animationsOrdered;
 
-	private SpriteAnimation defaultAnimation = null;
+	public final SpriteAnimation defaultAnimation;
 	public final String id;
 
-	public SpriteInfo(String id) {
+	@Override
+	public String toString() {
+		return id;
+	}
+
+	public SpriteInfo(String id, SpriteAnimation defaultAnimation) {
 		this.id = id;
+		this.defaultAnimation = defaultAnimation;
 		animations = new HashMap<>();
 		animationsOrdered = new ArrayList<>();
+		addAnimation(defaultAnimation);
 	}
 
 	public static SpriteInfo fromJSON(
@@ -34,11 +42,16 @@ public class SpriteInfo implements HasJSONRepresentation {
 		if (rAnimations == null) throw new CorruptDataException("Error in sprite, missing animations");
 
 		try {
-			SpriteInfo info = new SpriteInfo((String) rId);
 			JSONArray animations = (JSONArray) rAnimations;
-			for (Object a : animations) {
-				info.addAnimation(SpriteAnimation.fromJSON(
-					(JSONObject) a, loc));
+			@SuppressWarnings("unchecked")
+			Iterator<Object> i = animations.iterator();
+			// Hazard: Editor must make sure that every sprite has at least one sprite
+			if (!i.hasNext()) throw new CorruptDataException("No animations defined for sprite");
+			SpriteInfo info = new SpriteInfo((String) rId,
+				SpriteAnimation.fromJSON((JSONObject) i.next(), loc));
+			while (i.hasNext()) {
+				info.addAnimation(
+					SpriteAnimation.fromJSON((JSONObject) i.next(), loc));
 			}
 			return info;
 		} catch (ClassCastException e) {
@@ -46,18 +59,11 @@ public class SpriteInfo implements HasJSONRepresentation {
 		}
 	}
 
-	public SpriteAnimation getDefaultAnimation() throws CorruptDataException {
-		if (defaultAnimation == null)
-			throw new CorruptDataException("No animations defined for sprite " + id);
-		else return defaultAnimation;
-	}
-
 	public Collection<SpriteAnimation> getAllAnimations() {
 		return animations.values();
 	}
 
 	public void addAnimation(SpriteAnimation animation) {
-		if (defaultAnimation == null) defaultAnimation = animation;
 		animations.put(animation.id, animation);
 		animationsOrdered.add(animation);
 	}

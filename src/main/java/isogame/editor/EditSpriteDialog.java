@@ -17,6 +17,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import java.io.File;
+import java.util.Iterator;
 import java.util.UUID;
 
 /**
@@ -38,7 +39,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 		boolean isNew;
 		final SpriteInfo baseInfo;
 		if (info == null) {
-			baseInfo = new SpriteInfo(UUID.randomUUID().toString());
+			baseInfo = new SpriteInfo(UUID.randomUUID().toString(), null);
 			isNew = true;
 		} else {
 			baseInfo = info;
@@ -106,9 +107,11 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 			if (clickedButton == ButtonType.OK) {
 				if (animList.size() == 0) return null;
 
-				SpriteInfo i = new SpriteInfo(idField.getText());
-				for (SpriteAnimation a : animList) {
-					i.addAnimation(a);
+				Iterator<SpriteAnimation> it = animList.iterator();
+				if (!it.hasNext()) return null;
+				SpriteInfo i = new SpriteInfo(idField.getText(), it.next());
+				while (it.hasNext()) {
+					i.addAnimation(it.next());
 				}
 				return i;
 			} else {

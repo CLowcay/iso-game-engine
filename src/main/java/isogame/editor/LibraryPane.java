@@ -325,34 +325,30 @@ public class LibraryPane extends VBox {
 	}
 	
 	private void addSprite(SpriteInfo sprite, boolean isGlobal) {
-		try {
-			SpriteAnimation anim = sprite.getDefaultAnimation();
-			ToolContextMenu menu;
-			if (isGlobal) {
-				menu = null;
-			} else {
-				menu = new ToolContextMenu(this, AssetType.SPRITE, sprite.id);
-			}
-			
-			Canvas cu = new Canvas(64, anim.h / 8);
-			Canvas cd = new Canvas(64, anim.h / 8);
-			Canvas cl = new Canvas(64, anim.h / 8);
-			Canvas cr = new Canvas(64, anim.h / 8);
+		SpriteAnimation anim = sprite.defaultAnimation;
+		ToolContextMenu menu;
+		if (isGlobal) {
+			menu = null;
+		} else {
+			menu = new ToolContextMenu(this, AssetType.SPRITE, sprite.id);
+		}
+		
+		Canvas cu = new Canvas(64, anim.h / 8);
+		Canvas cd = new Canvas(64, anim.h / 8);
+		Canvas cl = new Canvas(64, anim.h / 8);
+		Canvas cr = new Canvas(64, anim.h / 8);
 
-			ToggleButton u = makeSpriteButton(sprite, anim, cu, FacingDirection.UP, menu);
-			ToggleButton d = makeSpriteButton(sprite, anim, cd, FacingDirection.DOWN, menu);
-			ToggleButton l = makeSpriteButton(sprite, anim, cl, FacingDirection.LEFT, menu);
-			ToggleButton r = makeSpriteButton(sprite, anim, cr, FacingDirection.RIGHT, menu);
+		ToggleButton u = makeSpriteButton(sprite, anim, cu, FacingDirection.UP, menu);
+		ToggleButton d = makeSpriteButton(sprite, anim, cd, FacingDirection.DOWN, menu);
+		ToggleButton l = makeSpriteButton(sprite, anim, cl, FacingDirection.LEFT, menu);
+		ToggleButton r = makeSpriteButton(sprite, anim, cr, FacingDirection.RIGHT, menu);
 
-			if (isGlobal) {
-				sprites.global.getChildren().addAll(u, d, l, r);
-				spriteButtonsG.put(sprite.id, Arrays.asList(u, d, l, r));
-			} else {
-				sprites.local.getChildren().addAll(u, d, l, r);
-				spriteButtonsL.put(sprite.id, Arrays.asList(u, d, l, r));
-			}
-		} catch (CorruptDataException e) {
-			throw new RuntimeException("This cannot happen", e);
+		if (isGlobal) {
+			sprites.global.getChildren().addAll(u, d, l, r);
+			spriteButtonsG.put(sprite.id, Arrays.asList(u, d, l, r));
+		} else {
+			sprites.local.getChildren().addAll(u, d, l, r);
+			spriteButtonsL.put(sprite.id, Arrays.asList(u, d, l, r));
 		}
 	}
 

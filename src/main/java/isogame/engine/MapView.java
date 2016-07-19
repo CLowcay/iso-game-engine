@@ -19,7 +19,7 @@ import static isogame.GlobalConstants.SCROLL_SPEED;
 import static isogame.GlobalConstants.TILEH;
 
 /**
- * Draws a scrolling, rotating map.  (Shouldn't this be part of the game engine?)
+ * Draws a scrolling, rotating map.
  * */
 public class MapView extends Canvas {
 	private Stage stage = null;

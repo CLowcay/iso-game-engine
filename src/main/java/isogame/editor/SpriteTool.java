@@ -21,15 +21,11 @@ public class SpriteTool extends Tool {
 	@Override
 	public void apply(MapPoint p, Stage stage, View view) {
 		if (stage.terrain.hasTile(p)) {
-			try {
-				Sprite s = new Sprite(sprite);
-				s.pos = stage.terrain.getTile(p).pos;
-				s.direction = SpriteAnimation.inverseDirectionTransform(
-					direction, view.getCameraAngle());
-				stage.addSprite(s);
-			} catch (CorruptDataException e) {
-				throw new RuntimeException("This cannot happen", e);
-			}
+			Sprite s = new Sprite(sprite);
+			s.pos = stage.terrain.getTile(p).pos;
+			s.direction = SpriteAnimation.inverseDirectionTransform(
+				direction, view.getCameraAngle());
+			stage.addSprite(s);
 		}
 	}
 }

@@ -12,14 +12,14 @@ public class Sprite implements HasJSONRepresentation {
 	// The direction the sprite is facing
 	public FacingDirection direction;
 
-	public SpriteAnimation animation;
+	private SpriteAnimation animation;
 
 	// animate the frames
 	private FrameAnimator frameAnimator;
 
-	public Sprite(SpriteInfo info) throws CorruptDataException {
+	public Sprite(SpriteInfo info) {
 		this.info = info;
-		setAnimation(info.getDefaultAnimation().id);
+		setAnimation(info.defaultAnimation.id);
 	}
 
 	public void renderFrame(
