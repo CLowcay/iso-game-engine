@@ -1,5 +1,7 @@
 package isogame.editor;
 
+import javafx.scene.paint.Color;
+
 import isogame.engine.AssetType;
 import isogame.engine.CameraAngle;
 import isogame.engine.CliffTexture;
@@ -62,6 +64,8 @@ public class LibraryPane extends VBox {
 
 	private final EditorCanvas canvas;
 
+	private final File gfxRoot;
+
 	public Library getGlobalLibrary() {
 		return global;
 	}
@@ -76,7 +80,7 @@ public class LibraryPane extends VBox {
 		this.canvas = canvas;
 		this.toolsGroup = toolsGroup;
 
-		final File gfxRoot = new File(dataRoot, "gfx");
+		gfxRoot = new File(dataRoot, "gfx");
 
 		HBox header = new HBox();
 		ToggleButton selectTextures = new ToggleButton("Textures");
@@ -237,6 +241,36 @@ public class LibraryPane extends VBox {
 		}
 	}
 
+	public void editTexture(String id) {
+		// TODO: complete this
+		return;
+	}
+
+	public void editSprite(String id) {
+		try {
+			SpriteInfo s = local != null ? local.getSprite(id) : global.getSprite(id);
+			(new EditSpriteDialog(gfxRoot, loc, s))
+				.showAndWait()
+				.ifPresent(sprite -> {
+					try {
+						if (local != null) local.updateSprite(sprite);
+						else global.updateSprite(sprite);
+						redrawSpriteButtons(sprite);
+						saveGlobal();
+					} catch (CorruptDataException e) {
+						throw new RuntimeException("This cannot happen", e);
+					}
+				});
+		} catch (CorruptDataException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+	}
+
+	public void editCliffTexture(String id) {
+		// TODO: complete this
+		return;
+	}
+
 	public void makeTextureGlobal(String id) {
 		try {
 			TerrainTexture tex = local.getTerrain(id);
@@ -306,9 +340,7 @@ public class LibraryPane extends VBox {
 		ToggleButton t = new ToggleButton("", preview);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(toolsGroup);
-		if (!isGlobal) {
-			t.setContextMenu(new ToolContextMenu(this, AssetType.TEXTURE, tex.id));
-		}
+		t.setContextMenu(new ToolContextMenu(this, AssetType.TEXTURE, tex.id, isGlobal));
 
 		t.setOnAction(event -> {
 			if (t.isSelected()) canvas.setTool(new TerrainTextureTool(tex));
@@ -325,23 +357,13 @@ public class LibraryPane extends VBox {
 	}
 	
 	private void addSprite(SpriteInfo sprite, boolean isGlobal) {
-		SpriteAnimation anim = sprite.defaultAnimation;
-		ToolContextMenu menu;
-		if (isGlobal) {
-			menu = null;
-		} else {
-			menu = new ToolContextMenu(this, AssetType.SPRITE, sprite.id);
-		}
+		ToolContextMenu menu = new ToolContextMenu(
+			this, AssetType.SPRITE, sprite.id, isGlobal);
 		
-		Canvas cu = new Canvas(64, anim.h / 8);
-		Canvas cd = new Canvas(64, anim.h / 8);
-		Canvas cl = new Canvas(64, anim.h / 8);
-		Canvas cr = new Canvas(64, anim.h / 8);
-
-		ToggleButton u = makeSpriteButton(sprite, anim, cu, FacingDirection.UP, menu);
-		ToggleButton d = makeSpriteButton(sprite, anim, cd, FacingDirection.DOWN, menu);
-		ToggleButton l = makeSpriteButton(sprite, anim, cl, FacingDirection.LEFT, menu);
-		ToggleButton r = makeSpriteButton(sprite, anim, cr, FacingDirection.RIGHT, menu);
+		ToggleButton u = makeSpriteButton(sprite, makeSpritePreview(sprite, FacingDirection.UP), FacingDirection.UP, menu);
+		ToggleButton d = makeSpriteButton(sprite, makeSpritePreview(sprite, FacingDirection.DOWN), FacingDirection.DOWN, menu);
+		ToggleButton l = makeSpriteButton(sprite, makeSpritePreview(sprite, FacingDirection.LEFT), FacingDirection.LEFT, menu);
+		ToggleButton r = makeSpriteButton(sprite, makeSpritePreview(sprite, FacingDirection.RIGHT), FacingDirection.RIGHT, menu);
 
 		if (isGlobal) {
 			sprites.global.getChildren().addAll(u, d, l, r);
@@ -352,16 +374,25 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	private ToggleButton makeSpriteButton(
-		SpriteInfo sprite, SpriteAnimation anim, Canvas preview,
-		FacingDirection direction, ToolContextMenu menu
-	) {
-		GraphicsContext gc = preview.getGraphicsContext2D();
-		gc.scale(1.0d/8.0d, 1.0d/8.0d);
-		anim.renderFrame(gc,
-			0, anim.h - (int) GlobalConstants.TILEH,
-			0, CameraAngle.UL, direction);
+	private void redrawSpriteButtons(SpriteInfo sprite) {
+		List<ToggleButton> buttons = spriteButtonsL.get(sprite.id);
+		if (buttons == null) {
+			buttons = spriteButtonsG.get(sprite.id);
+			if (buttons == null) throw new RuntimeException(
+				"Could not find sprite buttons to redraw.  This cannot happen");
+		}
+		if (buttons.size() != 4) throw new RuntimeException(
+			"Wrong number of sprite buttons, this cannot happen");
 
+		buttons.get(0).setGraphic(makeSpritePreview(sprite, FacingDirection.UP));
+		buttons.get(1).setGraphic(makeSpritePreview(sprite, FacingDirection.DOWN));
+		buttons.get(2).setGraphic(makeSpritePreview(sprite, FacingDirection.LEFT));
+		buttons.get(3).setGraphic(makeSpritePreview(sprite, FacingDirection.RIGHT));
+	}
+
+	private ToggleButton makeSpriteButton(
+		SpriteInfo sprite, Canvas preview, FacingDirection direction, ToolContextMenu menu
+	) {
 		ToggleButton t = new ToggleButton("", preview);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(toolsGroup);
@@ -376,6 +407,19 @@ public class LibraryPane extends VBox {
 		return t;
 	}
 
+	private Canvas makeSpritePreview(
+		SpriteInfo sprite, FacingDirection direction
+	) {
+		SpriteAnimation anim = sprite.defaultAnimation;
+		Canvas c = new Canvas(64, anim.h / 8);
+		GraphicsContext gc = c.getGraphicsContext2D();
+		gc.scale(1.0d/8.0d, 1.0d/8.0d);
+		anim.renderFrame(gc,
+			0, anim.h - (int) GlobalConstants.TILEH,
+			0, CameraAngle.UL, direction);
+		return c;
+	}
+
 	private void addCliffTexture(CliffTexture tex, boolean isGlobal) {
 		Canvas n = new Canvas(64, 48);
 		Canvas s = new Canvas(64, 48);
@@ -384,8 +428,8 @@ public class LibraryPane extends VBox {
 		Canvas up = new Canvas(64, 48);
 		Canvas down = new Canvas(64, 48);
 
-		ToolContextMenu menu = isGlobal? null :
-			new ToolContextMenu(this, AssetType.CLIFF_TEXTURE, tex.id);
+		ToolContextMenu menu = new ToolContextMenu(
+			this, AssetType.CLIFF_TEXTURE, tex.id, isGlobal);
 
 		ToggleButton bn = makeCliffButton(tex, n, SlopeType.N, 0, menu);
 		ToggleButton bs = makeCliffButton(tex, s, SlopeType.S, 0, menu);
@@ -449,5 +493,6 @@ public class LibraryPane extends VBox {
 
 		return t;
 	}
+
 }
 

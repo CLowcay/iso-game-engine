@@ -113,6 +113,17 @@ public class Library {
 			new CorruptDataException("No such cliff texture " + id);
 	}
 
+	public void updateSprite(SpriteInfo sprite) throws CorruptDataException {
+		if (sprites.containsKey(sprite.id)) {
+			sprites.put(sprite.id, sprite);
+		} else if (parent != null) {
+			parent.updateSprite(sprite);
+		} else {
+			throw new CorruptDataException(
+				"Cannot update sprite because it doesn't exist yet: " + sprite.id);
+		}
+	}
+
 	public Collection<SpriteInfo> allSprites() {
 		return sprites.values();
 	}

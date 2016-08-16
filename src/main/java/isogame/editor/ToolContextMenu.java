@@ -6,8 +6,19 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 
 public class ToolContextMenu extends ContextMenu {
-	public ToolContextMenu(LibraryPane library, AssetType type, String id) {
+	public ToolContextMenu(
+		LibraryPane library, AssetType type, String id, boolean isGlobal
+	) {
 		super();
+
+		MenuItem edit = new MenuItem("Edit Sprite");
+		edit.setOnAction(event -> {
+			switch (type) {
+				case TEXTURE: library.editTexture(id); break;
+				case SPRITE: library.editSprite(id); break;
+				case CLIFF_TEXTURE: library.editCliffTexture(id); break;
+			}
+		});
 
 		MenuItem global = new MenuItem("Make global");
 		global.setOnAction(event -> {
@@ -28,7 +39,11 @@ public class ToolContextMenu extends ContextMenu {
 			}
 		});
 
-		this.getItems().addAll(global, delete);
+		if (isGlobal) {
+			this.getItems().add(edit);
+		} else {
+			this.getItems().addAll(edit, global, delete);
+		}
 	}
 }
 
