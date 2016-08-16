@@ -28,6 +28,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 	private final ListView<SpriteAnimation> anims;
 	private final ObservableList<SpriteAnimation> animList;
 	private final Button add = new Button("Add animation");
+	private final Button edit = new Button("Edit animation");
 	private final Button remove = new Button("Remove");
 
 	/**
@@ -70,19 +71,20 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 		animList = FXCollections.observableArrayList(baseInfo.getAllAnimations());
 		anims = new ListView<>(animList);
 
-		if (anims.getFocusModel().getFocusedIndex() == -1) {
-			remove.setDisable(true);
-		}
-
-		anims.getFocusModel().focusedItemProperty().addListener(i -> {
-			// TODO: make the focus work properly
-			remove.setDisable(i == null);
-		});
+		edit.disableProperty().bind(anims.getSelectionModel().selectedItemProperty().isNull());
+		remove.disableProperty().bind(anims.getSelectionModel().selectedItemProperty().isNull());
 
 		add.setOnAction(event -> {
-			(new NewSpriteAnimationDialog(dataRoot, loc))
+			(new EditSpriteAnimationDialog(dataRoot, loc, null))
 				.showAndWait()
 				.ifPresent(a -> animList.add(a));
+		});
+
+		edit.setOnAction(event -> {
+			SpriteAnimation anim = anims.getSelectionModel().getSelectedItem();
+			(new EditSpriteAnimationDialog(dataRoot, loc, anim))
+				.showAndWait()
+				.ifPresent(a -> animList.set(animList.indexOf(anim), a));
 		});
 
 		remove.setOnAction(event -> {
@@ -91,7 +93,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 		});
 
 		FlowPane buttons = new FlowPane();
-		buttons.getChildren().addAll(add, remove);
+		buttons.getChildren().addAll(add, edit, remove);
 
 		VBox listGroup = new VBox();
 		listGroup.getChildren().addAll(anims, buttons);

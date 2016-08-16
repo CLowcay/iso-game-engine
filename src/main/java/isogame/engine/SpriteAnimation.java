@@ -23,7 +23,7 @@ import org.json.simple.JSONObject;
  * */
 public class SpriteAnimation implements HasJSONRepresentation {
 	public final String id;
-	private final String url;
+	public final String url;
 	public final int frames;
 	public final int framerate;  // in fps
 	public final int w;

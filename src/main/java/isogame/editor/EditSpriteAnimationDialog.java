@@ -22,12 +22,18 @@ import java.util.UUID;
 /**
  * Dialog box to create new sprites
  * */
-public class NewSpriteAnimationDialog extends Dialog<SpriteAnimation> {
-	public NewSpriteAnimationDialog(File dataDirectory, ResourceLocator loc) {
+public class EditSpriteAnimationDialog extends Dialog<SpriteAnimation> {
+	public EditSpriteAnimationDialog(
+		File dataDirectory, ResourceLocator loc, SpriteAnimation anim
+	) {
 		super();
 
 		// Set up the header and footer
-		this.setTitle("New sprite animation");
+		if (anim == null) {
+			this.setTitle("New sprite animation");
+		} else {
+			this.setTitle("Edit sprite animation");
+		}
 		this.setHeaderText("Configure the animation");
 		this.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
@@ -38,7 +44,11 @@ public class NewSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 		grid.setPadding(new Insets(20, 150, 10, 10));
 
 		TextField id = new TextField();
-		id.setText(UUID.randomUUID().toString());
+		if (anim == null) {
+			id.setText(UUID.randomUUID().toString());
+		} else {
+			id.setText(anim.id);
+		}
 		id.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> id.selectAll());
 
 		TextField spriteFile = new TextField();
@@ -68,6 +78,12 @@ public class NewSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 
 		PositiveIntegerField frames = new PositiveIntegerField();
 		PositiveIntegerField framerate = new PositiveIntegerField();
+
+		if (anim != null) {
+			spriteFile.setText(anim.url);
+			frames.setValue(anim.frames);
+			framerate.setValue(anim.framerate);
+		}
 
 		grid.add(new Label("Frame count"), 0, 2);
 		grid.add(frames, 1, 2);

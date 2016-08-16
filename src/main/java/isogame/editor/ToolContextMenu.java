@@ -11,7 +11,7 @@ public class ToolContextMenu extends ContextMenu {
 	) {
 		super();
 
-		MenuItem edit = new MenuItem("Edit Sprite");
+		MenuItem edit = new MenuItem("Edit " + type.toString());
 		edit.setOnAction(event -> {
 			switch (type) {
 				case TEXTURE: library.editTexture(id); break;
