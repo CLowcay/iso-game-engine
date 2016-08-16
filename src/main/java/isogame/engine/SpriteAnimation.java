@@ -4,6 +4,7 @@ import isogame.GlobalConstants;
 import isogame.resource.ResourceLocator;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import java.io.IOException;
@@ -30,6 +31,8 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	public final int h; 
 
 	private final Paint[] frameTextures;
+	private final PixelReader hitTester;
+	private final double sf;
 
 	public SpriteAnimation(
 		ResourceLocator loc,
@@ -46,6 +49,7 @@ public class SpriteAnimation implements HasJSONRepresentation {
 
 		try {
 			Image buffer = new Image(loc.gfx(url));
+			hitTester = buffer.getPixelReader();
 
 			frameTextures = new Paint[frames * 4];
 			for (int d = 0; d < 4; d++) {
@@ -57,12 +61,26 @@ public class SpriteAnimation implements HasJSONRepresentation {
 
 			double iw = buffer.getWidth() / ((double) frames);
 			double ih = buffer.getHeight() / 4.0d;
+			sf = GlobalConstants.TILEW / iw;
 			w = (int) GlobalConstants.TILEW;
 			h = (int) ((GlobalConstants.TILEW / iw) * ih);
 		} catch (IOException e) {
 			throw new CorruptDataException(
 				"Cannot locate resource " + url, e);
 		}
+	}
+
+	/**
+	 * Do a low level pixel perfect hit test.
+	 * @param x The x coordinate to test, relative to the origin of this animation's tile
+	 * @param y The y coordinate to test, relative to the origin of this animation's tile
+	 * @param frame The frame to hit test on
+	 * @return true if the hit test passes.
+	 * */
+	public boolean hitTest(int x, int y, int frame) {
+		int xt = (int) ((double) (x + (frame * GlobalConstants.TILEW)) / sf);
+		int yt = (int) ((double) (y + h - GlobalConstants.TILEH) / sf);
+		return hitTester.getColor(xt, yt).isOpaque();
 	}
 
 	public static SpriteAnimation fromJSON(
