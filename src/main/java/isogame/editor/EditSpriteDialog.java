@@ -109,6 +109,16 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 			if (clickedButton == ButtonType.OK) {
 				if (animList.size() == 0) return null;
 
+				for (int i = 0; i < animList.size(); i++) {
+					if (animList.get(i).id.equals("idle")) {
+						if (i != 0) {
+							SpriteAnimation a = animList.remove(i);
+							animList.add(0, a);
+						}
+						break;
+					}
+				}
+
 				Iterator<SpriteAnimation> it = animList.iterator();
 				if (!it.hasNext()) return null;
 				SpriteInfo i = new SpriteInfo(idField.getText(), it.next());
