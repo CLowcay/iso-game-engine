@@ -41,6 +41,12 @@ public class Stage implements HasJSONRepresentation {
 	private final Rotate rLR;
 	private final Rotate rUR;
 
+	public Stage clone() {
+		Stage r = new Stage(this.terrain, this.localLibrary);
+		for (Sprite s : sprites.values()) r.addSprite(s);
+		return r;
+	}
+
 	public Stage(StageInfo terrain, Library localLibrary) {
 		this.terrain = terrain;
 		this.localLibrary = localLibrary;
