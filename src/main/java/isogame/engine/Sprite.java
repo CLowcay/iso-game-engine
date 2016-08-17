@@ -19,6 +19,8 @@ public class Sprite implements HasJSONRepresentation {
 
 	public Sprite(SpriteInfo info) {
 		this.info = info;
+		this.pos = new MapPoint(0, 0);
+		this.direction = FacingDirection.UP;
 		setAnimation(info.defaultAnimation.id);
 	}
 
