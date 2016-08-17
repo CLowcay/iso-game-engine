@@ -28,7 +28,7 @@ public class SpriteInfo implements HasJSONRepresentation {
 		this.defaultAnimation = defaultAnimation;
 		animations = new HashMap<>();
 		animationsOrdered = new ArrayList<>();
-		addAnimation(defaultAnimation);
+		if (defaultAnimation != null) addAnimation(defaultAnimation);
 	}
 
 	public static SpriteInfo fromJSON(

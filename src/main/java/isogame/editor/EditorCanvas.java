@@ -219,7 +219,7 @@ public class EditorCanvas extends MapView {
 			super.setHighlight(oneList, 0);
 		});
 		this.doOnSelection(p -> {
-			tool.apply(p, getStage(), view);
+			if (tool != null) tool.apply(p, getStage(), view);
 			saved.setValue(false);
 		});
 	}
