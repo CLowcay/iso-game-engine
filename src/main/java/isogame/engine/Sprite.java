@@ -1,16 +1,20 @@
 package isogame.engine;
 
+import isogame.GlobalConstants;
 import javafx.scene.canvas.GraphicsContext;
+import java.util.Optional;
 import org.json.simple.JSONObject;
 
 public class Sprite implements HasJSONRepresentation {
 	public final SpriteInfo info;
 
 	// position of the sprite on the map.
-	public MapPoint pos;
+	public MapPoint pos = new MapPoint(0, 0);
 
 	// The direction the sprite is facing
-	public FacingDirection direction;
+	public FacingDirection direction = FacingDirection.UP;
+
+	private Optional<SpriteDecalRenderer> renderDecal = Optional.empty();
 
 	private SpriteAnimation animation;
 
@@ -20,9 +24,16 @@ public class Sprite implements HasJSONRepresentation {
 
 	public Sprite(SpriteInfo info) {
 		this.info = info;
-		this.pos = new MapPoint(0, 0);
-		this.direction = FacingDirection.UP;
 		setAnimation(info.defaultAnimation.id);
+	}
+
+	/**
+	 * Register a function that can draw extra decals over the sprite.
+	 * @param r The decal renderer function, null to deregister the current decal
+	 * renderer.
+	 * */
+	public void setDecalRenderer(SpriteDecalRenderer r) {
+		renderDecal = Optional.ofNullable(r);
 	}
 
 	/**
@@ -43,6 +54,10 @@ public class Sprite implements HasJSONRepresentation {
 	) {
 		int frame = frameAnimator.frameAt(t);
 		animation.renderFrame(cx, x, y, frame, angle, direction);
+		cx.save();
+		cx.translate(x, y - animation.h + GlobalConstants.TILEH);
+		renderDecal.ifPresent(r -> r.render(cx, this, t, angle));
+		cx.restore();
 	}
 
 	/**

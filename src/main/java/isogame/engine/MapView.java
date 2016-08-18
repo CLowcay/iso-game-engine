@@ -142,7 +142,7 @@ public class MapView extends Canvas {
 							new Point2D(event.getX(), event.getY()), stage);
 						if (p == null) p = view.tileAtMouse(
 							new Point2D(event.getX(), event.getY()), stage);
-						if (p != null) onSpriteSelection.accept(p);
+						onSpriteSelection.accept(p);
 					} else {
 						p = view.tileAtMouse(
 							new Point2D(event.getX(), event.getY()), stage);
@@ -255,6 +255,9 @@ public class MapView extends Canvas {
 		this.onSelection = c;
 	}
 
+	/**
+	 * Invoked with null when the user clicks outside a sprite.
+	 * */
 	public void doOnSpriteSelection(Consumer<MapPoint> c) {
 		this.onSpriteSelection = c;
 	}
