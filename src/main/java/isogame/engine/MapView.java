@@ -26,6 +26,7 @@ public class MapView extends Canvas {
 	private boolean enableAnimations = false;
 	private Consumer<MapPoint> onSelection = x -> {};
 	private Consumer<MapPoint> onMouseOver = x -> {};
+	private Consumer<MapPoint> onSpriteSelection = null;
 	private Runnable onMouseOut = () -> {};
 
 	private int selectionHighlighter = 0;
@@ -135,8 +136,17 @@ public class MapView extends Canvas {
 						}
 					}
 				} else if (etype == MouseEvent.MOUSE_PRESSED) {
-					MapPoint p = view.tileAtMouse(
-						new Point2D(event.getX(), event.getY()), stage);
+					MapPoint p;
+					if (onSpriteSelection != null) {
+						p = view.spriteAtMouse(
+							new Point2D(event.getX(), event.getY()), stage);
+						if (p == null) p = view.tileAtMouse(
+							new Point2D(event.getX(), event.getY()), stage);
+						if (p != null) onSpriteSelection.accept(p);
+					} else {
+						p = view.tileAtMouse(
+							new Point2D(event.getX(), event.getY()), stage);
+					}
 
 					if (p != null && selectable.contains(p)) onSelection.accept(p);
 				}
@@ -243,6 +253,10 @@ public class MapView extends Canvas {
 
 	public void doOnSelection(Consumer<MapPoint> c) {
 		this.onSelection = c;
+	}
+
+	public void doOnSpriteSelection(Consumer<MapPoint> c) {
+		this.onSpriteSelection = c;
 	}
 
 	public void doOnMouseOver(Consumer<MapPoint> c) {

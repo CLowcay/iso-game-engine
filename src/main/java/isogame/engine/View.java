@@ -98,9 +98,26 @@ public class View {
 		return new Point2D(x, y);
 	}
 
+	/**
+	 * Get the tile at the mouse position.
+	 * @return null if there is no tile under the mouse.
+	 * */
 	public MapPoint tileAtMouse(Point2D mouse, Stage stage) {
 		try {
 			return stage.mouseTileCollision(
+				screenTransform.inverseTransform(mouse), angle);
+		} catch (NonInvertibleTransformException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+	}
+
+	/**
+	 * Get the sprite at the mouse position.
+	 * @return null if there is no sprite under the mouse.
+	 * */
+	public MapPoint spriteAtMouse(Point2D mouse, Stage stage) {
+		try {
+			return stage.mouseSpriteCollision(
 				screenTransform.inverseTransform(mouse), angle);
 		} catch (NonInvertibleTransformException e) {
 			throw new RuntimeException("This cannot happen", e);

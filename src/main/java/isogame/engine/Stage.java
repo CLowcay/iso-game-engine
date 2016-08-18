@@ -205,7 +205,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Determine which map tile the mouse is currently over, correcting for
 	 * elevation.
-	 * @return Null if there is no tile at the mouse position.
+	 * @return null if there is no tile at the mouse position.
 	 * */
 	public MapPoint mouseTileCollision(Point2D in, CameraAngle a) {
 		MapPoint p = fromIsoCoord(in, a);
@@ -286,6 +286,28 @@ public class Stage implements HasJSONRepresentation {
 			Point2D cp = correctedIsoCoord(tile.pos, a);
 			if (isPointInPolygon(xs, ys, pts, in.getX() - cp.getX(), in.getY() - cp.getY())) {
 				return tile.pos;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Determine which sprite the mouse is currently over, correcting for
+	 * elevation etc.  Does a pixel perfect hit test.
+	 * @return null if there is no sprite at the mouse position
+	 * */
+	public MapPoint mouseSpriteCollision(Point2D in, CameraAngle a) {
+		MapPoint p = fromIsoCoord(in, a);
+		Iterator<Tile> it = terrain.iterateCollisionDetection(p, a);
+
+		Tile tile;
+		while (it.hasNext()) {
+			tile = it.next();
+			Sprite s = sprites.get(tile.pos);
+			if (s != null) {
+				Point2D sp = in.subtract(correctedIsoCoord(tile.pos, a));
+				if (s.hitTest(sp.getX(), sp.getY())) return tile.pos;
 			}
 		}
 

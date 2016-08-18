@@ -16,6 +16,7 @@ public class Sprite implements HasJSONRepresentation {
 
 	// animate the frames
 	private FrameAnimator frameAnimator;
+	private int frame = 0;
 
 	public Sprite(SpriteInfo info) {
 		this.info = info;
@@ -24,6 +25,19 @@ public class Sprite implements HasJSONRepresentation {
 		setAnimation(info.defaultAnimation.id);
 	}
 
+	/**
+	 * Check if a point is on this sprite.
+	 * @param x coordinate transformed relative to the origin of this sprite
+	 * @param y coordinate transformed relative to the origin of this sprite
+	 * @return true if the point collides, otherwise false
+	 * */
+	public boolean hitTest(double x, double y) {
+		return animation.hitTest((int) x, (int) y, frame);
+	}
+
+	/**
+	 * Render a single frame of this sprite.
+	 * */
 	public void renderFrame(
 		GraphicsContext cx, int x, int y, long t, CameraAngle angle
 	) {
@@ -31,8 +45,21 @@ public class Sprite implements HasJSONRepresentation {
 		animation.renderFrame(cx, x, y, frame, angle, direction);
 	}
 
+	/**
+	 * Rotate the sprite anticlockwise.
+	 * */
 	public void rotate() {
 		direction = direction.rotateAntiClockwise();
+	}
+
+	/**
+	 * Set the animation for rendering this sprite.
+	 * */
+	public void setAnimation(String animation) {
+		this.animation = info.animations.get(animation);
+		this.frame = 0;
+		this.frameAnimator = new FrameAnimator(
+			this.animation.frames, this.animation.framerate);
 	}
 
 	public static Sprite fromJSON(JSONObject json, Library lib)
@@ -70,12 +97,6 @@ public class Sprite implements HasJSONRepresentation {
 		r.put("animation", animation.id);
 		r.put("sprite", info.id);
 		return r;
-	}
-
-	public void setAnimation(String animation) {
-		this.animation = info.animations.get(animation);
-		this.frameAnimator = new FrameAnimator(
-			this.animation.frames, this.animation.framerate);
 	}
 }
 

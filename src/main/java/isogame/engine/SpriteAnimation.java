@@ -32,6 +32,8 @@ public class SpriteAnimation implements HasJSONRepresentation {
 
 	private final Paint[] frameTextures;
 	private final PixelReader hitTester;
+	private final int hitW;
+	private final int hitH;
 	private final double sf;
 
 	public SpriteAnimation(
@@ -50,6 +52,8 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		try {
 			Image buffer = new Image(loc.gfx(url));
 			hitTester = buffer.getPixelReader();
+			hitW = (int) buffer.getWidth();
+			hitH = (int) buffer.getHeight();
 
 			frameTextures = new Paint[frames * 4];
 			for (int d = 0; d < 4; d++) {
@@ -80,6 +84,7 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	public boolean hitTest(int x, int y, int frame) {
 		int xt = (int) ((double) (x + (frame * GlobalConstants.TILEW)) / sf);
 		int yt = (int) ((double) (y + h - GlobalConstants.TILEH) / sf);
+		if (xt < 0 || yt < 0 || xt >= hitW || yt >= hitH) return false;
 		return hitTester.getColor(xt, yt).isOpaque();
 	}
 
