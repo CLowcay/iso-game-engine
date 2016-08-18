@@ -53,6 +53,8 @@ public class MapView extends Canvas {
 		this.enableAnimations = enableAnimations;
 		this.highlightColors = highlightColors;
 
+		if (stage != null) stage.setHighlightColors(highlightColors);
+
 		this.widthProperty().addListener((obs, w0, w) -> {
 			view.setViewport(w.intValue(), (int) this.getHeight());
 		});
