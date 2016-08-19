@@ -32,6 +32,19 @@ public class MapPoint implements HasJSONRepresentation {
 		}
 	}
 
+	public MapPoint add(MapPoint p) {
+		return new MapPoint(x + p.x, y + p.y);
+	}
+
+	/**
+	 * Add a map point to this one, scaling the other map point first.
+	 * @param p The point to add
+	 * @param s The scale factor to apply to p
+	 * */
+	public MapPoint addScale(MapPoint p, int s) {
+		return new MapPoint(x + s * p.x, y + s * p.y);
+	}
+
 	@Override
 	public String toString() {
 		return "MAP:(" + x + ", " + y + ")";

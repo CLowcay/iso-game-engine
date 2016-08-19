@@ -22,9 +22,19 @@ public class Sprite implements HasJSONRepresentation {
 	private FrameAnimator frameAnimator;
 	private int frame = 0;
 
+	private AnimationChain animationChain = null;
+
 	public Sprite(SpriteInfo info) {
 		this.info = info;
 		setAnimation(info.defaultAnimation.id);
+	}
+
+	public void setAnimationChain(AnimationChain chain) {
+		this.animationChain = chain;
+	}
+
+	public AnimationChain getAnimationChain() {
+		return animationChain;
 	}
 
 	/**
@@ -48,16 +58,16 @@ public class Sprite implements HasJSONRepresentation {
 
 	/**
 	 * Render a single frame of this sprite.
+	 * WARNING: does not preserve the current translation.
 	 * */
 	public void renderFrame(
-		GraphicsContext cx, int x, int y, long t, CameraAngle angle
+		GraphicsContext cx, int xoff, int w, long t, CameraAngle angle
 	) {
 		int frame = frameAnimator.frameAt(t);
-		animation.renderFrame(cx, x, y, frame, angle, direction);
-		cx.save();
-		cx.translate(x, y - animation.h + GlobalConstants.TILEH);
+
+		cx.translate(0, GlobalConstants.TILEH - animation.h);
+		animation.renderFrame(cx, xoff, w, frame, angle, direction);
 		renderDecal.ifPresent(r -> r.render(cx, this, t, angle));
-		cx.restore();
 	}
 
 	/**

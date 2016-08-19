@@ -23,8 +23,7 @@ public class SpriteTool extends Tool {
 		if (stage.terrain.hasTile(p)) {
 			Sprite s = new Sprite(sprite);
 			s.pos = stage.terrain.getTile(p).pos;
-			s.direction = SpriteAnimation.inverseDirectionTransform(
-				direction, view.getCameraAngle());
+			s.direction = direction.inverseTransform(view.getCameraAngle());
 			stage.addSprite(s);
 		}
 	}

@@ -444,7 +444,9 @@ public class Stage implements HasJSONRepresentation {
 
 				Sprite s = sprites.get(tile.pos);
 				if (s != null) {
-					s.renderFrame(cx, 0, 0, t, angle);
+					cx.save();
+					s.renderFrame(cx, 0, (int) TILEW, t, angle);
+					cx.restore();
 				}
 
 				if (renderDebug) {

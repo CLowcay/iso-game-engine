@@ -116,65 +116,15 @@ public class SpriteAnimation implements HasJSONRepresentation {
 
 	public void renderFrame(
 		GraphicsContext cx,
-		int x,
-		int y,
+		int xoff, int w,
 		int frame,
 		CameraAngle angle,
 		FacingDirection direction
 	) {
-		cx.translate(0, GlobalConstants.TILEH - h);
 		frame = frame % frames;
-		int rotation = directionTransform(direction, angle);
+		int rotation = direction.transform(angle);
 		cx.setFill(frameTextures[(frame * 4) + rotation]);
-		cx.fillRect(x, y, w, h);
-		cx.translate(0, h - GlobalConstants.TILEH);
-	}
-
-	public static int directionTransform(
-		FacingDirection direction, CameraAngle angle
-	) {
-		int d = 0;
-		int a = 0;
-		switch (direction) {
-			case UP: d = 0; break;
-			case LEFT: d = 1; break;
-			case DOWN: d = 2; break;
-			case RIGHT: d = 3; break;
-		}
-		switch (angle) {
-			case UL: a = 0; break;
-			case UR: a = 1; break;
-			case LR: a = 2; break;
-			case LL: a = 3; break;
-		}
-		return (d + a) % 4;
-	}
-
-	public static FacingDirection inverseDirectionTransform(
-		FacingDirection direction, CameraAngle angle
-	) {
-		int d = 0;
-		int a = 0;
-		switch (direction) {
-			case UP: d = 0; break;
-			case LEFT: d = 1; break;
-			case DOWN: d = 2; break;
-			case RIGHT: d = 3; break;
-		}
-		switch (angle) {
-			case UL: a = 0; break;
-			case UR: a = 1; break;
-			case LR: a = 2; break;
-			case LL: a = 3; break;
-		}
-
-		switch ((d - a + 4) % 4) {
-			case 0: return FacingDirection.UP;
-			case 1: return FacingDirection.LEFT;
-			case 2: return FacingDirection.DOWN;
-			case 3: return FacingDirection.RIGHT;
-			default: throw new RuntimeException("This cannot happen");
-		}
+		cx.fillRect(xoff, 0, w, h);
 	}
 
 	@Override
