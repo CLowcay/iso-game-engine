@@ -55,19 +55,20 @@ public class SpriteAnimation implements HasJSONRepresentation {
 			hitW = (int) buffer.getWidth();
 			hitH = (int) buffer.getHeight();
 
-			frameTextures = new Paint[frames * 4];
-			for (int d = 0; d < 4; d++) {
-				for (int f = 0; f < frames; f++) {
-					frameTextures[(f * 4) + d] =
-						new ImagePattern(buffer, -f, -d, frames, 4, true);
-				}
-			}
-
 			double iw = buffer.getWidth() / ((double) frames);
 			double ih = buffer.getHeight() / 4.0d;
 			sf = GlobalConstants.TILEW / iw;
 			w = (int) GlobalConstants.TILEW;
 			h = (int) ((GlobalConstants.TILEW / iw) * ih);
+
+			frameTextures = new Paint[frames * 4];
+			for (int d = 0; d < 4; d++) {
+				for (int f = 0; f < frames; f++) {
+					frameTextures[(f * 4) + d] =
+						new ImagePattern(buffer, -f * w, -d * h, frames * w, 4 * h, false);
+				}
+			}
+
 		} catch (IOException e) {
 			throw new CorruptDataException(
 				"Cannot locate resource " + url, e);
@@ -121,10 +122,12 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		CameraAngle angle,
 		FacingDirection direction
 	) {
+		cx.translate(0, GlobalConstants.TILEH - h);
 		frame = frame % frames;
 		int rotation = directionTransform(direction, angle);
 		cx.setFill(frameTextures[(frame * 4) + rotation]);
-		cx.fillRect(x, y - h + GlobalConstants.TILEH, w, h);
+		cx.fillRect(x, y, w, h);
+		cx.translate(0, h - GlobalConstants.TILEH);
 	}
 
 	public static int directionTransform(
