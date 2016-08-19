@@ -21,6 +21,13 @@ public class AnimationChain {
 	}
 
 	/**
+	 * Shut down the animation chain now.
+	 * */
+	public void terminateChain() {
+		sprite.setAnimationChain(null);
+	}
+
+	/**
 	 * @return true if the entire animation chain is finished
 	 * */
 	public boolean updateAnimation(long t) {

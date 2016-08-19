@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -31,6 +32,8 @@ public class Stage implements HasJSONRepresentation {
 	public String name = null;
 	public final StageInfo terrain;
 	public final Map<MapPoint, Sprite> sprites;
+	public final Map<MapPoint, Sprite> slicedSprites; // sprites that are moving into new squares.
+	public final Collection<AnimationChain> animationChains = new LinkedList<>();
 	public final Library localLibrary;
 
 	// transformation from map coordinates to iso coordinates
@@ -50,7 +53,8 @@ public class Stage implements HasJSONRepresentation {
 	public Stage(StageInfo terrain, Library localLibrary) {
 		this.terrain = terrain;
 		this.localLibrary = localLibrary;
-		sprites = new HashMap<MapPoint, Sprite>();
+		sprites = new HashMap<>();
+		slicedSprites = new HashMap<>();
 
 		// set the camera angle rotations
 		double xPivot = ((double) terrain.w) / 2.0d;
@@ -125,6 +129,44 @@ public class Stage implements HasJSONRepresentation {
 
 	public void removeSprite(MapPoint p) {
 		sprites.remove(p);
+	}
+
+	/**
+	 * Register a new animation chain with this stage.  Must be invoked in order
+	 * to activate the animations.
+	 * */
+	public void registerAnimationChain(AnimationChain chain) {
+		animationChains.add(chain);
+	}
+
+	public void deregisterAnimationChain(AnimationChain chain) {
+		animationChains.remove(chain);
+		chain.terminateChain();
+	}
+
+	/**
+	 * Queue a move animation on a sprite.
+	 * */
+	public void queueMoveSprite(MapPoint start, MapPoint target) {
+		Sprite s = sprites.get(start);
+		if (s != null) {
+			AnimationChain chain = s.getAnimationChain();
+			if (!(chain == null)) {
+				chain = new AnimationChain(s);
+				s.setAnimationChain(chain);
+				registerAnimationChain(chain);
+			}
+			
+			chain.queueAnimation(new MoveSpriteAnimation(start, target,
+				(current, next) -> {
+					sprites.remove(s.pos);
+					slicedSprites.remove(current);
+
+					s.pos = current;
+					sprites.put(current, s);
+					if (!current.equals(next)) slicedSprites.put(next, s);
+				}));
+		}
 	}
 
 	public void rotateSprite(MapPoint p) {
@@ -421,6 +463,10 @@ public class Stage implements HasJSONRepresentation {
 	public void render(GraphicsContext cx, CameraAngle angle,
 		long t, BoundingBox visible, boolean renderDebug
 	) {
+		for (AnimationChain chain : animationChains) {
+			chain.updateAnimation(t);
+		}
+
 		terrain.iterateTiles(angle).forEachRemaining(tile -> {
 			Point2D p = correctedIsoCoord(tile.pos, angle);
 			double x = p.getX();
@@ -443,11 +489,9 @@ public class Stage implements HasJSONRepresentation {
 				cx.restore();
 
 				Sprite s = sprites.get(tile.pos);
-				if (s != null) {
-					cx.save();
-					s.renderFrame(cx, 0, (int) TILEW, t, angle);
-					cx.restore();
-				}
+				if (s != null) doSprite(cx, angle, t, s, false);
+				s = slicedSprites.get(tile.pos);
+				if (s != null) doSprite(cx, angle, t, s, true);
 
 				if (renderDebug) {
 					cx.setFill(Color.RED);
@@ -460,6 +504,19 @@ public class Stage implements HasJSONRepresentation {
 				cx.restore();
 			}
 		});
+	}
+
+	private void doSprite(
+		GraphicsContext cx, CameraAngle angle, long t, Sprite s, boolean sliced
+	) {
+		AnimationChain chain = s.getAnimationChain();
+		if (chain != null) {
+			chain.renderSprite(cx, angle, s, t, sliced);
+		} else {
+			cx.save();
+			s.renderFrame(cx, 0, (int) TILEW, t, angle);
+			cx.restore();
+		}
 	}
 }
 
