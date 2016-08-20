@@ -159,7 +159,7 @@ public class Stage implements HasJSONRepresentation {
 		}
 		
 		chain.queueAnimation(new MoveSpriteAnimation(
-		start, target, animation, speed,
+		start, target, animation, speed, terrain,
 			(current, next) -> {
 				sprites.remove(s.pos);
 
@@ -491,6 +491,10 @@ public class Stage implements HasJSONRepresentation {
 				cx.save();
 				tile.render(cx, hcolor, angle);
 				cx.restore();
+
+				if (tile.slope != SlopeType.NONE) {
+					cx.translate(0, -(TILEH / 4));
+				}
 
 				Sprite s = sprites.get(tile.pos);
 				if (s != null) doSprite(cx, angle, t, s, false);

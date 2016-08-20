@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 
 public class MoveSpriteAnimation extends Animation {
 	private final double walkSpeed;
+	private final StageInfo terrain;
 	private final BiConsumer<MapPoint, MapPoint> crossBoundary;
 	private final ContinuousAnimator animator;
 	private final FacingDirection direction;
@@ -16,6 +17,8 @@ public class MoveSpriteAnimation extends Animation {
 	private final MapPoint start;
 	private final MapPoint target;
 	private MapPoint point;
+
+	private double elevationDelta = 0;
 
 	private final double targetv;
 	private double v = 0;
@@ -34,15 +37,35 @@ public class MoveSpriteAnimation extends Animation {
 	private final static MapPoint leftPV = new MapPoint(-1, 0);
 	private final static MapPoint rightPV = new MapPoint(1, 0);
 
+	private double computeElevationDelta() {
+		Tile tfrom = terrain.getTile(point);
+		Tile tto = terrain.getTile(point.add(directionVector));
+		if (tfrom.slope == SlopeType.NONE) {
+			if (tto.slope == SlopeType.NONE) {
+				return 0;
+			} else {
+				return tto.slope == direction.upThisWay()? -0.5 : 0.5;
+			}
+		} else {
+			if (tto.slope == SlopeType.NONE) {
+				return tfrom.slope == direction.upThisWay()? -0.5 : 0.5;
+			} else {
+				return tfrom.slope == direction.upThisWay()? -1 : 1;
+			}
+		}
+	}
+
 	public MoveSpriteAnimation(
 		MapPoint start, MapPoint target,
 		String spriteAnimation, double walkSpeed,
+		StageInfo terrain,
 		BiConsumer<MapPoint, MapPoint> crossBoundary
 	) {
 		if (start.equals(target)) throw new RuntimeException(
 			"Start and end points of movement must be different");
 
 		this.walkSpeed = walkSpeed;
+		this.terrain = terrain;
 		this.spriteAnimation = spriteAnimation;
 		this.crossBoundary = crossBoundary;
 		this.animator = new ContinuousAnimator();
@@ -72,6 +95,8 @@ public class MoveSpriteAnimation extends Animation {
 		} else {
 			throw new RuntimeException("Must travel in straight lines");
 		}
+
+		elevationDelta = computeElevationDelta();
 	}
 
 	public void start(Sprite s) {
@@ -94,6 +119,7 @@ public class MoveSpriteAnimation extends Animation {
 		} else if (Math.floor(v) != Math.floor(v1)){
 			v = v1;
 			point = start.addScale(directionVector, (int) Math.floor(v));
+			elevationDelta = computeElevationDelta();
 			crossBoundary.accept(point, point.add(directionVector));
 		} else {
 			v = v1;
@@ -127,10 +153,15 @@ public class MoveSpriteAnimation extends Animation {
 		}
 
 		Point2D offset = directionVector.multiply(scale);
-		if (isTargetSlice) offset = offset.subtract(directionVector);
+		double elevationOffset = elevationDelta * scale;
+		if (isTargetSlice) {
+			offset = offset.subtract(directionVector);
+			elevationOffset = elevationOffset - elevationDelta;
+		}
 
 		gx.save();
-		gx.translate(offset.getX(), offset.getY());
+		gx.translate(offset.getX(), offset.getY() +
+			(elevationOffset * (GlobalConstants.TILEH / 2)));
 		if (isLeftSlice) {
 			s.renderFrame(gx, 0, (int) (GlobalConstants.TILEW - offset.getX()), t, angle);
 		} else {

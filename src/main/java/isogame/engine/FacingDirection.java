@@ -29,6 +29,19 @@ public enum FacingDirection {
 	}
 
 	/**
+	 * Which slope would you be going up if you went up along this direction.
+	 * */
+	public SlopeType upThisWay() {
+		switch (this) {
+			case UP: return SlopeType.N;
+			case LEFT: return SlopeType.W;
+			case DOWN: return SlopeType.S;
+			case RIGHT: return SlopeType.E;
+			default: throw new RuntimeException("This cannot happen");
+		}
+	}
+
+	/**
 	 * Return values are:
 	 * 0: UP
 	 * 1: LEFT
