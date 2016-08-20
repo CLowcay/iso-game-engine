@@ -26,13 +26,13 @@ public class MapView extends Canvas {
 	private boolean enableAnimations = false;
 	private Consumer<MapPoint> onSelection = x -> {};
 	private Consumer<MapPoint> onMouseOver = x -> {};
-	private Consumer<MapPoint> onSpriteSelection = null;
 	private Runnable onMouseOut = () -> {};
 
 	private int selectionHighlighter = 0;
 
 	private final ContinuousAnimator scrolling = new ContinuousAnimator();
 	private final Set<MapPoint> selectable = new HashSet<>();
+	private final Set<Sprite> selectableSprites = new HashSet<>();
 
 	private final Paint[] highlightColors;
 
@@ -140,13 +140,20 @@ public class MapView extends Canvas {
 				} else if (etype == MouseEvent.MOUSE_PRESSED) {
 					MapPoint p = view.tileAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
-					if (p != null && selectable.contains(p)) onSelection.accept(p);
 
-					if (onSpriteSelection != null) {
-						MapPoint p2 = view.spriteAtMouse(
-							new Point2D(event.getX(), event.getY()), stage);
-						p = p2 == null? p : p2;
-						if (p != null) onSpriteSelection.accept(p);
+					MapPoint ps = view.spriteAtMouse(
+						new Point2D(event.getX(), event.getY()), stage);
+
+					if (ps != null &&
+						selectableSprites.stream().anyMatch(s -> s.pos.equals(ps))) {
+						onSelection.accept(ps);
+
+					} else if (p != null && (selectable.contains(p) ||
+						selectableSprites.stream().anyMatch(s -> s.pos.equals(p)))) {
+						onSelection.accept(p);
+
+					} else {
+						onSelection.accept(null);
 					}
 				}
 			}
@@ -250,15 +257,19 @@ public class MapView extends Canvas {
 		selectable.addAll(pts);
 	}
 
-	public void doOnSelection(Consumer<MapPoint> c) {
-		this.onSelection = c;
+	public void setSelectableSprites(Collection<Sprite> pts) {
+		if (stage == null) return;
+
+		selectableSprites.clear();
+		selectableSprites.addAll(pts);
 	}
 
-	/**
-	 * Invoked with null when the user clicks outside a sprite.
-	 * */
-	public void doOnSpriteSelection(Consumer<MapPoint> c) {
-		this.onSpriteSelection = c;
+	public boolean isSelectable(MapPoint p) {
+		return selectable.contains(p);
+	}
+
+	public void doOnSelection(Consumer<MapPoint> c) {
+		this.onSelection = c;
 	}
 
 	public void doOnMouseOver(Consumer<MapPoint> c) {

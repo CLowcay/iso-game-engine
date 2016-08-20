@@ -55,8 +55,8 @@ public class Sprite implements HasJSONRepresentation {
 	 * @param y coordinate transformed relative to the origin of this sprite
 	 * @return true if the point collides, otherwise false
 	 * */
-	public boolean hitTest(double x, double y) {
-		return animation.hitTest((int) x, (int) y, frame);
+	public boolean hitTest(double x, double y, CameraAngle angle) {
+		return animation.hitTest((int) x, (int) y, frame, angle, direction);
 	}
 
 	/**

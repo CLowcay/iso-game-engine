@@ -19,6 +19,7 @@ public class MoveSpriteAnimation extends Animation {
 	private MapPoint point;
 
 	private double elevationDelta = 0;
+	private boolean fromFlatElevation = false;
 
 	private final double targetv;
 	private double v = 0;
@@ -37,20 +38,22 @@ public class MoveSpriteAnimation extends Animation {
 	private final static MapPoint leftPV = new MapPoint(-1, 0);
 	private final static MapPoint rightPV = new MapPoint(1, 0);
 
-	private double computeElevationDelta() {
+	private void updateElevationDelta() {
 		Tile tfrom = terrain.getTile(point);
 		Tile tto = terrain.getTile(point.add(directionVector));
 		if (tfrom.slope == SlopeType.NONE) {
+			fromFlatElevation = true;
 			if (tto.slope == SlopeType.NONE) {
-				return 0;
+				elevationDelta = 0;
 			} else {
-				return tto.slope == direction.upThisWay()? -0.5 : 0.5;
+				elevationDelta = tto.slope == direction.upThisWay()? -0.5 : 0.5;
 			}
 		} else {
+			fromFlatElevation = false;
 			if (tto.slope == SlopeType.NONE) {
-				return tfrom.slope == direction.upThisWay()? -0.5 : 0.5;
+				elevationDelta = tfrom.slope == direction.upThisWay()? -0.5 : 0.5;
 			} else {
-				return tfrom.slope == direction.upThisWay()? -1 : 1;
+				elevationDelta = tfrom.slope == direction.upThisWay()? -1 : 1;
 			}
 		}
 	}
@@ -96,7 +99,7 @@ public class MoveSpriteAnimation extends Animation {
 			throw new RuntimeException("Must travel in straight lines");
 		}
 
-		elevationDelta = computeElevationDelta();
+		updateElevationDelta();
 	}
 
 	public void start(Sprite s) {
@@ -119,7 +122,7 @@ public class MoveSpriteAnimation extends Animation {
 		} else if (Math.floor(v) != Math.floor(v1)){
 			v = v1;
 			point = start.addScale(directionVector, (int) Math.floor(v));
-			elevationDelta = computeElevationDelta();
+			updateElevationDelta();
 			crossBoundary.accept(point, point.add(directionVector));
 		} else {
 			v = v1;
@@ -153,7 +156,15 @@ public class MoveSpriteAnimation extends Animation {
 		}
 
 		Point2D offset = directionVector.multiply(scale);
-		double elevationOffset = elevationDelta * scale;
+		double elevationOffset;
+		if (Math.abs(elevationDelta) == 1.0d) {
+			elevationOffset = elevationDelta * scale;
+		} else if (fromFlatElevation)
+			elevationOffset = scale < 0.5d? 0d : elevationDelta * 2.0d * (scale - 0.5d);
+		else {
+			elevationOffset = scale >= 0.5d? elevationDelta : elevationDelta * 2.0d * scale;
+		}
+
 		if (isTargetSlice) {
 			offset = offset.subtract(directionVector);
 			elevationOffset = elevationOffset - elevationDelta;

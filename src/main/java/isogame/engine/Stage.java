@@ -353,7 +353,7 @@ public class Stage implements HasJSONRepresentation {
 			Sprite s = sprites.get(tile.pos);
 			if (s != null) {
 				Point2D sp = in.subtract(correctedIsoCoord(tile.pos, a));
-				if (s.hitTest(sp.getX(), sp.getY())) return tile.pos;
+				if (s.hitTest(sp.getX(), sp.getY(), a)) return tile.pos;
 			}
 		}
 
