@@ -11,6 +11,7 @@ public class MoveSpriteAnimation extends Animation {
 	private final ContinuousAnimator animator;
 	private final FacingDirection direction;
 	private final MapPoint directionVector;
+	private final String spriteAnimation;
 
 	private final MapPoint start;
 	private final MapPoint target;
@@ -34,11 +35,14 @@ public class MoveSpriteAnimation extends Animation {
 	private final static MapPoint rightPV = new MapPoint(1, 0);
 
 	public MoveSpriteAnimation(
-		MapPoint start, MapPoint target, BiConsumer<MapPoint, MapPoint> crossBoundary
+		MapPoint start, MapPoint target,
+		String spriteAnimation,
+		BiConsumer<MapPoint, MapPoint> crossBoundary
 	) {
 		if (start.equals(target)) throw new RuntimeException(
 			"Start and end points of movement must be different");
 
+		this.spriteAnimation = spriteAnimation;
 		this.crossBoundary = crossBoundary;
 		this.animator = new ContinuousAnimator();
 		animator.setAnimation(new Point2D(1, 0), walkSpeed);
@@ -69,7 +73,8 @@ public class MoveSpriteAnimation extends Animation {
 		}
 	}
 
-	public void start() {
+	public void start(Sprite s) {
+		s.setAnimation(spriteAnimation);
 		animator.start();
 	}
 
@@ -87,6 +92,8 @@ public class MoveSpriteAnimation extends Animation {
 			v = v1;
 			point = start.addScale(directionVector, (int) Math.floor(v));
 			crossBoundary.accept(point, point.add(directionVector));
+		} else {
+			v = v1;
 		}
 
 		return false;

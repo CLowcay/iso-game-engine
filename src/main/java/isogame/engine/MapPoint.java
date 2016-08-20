@@ -45,6 +45,13 @@ public class MapPoint implements HasJSONRepresentation {
 		return new MapPoint(x + s * p.x, y + s * p.y);
 	}
 
+	/**
+	 * compute this - p.
+	 * */
+	public MapPoint subtract(MapPoint p) {
+		return new MapPoint(x - p.x, y - p.y);
+	}
+
 	@Override
 	public String toString() {
 		return "MAP:(" + x + ", " + y + ")";

@@ -32,7 +32,7 @@ public class Stage implements HasJSONRepresentation {
 	public String name = null;
 	public final StageInfo terrain;
 	public final Map<MapPoint, Sprite> sprites;
-	public final Map<MapPoint, Sprite> slicedSprites; // sprites that are moving into new squares.
+	private final Map<MapPoint, Sprite> slicedSprites; // sprites that are moving into new squares.
 	public final Collection<AnimationChain> animationChains = new LinkedList<>();
 	public final Library localLibrary;
 
@@ -146,27 +146,28 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Queue a move animation on a sprite.
+	 * @param animation The walking animation to use.
 	 * */
-	public void queueMoveSprite(MapPoint start, MapPoint target) {
-		Sprite s = sprites.get(start);
-		if (s != null) {
-			AnimationChain chain = s.getAnimationChain();
-			if (!(chain == null)) {
-				chain = new AnimationChain(s);
-				s.setAnimationChain(chain);
-				registerAnimationChain(chain);
-			}
-			
-			chain.queueAnimation(new MoveSpriteAnimation(start, target,
-				(current, next) -> {
-					sprites.remove(s.pos);
-					slicedSprites.remove(current);
-
-					s.pos = current;
-					sprites.put(current, s);
-					if (!current.equals(next)) slicedSprites.put(next, s);
-				}));
+	public void queueMoveSprite(
+		Sprite s, MapPoint start, MapPoint target, String animation
+	) {
+		AnimationChain chain = s.getAnimationChain();
+		if (chain == null) {
+			chain = new AnimationChain(s);
+			s.setAnimationChain(chain);
+			registerAnimationChain(chain);
 		}
+		
+		chain.queueAnimation(new MoveSpriteAnimation(
+		start, target, animation,
+			(current, next) -> {
+				sprites.remove(s.pos);
+				slicedSprites.remove(current);
+
+				s.pos = current;
+				sprites.put(current, s);
+				if (!current.equals(next)) slicedSprites.put(next, s);
+			}));
 	}
 
 	public void rotateSprite(MapPoint p) {

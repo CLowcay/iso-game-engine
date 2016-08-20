@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Queue;
 
 public class AnimationChain {
+	private Runnable onFinished = () -> {};
 	private Optional<MoveSpriteAnimation> activeAnimation = Optional.empty();
 	private final Queue<MoveSpriteAnimation> queuedAnimations = new LinkedList<>();
 	private final Sprite sprite;
@@ -14,6 +15,11 @@ public class AnimationChain {
 	public AnimationChain(Sprite sprite) {
 		this.sprite = sprite;
 		sprite.setAnimationChain(this);
+	}
+
+	private boolean chainRunning = false;
+	public void doOnFinished(Runnable onFinished) {
+		this.onFinished = onFinished;
 	}
 
 	public Optional<MoveSpriteAnimation> getActiveAnimation() {
@@ -33,13 +39,23 @@ public class AnimationChain {
 	public boolean updateAnimation(long t) {
 		if (!activeAnimation.isPresent()) {
 			activeAnimation = Optional.ofNullable(queuedAnimations.poll());
-			activeAnimation.ifPresent(a -> a.start());
+			activeAnimation.ifPresent(a -> {
+				System.err.println("starting");
+				a.start(sprite);
+				chainRunning = true;
+			});
 		}
 
 		return activeAnimation.map(a -> {
 			if (a.updateAnimation(t)) activeAnimation = Optional.empty();
 			return false;
-		}).orElse(true);
+		}).orElseGet(() -> {
+			if (chainRunning) {
+				chainRunning = false;
+				onFinished.run();
+			}
+			return true;
+		});
 	}
 
 	/**
