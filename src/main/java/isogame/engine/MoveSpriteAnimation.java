@@ -6,7 +6,7 @@ import javafx.scene.canvas.GraphicsContext;
 import java.util.function.BiConsumer;
 
 public class MoveSpriteAnimation extends Animation {
-	private final static double walkSpeed = 1;
+	private final double walkSpeed;
 	private final BiConsumer<MapPoint, MapPoint> crossBoundary;
 	private final ContinuousAnimator animator;
 	private final FacingDirection direction;
@@ -36,12 +36,13 @@ public class MoveSpriteAnimation extends Animation {
 
 	public MoveSpriteAnimation(
 		MapPoint start, MapPoint target,
-		String spriteAnimation,
+		String spriteAnimation, double walkSpeed,
 		BiConsumer<MapPoint, MapPoint> crossBoundary
 	) {
 		if (start.equals(target)) throw new RuntimeException(
 			"Start and end points of movement must be different");
 
+		this.walkSpeed = walkSpeed;
 		this.spriteAnimation = spriteAnimation;
 		this.crossBoundary = crossBoundary;
 		this.animator = new ContinuousAnimator();
@@ -75,7 +76,9 @@ public class MoveSpriteAnimation extends Animation {
 
 	public void start(Sprite s) {
 		s.setAnimation(spriteAnimation);
+		s.direction = direction;
 		animator.start();
+		crossBoundary.accept(s.pos, s.pos.add(directionVector));
 	}
 
 	/**
@@ -117,8 +120,8 @@ public class MoveSpriteAnimation extends Animation {
 		boolean isLeftSlice;
 		switch (direction.transform(angle)) {
 			case 0: directionVector = upV; isLeftSlice = !isTargetSlice; break;
-			case 1: directionVector = downV; isLeftSlice = isTargetSlice; break;
-			case 2: directionVector = leftV; isLeftSlice = isTargetSlice; break;
+			case 1: directionVector = leftV; isLeftSlice = isTargetSlice; break;
+			case 2: directionVector = downV; isLeftSlice = isTargetSlice; break;
 			case 3: directionVector = rightV; isLeftSlice = !isTargetSlice; break;
 			default: throw new RuntimeException("This cannot happen");
 		}

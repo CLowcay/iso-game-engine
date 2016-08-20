@@ -40,7 +40,6 @@ public class AnimationChain {
 		if (!activeAnimation.isPresent()) {
 			activeAnimation = Optional.ofNullable(queuedAnimations.poll());
 			activeAnimation.ifPresent(a -> {
-				System.err.println("starting");
 				a.start(sprite);
 				chainRunning = true;
 			});

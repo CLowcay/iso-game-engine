@@ -14,6 +14,9 @@ public class Sprite implements HasJSONRepresentation {
 	// The direction the sprite is facing
 	public FacingDirection direction = FacingDirection.UP;
 
+	// Extra data that can be used to identify this sprite
+	public Object userData;
+
 	private Optional<SpriteDecalRenderer> renderDecal = Optional.empty();
 
 	private SpriteAnimation animation;

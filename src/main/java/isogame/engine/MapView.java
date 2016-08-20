@@ -138,19 +138,16 @@ public class MapView extends Canvas {
 						}
 					}
 				} else if (etype == MouseEvent.MOUSE_PRESSED) {
-					MapPoint p;
-					if (onSpriteSelection != null) {
-						p = view.spriteAtMouse(
-							new Point2D(event.getX(), event.getY()), stage);
-						if (p == null) p = view.tileAtMouse(
-							new Point2D(event.getX(), event.getY()), stage);
-						onSpriteSelection.accept(p);
-					} else {
-						p = view.tileAtMouse(
-							new Point2D(event.getX(), event.getY()), stage);
-					}
-
+					MapPoint p = view.tileAtMouse(
+						new Point2D(event.getX(), event.getY()), stage);
 					if (p != null && selectable.contains(p)) onSelection.accept(p);
+
+					if (onSpriteSelection != null) {
+						MapPoint p2 = view.spriteAtMouse(
+							new Point2D(event.getX(), event.getY()), stage);
+						p = p2 == null? p : p2;
+						if (p != null) onSpriteSelection.accept(p);
+					}
 				}
 			}
 		};

@@ -149,7 +149,7 @@ public class Stage implements HasJSONRepresentation {
 	 * @param animation The walking animation to use.
 	 * */
 	public void queueMoveSprite(
-		Sprite s, MapPoint start, MapPoint target, String animation
+		Sprite s, MapPoint start, MapPoint target, String animation, double speed
 	) {
 		AnimationChain chain = s.getAnimationChain();
 		if (chain == null) {
@@ -159,13 +159,16 @@ public class Stage implements HasJSONRepresentation {
 		}
 		
 		chain.queueAnimation(new MoveSpriteAnimation(
-		start, target, animation,
+		start, target, animation, speed,
 			(current, next) -> {
 				sprites.remove(s.pos);
-				slicedSprites.remove(current);
+
+				if (!s.pos.equals(current)) slicedSprites.remove(current);
 
 				s.pos = current;
 				sprites.put(current, s);
+
+				s.pos = current;
 				if (!current.equals(next)) slicedSprites.put(next, s);
 			}));
 	}
