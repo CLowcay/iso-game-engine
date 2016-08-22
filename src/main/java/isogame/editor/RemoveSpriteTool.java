@@ -7,7 +7,7 @@ import isogame.engine.View;
 public class RemoveSpriteTool extends Tool {
 	@Override
 	public void apply(MapPoint p, Stage stage, View v) {
-		stage.removeSprite(p);
+		stage.clearTileOfSprites(p);
 	}
 }
 

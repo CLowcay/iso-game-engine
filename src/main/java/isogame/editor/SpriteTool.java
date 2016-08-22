@@ -24,7 +24,7 @@ public class SpriteTool extends Tool {
 			Sprite s = new Sprite(sprite);
 			s.pos = stage.terrain.getTile(p).pos;
 			s.direction = direction.inverseTransform(view.getCameraAngle());
-			stage.addSprite(s);
+			stage.replaceSprite(s);
 		}
 	}
 }

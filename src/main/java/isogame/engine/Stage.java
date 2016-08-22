@@ -15,10 +15,14 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONObject;
@@ -31,8 +35,12 @@ import static isogame.GlobalConstants.TILEW;
 public class Stage implements HasJSONRepresentation {
 	public String name = null;
 	public final StageInfo terrain;
-	public final Map<MapPoint, Sprite> sprites;
-	private final Map<MapPoint, Sprite> slicedSprites; // sprites that are moving into new squares.
+
+	public final Set<Sprite> allSprites = new HashSet<>();
+	private final Map<MapPoint, List<Sprite>> sprites;
+	// sprites that are moving into new squares.
+	private final Map<MapPoint, List<Sprite>> slicedSprites;
+
 	public final Collection<AnimationChain> animationChains = new LinkedList<>();
 	public final Library localLibrary;
 
@@ -46,7 +54,7 @@ public class Stage implements HasJSONRepresentation {
 
 	public Stage clone() {
 		Stage r = new Stage(this.terrain, this.localLibrary);
-		for (Sprite s : sprites.values()) r.addSprite(s);
+		for (Sprite s : allSprites) r.addSprite(s);
 		return r;
 	}
 
@@ -123,12 +131,65 @@ public class Stage implements HasJSONRepresentation {
 		}
 	}
 
+	/**
+	 * Add a sprite to the map.  It appears at the top of the z-order for its
+	 * tile.
+	 * */
 	public void addSprite(Sprite sprite) {
-		sprites.put(sprite.pos, sprite);
+		allSprites.add(sprite);
+		addSpriteToList(sprite, sprite.pos, sprites);
 	}
 
-	public void removeSprite(MapPoint p) {
+	/**
+	 * Add a sprite to the map, removing any sprites already at the same
+	 * location.
+	 * */
+	public void replaceSprite(Sprite sprite) {
+		clearTileOfSprites(sprite.pos);
+		addSprite(sprite);
+	}
+
+	/**
+	 * Remove a single sprite.
+	 * */
+	public void removeSprite(Sprite sprite) {
+		allSprites.remove(sprite);
+		removeSpriteFromList(sprite, sprite.pos, sprites);
+	}
+
+	/**
+	 * Get all the sprites on a tile.
+	 * */
+	public List<Sprite> getSpritesByTile(MapPoint p) {
+		List<Sprite> l = sprites.get(p);
+		return l == null? new LinkedList<>() : l;
+	}
+
+	/**
+	 * Remove all the sprites on a given tile.
+	 * */
+	public void clearTileOfSprites(MapPoint p) {
+		List<Sprite> l = sprites.get(p);
+		if (l != null) allSprites.removeAll(l);
 		sprites.remove(p);
+	}
+
+	private void addSpriteToList(
+		Sprite sprite, MapPoint p, Map<MapPoint, List<Sprite>> sprites
+	) {
+		List<Sprite> l = sprites.get(p);
+		if (l == null) {
+			l = new LinkedList<>();
+			sprites.put(p, l);
+		}
+		l.add(sprite);
+	}
+
+	private void removeSpriteFromList(
+		Sprite sprite, MapPoint p, Map<MapPoint, List<Sprite>> sprites
+	) {
+		List<Sprite> l = sprites.get(p);
+		if (l != null) l.remove(sprite);
 	}
 
 	/**
@@ -161,21 +222,20 @@ public class Stage implements HasJSONRepresentation {
 		chain.queueAnimation(new MoveSpriteAnimation(
 		start, target, animation, speed, terrain,
 			(current, next) -> {
-				sprites.remove(s.pos);
+				removeSpriteFromList(s, s.pos, sprites);
 
-				if (!s.pos.equals(current)) slicedSprites.remove(current);
-
-				s.pos = current;
-				sprites.put(current, s);
+				if (!s.pos.equals(current)) removeSpriteFromList(s, current, slicedSprites);
 
 				s.pos = current;
-				if (!current.equals(next)) slicedSprites.put(next, s);
+				addSpriteToList(s, s.pos, sprites);
+
+				if (!current.equals(next)) addSpriteToList(s, next, slicedSprites);
 			}));
 	}
 
-	public void rotateSprite(MapPoint p) {
-		Sprite s = sprites.get(p);
-		if (s != null) s.rotate();
+	public void rotateSprites(MapPoint p) {
+		List<Sprite> l = sprites.get(p);
+		if (l != null) for (Sprite s : l) s.rotate();
 	}
 
 	public boolean usesTerrainTexture(TerrainTexture tex) {
@@ -183,7 +243,7 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	public boolean usesSprite(SpriteInfo info) {
-		return sprites.values().stream().anyMatch(s -> s.info == info);
+		return allSprites.stream().anyMatch(s -> s.info == info);
 	}
 
 	public boolean usesCliffTexture(CliffTexture tex) {
@@ -194,7 +254,7 @@ public class Stage implements HasJSONRepresentation {
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
 		JSONArray s = new JSONArray();
-		for (Sprite sprite : sprites.values()) {
+		for (Sprite sprite : allSprites) {
 			s.add(sprite.getJSON());
 		}
 
@@ -350,10 +410,15 @@ public class Stage implements HasJSONRepresentation {
 		Tile tile;
 		while (it.hasNext()) {
 			tile = it.next();
-			Sprite s = sprites.get(tile.pos);
-			if (s != null) {
-				Point2D sp = in.subtract(correctedIsoCoord(tile.pos, a));
-				if (s.hitTest(sp.getX(), sp.getY(), a)) return tile.pos;
+			List<Sprite> l = sprites.get(tile.pos);
+
+			if (l != null) {
+				l = l.subList(0, l.size());
+				Collections.reverse(l);
+				for (Sprite s : l) {
+					Point2D sp = in.subtract(correctedIsoCoord(tile.pos, a));
+					if (s.hitTest(sp.getX(), sp.getY(), a)) return tile.pos;
+				}
 			}
 		}
 
@@ -496,10 +561,10 @@ public class Stage implements HasJSONRepresentation {
 					cx.translate(0, -(TILEH / 4));
 				}
 
-				Sprite s = sprites.get(tile.pos);
-				if (s != null) doSprite(cx, angle, t, s, false);
-				s = slicedSprites.get(tile.pos);
-				if (s != null) doSprite(cx, angle, t, s, true);
+				List<Sprite> l = sprites.get(tile.pos);
+				if (l != null) for (Sprite s : l) doSprite(cx, angle, t, s, false);
+				l = slicedSprites.get(tile.pos);
+				if (l != null) for (Sprite s : l) doSprite(cx, angle, t, s, true);
 
 				if (renderDebug) {
 					cx.setFill(Color.RED);

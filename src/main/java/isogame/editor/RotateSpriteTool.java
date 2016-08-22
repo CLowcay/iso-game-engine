@@ -7,7 +7,7 @@ import isogame.engine.View;
 public class RotateSpriteTool extends Tool {
 	@Override
 	public void apply(MapPoint p, Stage stage, View v) {
-		stage.rotateSprite(p);
+		stage.rotateSprites(p);
 	}
 }
 
