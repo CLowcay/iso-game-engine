@@ -69,8 +69,14 @@ public class MapView extends Canvas {
 			setScrollKey(k, true);
 			setScrollingAnimation();
 			switch (k) {
-				case A: view.rotateLeft(); break;
-				case D: view.rotateRight(); break;
+				case A:
+				case D:
+					Point2D centre = view.getViewportCentre();
+					MapPoint centreP = view.tileAtMouse(centre, stage);
+					if (k == KeyCode.A) view.rotateLeft(); else view.rotateRight();
+					view.centreOnTile(stage, centreP);
+					scrolling.reset(view.getScrollPos());
+					break;
 			}
 		});
 		root.setOnKeyReleased(event -> {

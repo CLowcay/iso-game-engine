@@ -76,6 +76,10 @@ public class View {
 		updateScreenTransform();
 	}
 
+	public Point2D getViewportCentre() {
+		return new Point2D(viewportW / 2.0, viewportH / 2.0);
+	}
+
 	public void rotateLeft() {
 		angle = angle.nextClockwise();
 	}
