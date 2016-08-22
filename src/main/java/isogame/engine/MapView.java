@@ -79,7 +79,6 @@ public class MapView extends Canvas {
 		});
 
 		centreView();
-		scrolling.reset(view.getScrollPos());
 	}
 
 	private void centreView() {
@@ -87,6 +86,8 @@ public class MapView extends Canvas {
 
 		view.centreOnTile(stage, new MapPoint(
 			stage.terrain.w/2, stage.terrain.h/2));
+
+		scrolling.reset(view.getScrollPos());
 	}
 
 	private AnimationTimer animateCanvas = new AnimationTimer() {
