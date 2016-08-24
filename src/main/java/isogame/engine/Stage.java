@@ -519,7 +519,7 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	public boolean isHighlighted(MapPoint p) {
-		return highlighting.containsKey(p);
+		return highlighting.containsKey(p) && highlighting.get(p).size() > 0;
 	}
 
 	/**
