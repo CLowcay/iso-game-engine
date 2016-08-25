@@ -52,6 +52,13 @@ public class MapPoint implements HasJSONRepresentation {
 		return new MapPoint(x - p.x, y - p.y);
 	}
 
+	/**
+	 * Compute the manhattan distance
+	 * */
+	public int distance(MapPoint p) {
+		return Math.abs(p.x - x) + Math.abs(p.y - y);
+	}
+
 	@Override
 	public String toString() {
 		return "MAP:(" + x + ", " + y + ")";
