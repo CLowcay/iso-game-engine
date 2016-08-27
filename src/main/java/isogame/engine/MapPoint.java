@@ -59,6 +59,13 @@ public class MapPoint implements HasJSONRepresentation {
 		return Math.abs(p.x - x) + Math.abs(p.y - y);
 	}
 
+	/**
+	 * Normalise a point so that x and y are in the range [-1, 1]
+	 * */
+	public MapPoint normalise() {
+		return new MapPoint(x / Math.abs(x), y / Math.abs(y));
+	}
+
 	@Override
 	public String toString() {
 		return "MAP:(" + x + ", " + y + ")";
