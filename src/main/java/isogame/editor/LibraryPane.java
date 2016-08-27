@@ -206,6 +206,7 @@ public class LibraryPane extends VBox {
 		local.allTerrains().forEach(t -> addTexture(t, false));
 		local.allSprites().forEach(s -> addSprite(s, false));
 		local.allCliffTextures().forEach(t -> addCliffTexture(t, false));
+		this.local = local;
 	}
 
 	public void addTextureToLibrary(TerrainTexture tex, boolean isGlobal) {
