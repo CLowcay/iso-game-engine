@@ -71,10 +71,11 @@ public class MapView extends Canvas {
 			switch (k) {
 				case A:
 				case D:
+					if (this.stage == null) return;
 					Point2D centre = view.getViewportCentre();
-					MapPoint centreP = view.tileAtMouse(centre, stage);
+					MapPoint centreP = view.tileAtMouse(centre, this.stage);
 					if (k == KeyCode.A) view.rotateLeft(); else view.rotateRight();
-					view.centreOnTile(stage, centreP);
+					view.centreOnTile(this.stage, centreP);
 					scrolling.reset(view.getScrollPos());
 					break;
 			}
