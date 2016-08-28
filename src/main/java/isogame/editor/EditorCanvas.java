@@ -114,7 +114,7 @@ public class EditorCanvas extends MapView {
 	 * */
 	public void saveStageAs(File dataDir) {
 		Stage stage = getStage();
-		if (saved.getValue() || stage == null) return;
+		if (stage == null) return;
 
 		FileChooser fc = new FileChooser();
 		fc.setTitle("Save map file");
