@@ -220,16 +220,32 @@ public class Stage implements HasJSONRepresentation {
 		}
 		
 		chain.queueAnimation(new MoveSpriteAnimation(
-		start, target, animation, speed, terrain,
-			(current, next) -> {
+			start, target, animation, speed, terrain,
+				(current, next) -> {
+					removeSpriteFromList(s, s.pos, sprites);
+
+					if (!s.pos.equals(current)) removeSpriteFromList(s, current, slicedSprites);
+
+					s.pos = current;
+					addSpriteToList(s, s.pos, sprites);
+
+					if (!current.equals(next)) addSpriteToList(s, next, slicedSprites);
+				}));
+	}
+
+	public void queueTeleportSprite(Sprite s, MapPoint target) {
+		AnimationChain chain = s.getAnimationChain();
+		if (chain == null) {
+			chain = new AnimationChain(s);
+			s.setAnimationChain(chain);
+			registerAnimationChain(chain);
+		}
+
+		chain.queueAnimation(new TeleportAnimation(
+			s.pos, target, (from, to) -> {
 				removeSpriteFromList(s, s.pos, sprites);
-
-				if (!s.pos.equals(current)) removeSpriteFromList(s, current, slicedSprites);
-
-				s.pos = current;
+				s.pos = to;
 				addSpriteToList(s, s.pos, sprites);
-
-				if (!current.equals(next)) addSpriteToList(s, next, slicedSprites);
 			}));
 	}
 

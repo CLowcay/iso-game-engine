@@ -102,7 +102,7 @@ public class MoveSpriteAnimation extends Animation {
 		updateElevationDelta();
 	}
 
-	public void start(Sprite s) {
+	@Override public void start(Sprite s) {
 		s.setAnimation(spriteAnimation);
 		s.direction = direction;
 		animator.start();
@@ -112,7 +112,7 @@ public class MoveSpriteAnimation extends Animation {
 	/**
 	 * @return true if the animation is now complete.
 	 * */
-	public boolean updateAnimation(long t) {
+	@Override public boolean updateAnimation(long t) {
 		double v1 = animator.valueAt(t).getX();
 		if (v1 >= targetv) {
 			v = targetv;

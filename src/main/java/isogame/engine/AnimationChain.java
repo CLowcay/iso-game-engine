@@ -8,8 +8,8 @@ import java.util.Queue;
 
 public class AnimationChain {
 	private Runnable onFinished = () -> {};
-	private Optional<MoveSpriteAnimation> activeAnimation = Optional.empty();
-	private final Queue<MoveSpriteAnimation> queuedAnimations = new LinkedList<>();
+	private Optional<Animation> activeAnimation = Optional.empty();
+	private final Queue<Animation> queuedAnimations = new LinkedList<>();
 	private final Sprite sprite;
 
 	public AnimationChain(Sprite sprite) {
@@ -22,7 +22,7 @@ public class AnimationChain {
 		this.onFinished = onFinished;
 	}
 
-	public Optional<MoveSpriteAnimation> getActiveAnimation() {
+	public Optional<Animation> getActiveAnimation() {
 		return activeAnimation;
 	}
 
@@ -76,7 +76,7 @@ public class AnimationChain {
 		}
 	}
 
-	public void queueAnimation(MoveSpriteAnimation a) {
+	public void queueAnimation(Animation a) {
 		queuedAnimations.add(a);
 	}
 }
