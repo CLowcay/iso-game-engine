@@ -85,12 +85,15 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	 * @return true if the hit test passes.
 	 * */
 	public boolean hitTest(
-		int x, int y, int frame, CameraAngle angle, FacingDirection direction
+		int x, int y0, int frame, CameraAngle angle, FacingDirection direction
 	) {
+		int y = y0 + h - ((int) GlobalConstants.TILEH);
+		if (x < 0 || x >= w || y < 0 || y >= h) return false;
+
 		int rotation = direction.transform(angle);
 		int xt = (int) ((double) (x + (frame * GlobalConstants.TILEW)) / sf);
-		int yt = (int) ((double) ((y + h - GlobalConstants.TILEH) + (rotation * h)) / sf);
-		if (xt < 0 || yt < 0 || xt >= hitW || yt >= hitH) return false;
+		int yt = (int) ((double) (y + (rotation * h)) / sf);
+
 		return hitTester.getColor(xt, yt).isOpaque();
 	}
 
