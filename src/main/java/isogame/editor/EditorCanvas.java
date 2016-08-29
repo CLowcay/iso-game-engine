@@ -200,7 +200,7 @@ public class EditorCanvas extends MapView {
 	}
 
 	public EditorCanvas(Node root, Window window) throws CorruptDataException {
-		super(root, null, true,
+		super(root, null, true, true,
 			new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)});
 
 		this.setFocusTraversable(true);

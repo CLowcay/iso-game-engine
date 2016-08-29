@@ -40,10 +40,13 @@ public class MapView extends Canvas {
 
 	public final View view = new View(960, 400);
 
+	private final boolean debugMode;
+
 	public MapView(
 		Node root,
 		Stage stage,
 		boolean enableAnimations,
+		boolean debugMode,
 		Paint[] highlightColors
 	) {
 		super();
@@ -51,6 +54,7 @@ public class MapView extends Canvas {
 
 		this.stage = stage;
 		this.enableAnimations = enableAnimations;
+		this.debugMode = debugMode;
 		this.highlightColors = highlightColors;
 
 		if (stage != null) stage.setHighlightColors(highlightColors);
@@ -114,7 +118,7 @@ public class MapView extends Canvas {
 
 			if (stage != null) {
 				view.setScrollPos(scrolling.valueAt(now));
-				view.renderFrame(cx, enableAnimations? now : 0, stage, true);
+				view.renderFrame(cx, enableAnimations? now : 0, stage, debugMode);
 			}
 		}
 	};
