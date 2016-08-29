@@ -63,7 +63,9 @@ public class MapPoint implements HasJSONRepresentation {
 	 * Normalise a point so that x and y are in the range [-1, 1]
 	 * */
 	public MapPoint normalise() {
-		return new MapPoint(x / Math.abs(x), y / Math.abs(y));
+		return new MapPoint(
+			x == 0? 0 : x / Math.abs(x),
+			y == 0? 0 : y / Math.abs(y));
 	}
 
 	@Override
