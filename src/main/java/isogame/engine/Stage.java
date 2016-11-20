@@ -5,7 +5,6 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
@@ -360,12 +359,12 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	private Map<MapPoint, LinkedList<Integer>> highlighting = new HashMap<>();
-	private Paint[] highlightColors = {};
+	private Highlighter[] highlightColors = {};
 
 	/**
 	 * Set the highlighting colour scheme.
 	 * */
-	public void setHighlightColors(Paint[] highlightColors) {
+	public void setHighlightColors(Highlighter[] highlightColors) {
 		this.highlightColors = highlightColors;
 	}
 
@@ -446,7 +445,7 @@ public class Stage implements HasJSONRepresentation {
 
 			if (visible.intersects(x, y, TILEW, TILEH)) {
 				// get the highlight color
-				Paint hcolor = null;
+				Highlighter hcolor = null;
 				LinkedList<Integer> h = highlighting.get(tile.pos);
 				if (h != null) {
 					Integer i = h.peekFirst();

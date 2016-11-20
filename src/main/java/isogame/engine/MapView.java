@@ -9,7 +9,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Node;
-import javafx.scene.paint.Paint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -34,7 +33,7 @@ public class MapView extends Canvas {
 	private final Set<MapPoint> selectable = new HashSet<>();
 	private final Set<Sprite> selectableSprites = new HashSet<>();
 
-	private final Paint[] highlightColors;
+	private final Highlighter[] highlightColors;
 
 	private final GraphicsContext cx;
 
@@ -47,7 +46,7 @@ public class MapView extends Canvas {
 		Stage stage,
 		boolean enableAnimations,
 		boolean debugMode,
-		Paint[] highlightColors
+		Highlighter[] highlightColors
 	) {
 		super();
 		cx = this.getGraphicsContext2D();

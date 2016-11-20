@@ -1,6 +1,7 @@
 package isogame.editor;
 
 import isogame.engine.CorruptDataException;
+import isogame.engine.Highlighter;
 import isogame.engine.Library;
 import isogame.engine.MapPoint;
 import isogame.engine.MapView;
@@ -201,7 +202,7 @@ public class EditorCanvas extends MapView {
 
 	public EditorCanvas(Node root, Window window) throws CorruptDataException {
 		super(root, null, true, true,
-			new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)});
+			new Highlighter[] {new Highlighter(Color.rgb(0x00, 0x00, 0xFF, 0.2))});
 
 		this.setFocusTraversable(true);
 

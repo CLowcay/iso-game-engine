@@ -200,35 +200,26 @@ public class Tile implements HasJSONRepresentation {
 	 * Render this tile at (0,0).  If you need to draw the tile somewhere else,
 	 * do a translation before calling this method.
 	 * */
-	public void render(GraphicsContext cx, Paint hcolor, CameraAngle angle) {
-		SlopeType adjAngle = adjustSlopeForCameraAngle(angle);
+	public void render(
+		GraphicsContext cx, Highlighter highlighter, CameraAngle angle
+	) {
+		SlopeType slope = adjustSlopeForCameraAngle(angle);
 
-		cx.drawImage(tex.getTexture(even, adjAngle), -OFFSETX, -OFFSETY);
-		if (adjAngle != SlopeType.NONE)
-			cx.drawImage(cliffTexture.getPreTexture(adjAngle), -OFFSETX, -OFFSETY);
-		/* TODO: highlighting */
+		cx.drawImage(tex.getTexture(even, slope), -OFFSETX, -OFFSETY);
+		if (highlighter != null) highlighter.renderTop(cx, slope);
+		if (slope != SlopeType.NONE) {
+			cx.drawImage(cliffTexture.getPreTexture(slope), -OFFSETX, -OFFSETY);
+			if (highlighter != null) highlighter.renderCliff(cx, slope);
+		}
 
 		if (elevation != 0) {
 			Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
 			for (int i = 0; i < elevation; i++) {
 				cx.translate(0, TILEH / 2);
 				cx.drawImage(epaint, -OFFSETX, -OFFSETY);
-				/* TODO: highlighting */
+				if (highlighter != null) highlighter.renderElevation(cx);
 			}
 		}
-	}
-
-	private void doHighlight(
-		GraphicsContext cx,
-		Paint hcolor,
-		double[] xs,
-		double[] ys,
-		int pts
-	) {
-			if (hcolor != null) {
-				cx.setFill(hcolor);
-				cx.fillPolygon(xs, ys, pts);
-			}
 	}
 
 	@Override
