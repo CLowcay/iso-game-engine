@@ -1,15 +1,40 @@
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'application'
-//apply from: 'http://dl.bintray.com/content/shemnon/javafx-gradle/javafx.plugin'
+plugins {
+	id 'com.github.johnrengelman.shadow' version '1.2.3'
+		id 'java'
+		id 'application'
+		id 'distribution'
+}
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.apache.tools.ant.taskdefs.condition.Os
+repositories {
+	jcenter()
+}
 
-mainClassName = 'isogame.MapEditor'
+mainClassName = 'isogame.editor.MapEditor'
+def baseName = 'InTheZone'
+version = '0.1.0'
 
 repositories {
     jcenter()
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.5'
-    testCompile "junit:junit:4.11"
+    //compile 'org.slf4j:slf4j-api:1.7.5'
+    //testCompile "junit:junit:4.11"
+	compile fileTree(dir: '../lib', include: '*.jar')
+	// https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
+	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+}
+task packageNative(type: Exec, dependsOn:shadowJar) {
+	if (Os.isFamily(Os.FAMILY_MAC))
+		executable "${project.rootDir}/package/mac.sh"
+	else if (Os.isFamily(Os.FAMILY_UNIX))
+		executable "${project.rootDir}/package/linux.sh"
+		//executable "echo"
+	else if (Os.isFamily(Os.FAMILY_WINDOWS))
+		executable "${project.rootDir}/package/windows.bat"
+	else
+		throw new GradleException("Unsupported OS: " + System.properties['os.name'])
+
+	args project.version, shadowJar.archivePath, mainClassName, baseName, 'Server'
 }

@@ -21,3 +21,4 @@ iso-game-engine.ipr
 iso-game-engine.iws
 jenv.sh
 dobuild.sh
+.gradletasknamecache
