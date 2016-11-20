@@ -108,7 +108,7 @@ public class View {
 	 * */
 	public MapPoint tileAtMouse(Point2D mouse, Stage stage) {
 		try {
-			return stage.mouseTileCollision(
+			return stage.collisions.mouseTileCollision(
 				screenTransform.inverseTransform(mouse), angle);
 		} catch (NonInvertibleTransformException e) {
 			throw new RuntimeException("This cannot happen", e);
@@ -121,7 +121,7 @@ public class View {
 	 * */
 	public MapPoint spriteAtMouse(Point2D mouse, Stage stage) {
 		try {
-			return stage.mouseSpriteCollision(
+			return stage.collisions.mouseSpriteCollision(
 				screenTransform.inverseTransform(mouse), angle);
 		} catch (NonInvertibleTransformException e) {
 			throw new RuntimeException("This cannot happen", e);

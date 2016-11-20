@@ -36,12 +36,16 @@ public class Stage implements HasJSONRepresentation {
 	public String name = null;
 	public final StageInfo terrain;
 
-	public final Set<Sprite> allSprites = new HashSet<>();
+	private final Set<Sprite> allSprites = new HashSet<>();
 	private final Map<MapPoint, List<Sprite>> sprites;
 	// sprites that are moving into new squares.
 	private final Map<MapPoint, List<Sprite>> slicedSprites;
 
-	public final Collection<AnimationChain> animationChains = new LinkedList<>();
+	private final Collection<AnimationChain> animationChains = new LinkedList<>();
+
+	/**
+	 * Assets for just this stage.
+	 * */
 	public final Library localLibrary;
 
 	// transformation from map coordinates to iso coordinates
@@ -52,6 +56,11 @@ public class Stage implements HasJSONRepresentation {
 	private final Rotate rLR;
 	private final Rotate rUR;
 
+	/**
+	 * The collision detector.
+	 * */
+	public final CollisionDetector collisions;
+
 	public Stage clone() {
 		Stage r = new Stage(this.terrain, this.localLibrary);
 		for (Sprite s : allSprites) r.addSprite(s);
@@ -61,6 +70,8 @@ public class Stage implements HasJSONRepresentation {
 	public Stage(StageInfo terrain, Library localLibrary) {
 		this.terrain = terrain;
 		this.localLibrary = localLibrary;
+		this.collisions = new CollisionDetector(this);
+
 		sprites = new HashMap<>();
 		slicedSprites = new HashMap<>();
 
@@ -129,6 +140,21 @@ public class Stage implements HasJSONRepresentation {
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in stage", e);
 		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject getJSON() {
+		JSONArray s = new JSONArray();
+		for (Sprite sprite : allSprites) {
+			s.add(sprite.getJSON());
+		}
+
+		JSONObject r = new JSONObject();
+		r.put("name", name);
+		r.put("terrain", terrain.getJSON());
+		r.put("sprites", s);
+		return r;
 	}
 
 	/**
@@ -233,6 +259,10 @@ public class Stage implements HasJSONRepresentation {
 				}));
 	}
 
+	/**
+	 * Queue a teleport "animation".  Instantly moves the character sprite from
+	 * one location to another.
+	 * */
 	public void queueTeleportSprite(Sprite s, MapPoint target) {
 		AnimationChain chain = s.getAnimationChain();
 		if (chain == null) {
@@ -249,36 +279,33 @@ public class Stage implements HasJSONRepresentation {
 			}));
 	}
 
+	/**
+	 * Rotate all the sprites on a particular tile.
+	 * */
 	public void rotateSprites(MapPoint p) {
 		List<Sprite> l = sprites.get(p);
 		if (l != null) for (Sprite s : l) s.rotate();
 	}
 
+	/**
+	 * Does this stage use that TerrainTexture.
+	 * */
 	public boolean usesTerrainTexture(TerrainTexture tex) {
 		return terrain.usesTerrainTexture(tex);
 	}
 
+	/**
+	 * Does this stage use that Sprite.
+	 * */
 	public boolean usesSprite(SpriteInfo info) {
 		return allSprites.stream().anyMatch(s -> s.info == info);
 	}
 
+	/**
+	 * Does this stage use that CliffTexture.
+	 * */
 	public boolean usesCliffTexture(CliffTexture tex) {
 		return terrain.usesCliffTexture(tex);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public JSONObject getJSON() {
-		JSONArray s = new JSONArray();
-		for (Sprite sprite : allSprites) {
-			s.add(sprite.getJSON());
-		}
-
-		JSONObject r = new JSONObject();
-		r.put("name", name);
-		r.put("terrain", terrain.getJSON());
-		r.put("sprites", s);
-		return r;
 	}
 
 	/**
@@ -325,152 +352,6 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Determine which map tile the mouse is currently over, correcting for
-	 * elevation.
-	 * @return null if there is no tile at the mouse position.
-	 * */
-	public MapPoint mouseTileCollision(Point2D in, CameraAngle a) {
-		MapPoint p = fromIsoCoord(in, a);
-		Iterator<Tile> it = terrain.iterateCollisionDetection(p, a);
-
-		Tile tile;
-		while (it.hasNext()) {
-			tile = it.next();
-
-			// compute a polygon representing the position and shape of the tile.
-			// Then we will do a test to see if the mouse point is inside the
-			// polygon.
-			double[] xs = new double[6];
-			double[] ys = new double[6];
-			int pts;
-
-			double extension = (TILEH * ((double) tile.elevation)) / 2;
-			switch (tile.adjustSlopeForCameraAngle(a)) {
-				case NONE:
-					if (tile.elevation == 0) {
-						xs[0] = TILEW / 2; ys[0] = -2;
-						xs[1] = TILEW + 4; ys[1] = TILEH / 2;
-						xs[2] = TILEW / 2; ys[2] = TILEH + 2;
-						xs[3] = -4;        ys[3] = TILEH / 2;
-						pts = 4;
-					} else if (tile.elevation > 0) {
-						xs[0] = TILEW / 2; ys[0] = -2;
-						xs[1] = TILEW + 4; ys[1] = TILEH / 2;
-						xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + extension + 2;
-						xs[3] = TILEW / 2; ys[3] = TILEH + extension + 2;
-						xs[4] = -4;        ys[4] = (TILEH / 2) + extension + 2;
-						xs[5] = -4;        ys[5] = TILEH / 2;
-						pts = 6;
-					} else {
-						throw new RuntimeException("Negative elevation not supported");
-					}
-					break;
-				case N:
-					xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
-					xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
-					xs[2] = TILEW + 4; ys[2] = 0;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 4;
-					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
-					pts = 6;
-					break;
-				case E:
-					xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
-					xs[1] = TILEW / 2; ys[1] = -2;
-					xs[2] = TILEW + 4; ys[2] = -2;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 2;
-					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
-					pts = 6;
-					break;
-				case S:
-					xs[0] = -4;        ys[0] = -2;
-					xs[1] = TILEW / 2; ys[1] = -2;
-					xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 2;
-					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
-					pts = 6;
-					break;
-				case W:
-					xs[0] = -4;        ys[0] = 0;
-					xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
-					xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 4;
-					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
-					pts = 6;
-					break;
-				default: throw new RuntimeException(
-					"Invalid slope type. This cannot happen");
-			}
-
-			Point2D cp = correctedIsoCoord(tile.pos, a);
-			if (isPointInPolygon(xs, ys, pts, in.getX() - cp.getX(), in.getY() - cp.getY())) {
-				return tile.pos;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Determine which sprite the mouse is currently over, correcting for
-	 * elevation etc.  Does a pixel perfect hit test.
-	 * @return null if there is no sprite at the mouse position
-	 * */
-	public MapPoint mouseSpriteCollision(Point2D in, CameraAngle a) {
-		MapPoint p = fromIsoCoord(in, a);
-		Iterator<Tile> it = terrain.iterateCollisionDetection(p, a);
-
-		Tile tile;
-		while (it.hasNext()) {
-			tile = it.next();
-			List<Sprite> l = sprites.get(tile.pos);
-
-			if (l != null) {
-				l = l.subList(0, l.size());
-				Collections.reverse(l);
-				for (Sprite s : l) {
-					Point2D sp = in.subtract(correctedIsoCoord(tile.pos, a));
-					if (s.hitTest(sp.getX(), sp.getY(), a)) return tile.pos;
-				}
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Determine if a point lies inside a convex polygon.
-	 * */
-	private boolean isPointInPolygon(
-		double[] xs, double[] ys, int pts, double x, double y
-	) {
-		double t = 0;
-
-		// for a convex polygon, we can determine if a point lies inside the
-		// polygon by checking it lies on the same side of each line on the
-		// perimeter of the polygon.
-		for (int i = 0; i < pts; i++) {
-			double lx0 = xs[i];
-			double ly0 = ys[i];
-			double lx1 = xs[(i + 1) % pts];
-			double ly1 = ys[(i + 1) % pts];
-
-			// the sign of this cross product determines which side the point is on.
-			double det = ((lx1 - lx0) * (y - ly0)) - ((ly1 - ly0) * (x - lx0));
-			if (det > 0 && t < 0 || det < 0 && t > 0) {
-				return false;
-			} else if (det != 0) {
-				t = det;
-			}
-		}
-
-		return true;
-	}
-
-	/**
 	 * Get the upper left hand coordinate of a tile in iso space, accounting for
 	 * its elevation.
 	 * */
@@ -481,6 +362,9 @@ public class Stage implements HasJSONRepresentation {
 	private Map<MapPoint, LinkedList<Integer>> highlighting = new HashMap<>();
 	private Paint[] highlightColors = {};
 
+	/**
+	 * Set the highlighting colour scheme.
+	 * */
 	public void setHighlightColors(Paint[] highlightColors) {
 		this.highlightColors = highlightColors;
 	}
@@ -534,6 +418,9 @@ public class Stage implements HasJSONRepresentation {
 		highlighting.clear();
 	}
 
+	/**
+	 * Is that tile highlighted.
+	 * */
 	public boolean isHighlighted(MapPoint p) {
 		return highlighting.containsKey(p) && highlighting.get(p).size() > 0;
 	}
