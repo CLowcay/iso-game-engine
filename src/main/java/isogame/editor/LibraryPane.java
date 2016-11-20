@@ -335,7 +335,7 @@ public class LibraryPane extends VBox {
 	private void addTexture(TerrainTexture tex, boolean isGlobal) {
 		Canvas preview = new Canvas(64, 32);
 		GraphicsContext gc = preview.getGraphicsContext2D();
-		gc.setFill(tex.evenPaint);
+		gc.setFill(tex.samplePaint);
 		gc.fillRect(0, 0, 64, 32);
 
 		ToggleButton t = new ToggleButton("", preview);

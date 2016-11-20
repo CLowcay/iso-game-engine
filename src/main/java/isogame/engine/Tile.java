@@ -1,8 +1,11 @@
 package isogame.engine;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Paint;
 import org.json.simple.JSONObject;
+import static isogame.engine.TilePrerenderer.OFFSETX;
+import static isogame.engine.TilePrerenderer.OFFSETY;
 import static isogame.GlobalConstants.ELEVATION_H;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
@@ -13,12 +16,13 @@ import static isogame.GlobalConstants.TILEW;
 public class Tile implements HasJSONRepresentation {
 	public final int elevation;
 	public final TerrainTexture tex;
-	public final Paint texture;
 	public final CliffTexture cliffTexture;
 	public final SlopeType slope;
 	public final boolean isManaZone;
 	public final StartZoneType startZone;
 	public final MapPoint pos;
+
+	private final boolean even;
 
 	public Tile(MapPoint p, TerrainTexture texture) {
 		this(p, 0, SlopeType.NONE, false, StartZoneType.NONE, texture, null);
@@ -47,11 +51,7 @@ public class Tile implements HasJSONRepresentation {
 		this.pos = pos;
 
 		tex = texture;
-		if ((pos.x + pos.y) % 2 == 0) {
-			this.texture = texture.evenPaint;
-		} else {
-			this.texture = texture.oddPaint;
-		}
+		even = (pos.x + pos.y) % 2 == 0;
 
 		this.cliffTexture = cliffTexture;
 
@@ -193,10 +193,6 @@ public class Tile implements HasJSONRepresentation {
 		}
 	}
 
-	public Paint getCliffTexture(CameraAngle angle) {
-		return cliffTexture.getTexture(adjustSlopeForCameraAngle(angle));
-	}
-
 	private double[] xs = new double[6];
 	private double[] ys = new double[6];
 
@@ -205,104 +201,19 @@ public class Tile implements HasJSONRepresentation {
 	 * do a translation before calling this method.
 	 * */
 	public void render(GraphicsContext cx, Paint hcolor, CameraAngle angle) {
-		switch (adjustSlopeForCameraAngle(angle)) {
-			case NONE:
-				xs[0] = TILEW / 2; ys[0] = -2;
-				xs[1] = TILEW + 4; ys[1] = TILEH / 2;
-				xs[2] = TILEW / 2; ys[2] = TILEH + 2;
-				xs[3] = -4;        ys[3] = TILEH / 2;
-				cx.setFill(texture);
-				cx.fillPolygon(xs, ys, 4);
-				doHighlight(cx, hcolor, xs, ys, 4);
-				break;
-			case N:
-				xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
-				xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
-				xs[2] = TILEW + 4; ys[2] = 0;
-				xs[3] = TILEW / 2; ys[3] = TILEH + 4;
-				cx.setFill(texture);
-				cx.fillPolygon(xs, ys, 4);
-				doHighlight(cx, hcolor, xs, ys, 4);
+		SlopeType adjAngle = adjustSlopeForCameraAngle(angle);
 
-				xs[0] = TILEW / 2; ys[0] = TILEH;
-				xs[1] = TILEW;     ys[1] = 0;
-				xs[2] = TILEW;     ys[2] = (TILEH / 2) + 2;
-				xs[3] = TILEW / 2; ys[3] = TILEH + 2;
-				cx.setFill(getCliffTexture(angle));
-				cx.fillPolygon(xs, ys, 4);
-				doHighlight(cx, hcolor, xs, ys, 4);
-				break;
-			case E:
-				xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
-				xs[1] = TILEW / 2; ys[1] = -2;
-				xs[2] = TILEW + 4; ys[2] = -2;
-				xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
-				cx.setFill(texture);
-				cx.fillPolygon(xs, ys, 4);
-				doHighlight(cx, hcolor, xs, ys, 4);
-
-				xs[0] = 0;         ys[0] = TILEH / 2;
-				xs[1] = TILEW / 2; ys[1] = TILEH / 2;
-				xs[2] = TILEW;     ys[2] = 0;
-				xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
-				xs[4] = TILEW / 2; ys[4] = TILEH + 2;
-				xs[5] = 0;         ys[5] = (TILEH / 2) + 2;
-				cx.setFill(getCliffTexture(angle));
-				cx.fillPolygon(xs, ys, 6);
-				doHighlight(cx, hcolor, xs, ys, 6);
-				break;
-			case S:
-				xs[0] = -4;        ys[0] = -2;
-				xs[1] = TILEW / 2; ys[1] = -2;
-				xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-				xs[3] = TILEW / 2; ys[3] = (TILEH / 2) + 2;
-				cx.setFill(texture);
-				cx.fillPolygon(xs, ys, 4);
-				doHighlight(cx, hcolor, xs, ys, 4);
-
-				xs[0] = 0;         ys[0] = 0;
-				xs[1] = TILEW / 2; ys[1] = TILEH / 2;
-				xs[2] = TILEW;     ys[2] = TILEH / 2;
-				xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
-				xs[4] = TILEW / 2; ys[4] = TILEH + 2;
-				xs[5] = 0;         ys[5] = (TILEH / 2) + 2;
-				cx.setFill(getCliffTexture(angle));
-				cx.fillPolygon(xs, ys, 6);
-				doHighlight(cx, hcolor, xs, ys, 6);
-				break;
-			case W:
-				xs[0] = -4;        ys[0] = 0;
-				xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
-				xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-				xs[3] = TILEW / 2; ys[3] = TILEH + 4;
-				cx.setFill(texture);
-				cx.fillPolygon(xs, ys, 4);
-				doHighlight(cx, hcolor, xs, ys, 4);
-
-				xs[0] = 0;         ys[0] = 0;
-				xs[1] = TILEW / 2; ys[1] = TILEH;
-				xs[2] = TILEW / 2; ys[2] = TILEH + 2;
-				xs[3] = 0;         ys[3] = (TILEH / 2) + 2;
-				cx.setFill(getCliffTexture(angle));
-				cx.fillPolygon(xs, ys, 4);
-				doHighlight(cx, hcolor, xs, ys, 4);
-				break;
-		}
+		cx.drawImage(tex.getTexture(even, adjAngle), -OFFSETX, -OFFSETY);
+		if (adjAngle != SlopeType.NONE)
+			cx.drawImage(cliffTexture.getPreTexture(adjAngle), -OFFSETX, -OFFSETY);
+		/* TODO: highlighting */
 
 		if (elevation != 0) {
-			Paint epaint = cliffTexture.getFlatTexture();
+			Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
 			for (int i = 0; i < elevation; i++) {
 				cx.translate(0, TILEH / 2);
-				xs[0] = 0;         ys[0] = 0;
-				xs[1] = 0;         ys[1] = (TILEH / 2) + 2;
-				xs[2] = TILEW / 2; ys[2] = TILEH + 2;
-				xs[3] = TILEW;     ys[3] = (TILEH / 2) + 2;
-				xs[4] = TILEW;     ys[4] = 0;
-				xs[5] = TILEW / 2; ys[5] = TILEH / 2;
-
-				cx.setFill(epaint);
-				cx.fillPolygon(xs, ys, 6);
-				doHighlight(cx, hcolor, xs, ys, 6);
+				cx.drawImage(epaint, -OFFSETX, -OFFSETY);
+				/* TODO: highlighting */
 			}
 		}
 	}

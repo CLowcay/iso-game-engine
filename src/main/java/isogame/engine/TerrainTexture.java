@@ -5,6 +5,7 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import java.io.IOException;
+import java.util.Map;
 import org.json.simple.JSONObject;
 
 /**
@@ -12,11 +13,13 @@ import org.json.simple.JSONObject;
  * sophisticated terrain.
  * */
 public class TerrainTexture implements HasJSONRepresentation {
-	public final Paint evenPaint;
-	public final Paint oddPaint;
-
 	public final String id;
 	private final String url;
+
+	public final Paint samplePaint;
+
+	private final Map<SlopeType, Image> evenPrerendered;
+	private final Map<SlopeType, Image> oddPrerendered;
 
 	public TerrainTexture(
 		ResourceLocator loc, String id, String url
@@ -29,12 +32,24 @@ public class TerrainTexture implements HasJSONRepresentation {
 			int w = (int) texture.getWidth();
 			int h = (int) texture.getHeight();
 
-			this.evenPaint = new ImagePattern(texture, 0, 0, 1, 1, true);
-			this.oddPaint = new ImagePattern(texture, -0.5, -0.5, 1, 1, true);
+			Paint evenPaint = new ImagePattern(texture, 0, 0, 1, 1, true);
+			Paint oddPaint = new ImagePattern(texture, -0.5, -0.5, 1, 1, true);
+			samplePaint = evenPaint;
+
+			evenPrerendered = TilePrerenderer.prerenderTile(evenPaint);
+			oddPrerendered = TilePrerenderer.prerenderTile(oddPaint);
 		} catch (IOException e) {
 			throw new CorruptDataException(
 				"Cannot locate resource " + url, e);
 		}
+	}
+
+	/**
+	 * Get an appropriate prerendered texture.
+	 * */
+	public Image getTexture(boolean even, SlopeType slope) {
+		if (even) return evenPrerendered.get(slope);
+		else return oddPrerendered.get(slope);
 	}
 
 	public static TerrainTexture fromJSON(
@@ -67,5 +82,6 @@ public class TerrainTexture implements HasJSONRepresentation {
 
 		return r;
 	}
+
 }
 
