@@ -35,7 +35,11 @@ public class Stage implements HasJSONRepresentation {
 	public String name = null;
 	public final StageInfo terrain;
 
-	private final Set<Sprite> allSprites = new HashSet<>();
+	/**
+	 * A convenient way to get a reference to all the sprites
+	 * */
+	public final Set<Sprite> allSprites = new HashSet<>();
+
 	private final Map<MapPoint, List<Sprite>> sprites;
 	// sprites that are moving into new squares.
 	private final Map<MapPoint, List<Sprite>> slicedSprites;
