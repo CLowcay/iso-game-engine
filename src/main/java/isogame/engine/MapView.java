@@ -25,6 +25,8 @@ public class MapView extends Canvas {
 	private boolean enableAnimations = false;
 	private Consumer<MapPoint> onSelection = x -> {};
 	private Consumer<MapPoint> onMouseOver = x -> {};
+	private Consumer<MapPoint> onMouseOverSprite = x -> {};
+	private Runnable onMouseOutSprite = () -> {};
 	private Runnable onMouseOut = () -> {};
 
 	private int selectionHighlighter = 0;
@@ -32,6 +34,7 @@ public class MapView extends Canvas {
 	private final ContinuousAnimator scrolling = new ContinuousAnimator();
 	private final Set<MapPoint> selectable = new HashSet<>();
 	private final Set<Sprite> selectableSprites = new HashSet<>();
+	private final Set<Sprite> mouseOverSprites = new HashSet<>();
 
 	private final Highlighter[] highlightColors;
 
@@ -125,6 +128,7 @@ public class MapView extends Canvas {
 	private EventHandler<MouseEvent> mouseHandler =
 		new EventHandler<MouseEvent>() {
 			MapPoint p0 = null;
+			MapPoint sprite0 = null;
 
 			@Override
 			public void handle(MouseEvent event) {
@@ -148,6 +152,24 @@ public class MapView extends Canvas {
 							}
 						}
 					}
+
+					MapPoint sprite = view.spriteAtMouse(
+						new Point2D(event.getX(), event.getY()), stage);
+
+					if (sprite0 != sprite) {
+						sprite0 = sprite;
+						if (sprite == null) {
+							onMouseOutSprite.run();
+						} else {
+							if (mouseOverSprites.stream().anyMatch(s -> s.pos.equals(sprite))) {
+								onMouseOverSprite.accept(sprite);
+							}
+							if (event.isPrimaryButtonDown() && selectableSprites.contains(sprite)) {
+								onSelection.accept(sprite);
+							}
+						}
+					}
+
 				} else if (etype == MouseEvent.MOUSE_PRESSED) {
 					MapPoint p = view.tileAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
@@ -275,6 +297,13 @@ public class MapView extends Canvas {
 		selectableSprites.addAll(pts);
 	}
 
+	public void setMouseOverSprites(Collection<Sprite> sprites) {
+		if (stage == null) return;
+		
+		mouseOverSprites.clear();
+		mouseOverSprites.addAll(sprites);
+	}
+
 	public boolean isSelectable(MapPoint p) {
 		return selectable.contains(p);
 	}
@@ -285,6 +314,14 @@ public class MapView extends Canvas {
 
 	public void doOnMouseOver(Consumer<MapPoint> c) {
 		this.onMouseOver = c;
+	}
+
+	public void doOnMouseOverSprite(Consumer<MapPoint> c) {
+		this.onMouseOverSprite = c;
+	}
+
+	public void doOnMouseOutSprite(Runnable c) {
+		this.onMouseOutSprite = c;
 	}
 
 	public void doOnMouseOut(Runnable r) {
