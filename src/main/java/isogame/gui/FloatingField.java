@@ -1,47 +1,32 @@
 package isogame.gui;
 
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
-import java.util.function.UnaryOperator;
+import java.util.Optional;
 
 public class FloatingField extends TypedTextField<Double> {
 	public FloatingField(double init) {
-		this();
-		this.setText((new Double(init)).toString());
+		super(init);
 	}
 
 	public FloatingField(String text) {
-		this();
-		this.setText(text);
+		super(text);
 	}
 
 	public FloatingField() {
 		super();
-
-		this.setTextFormatter(new TextFormatter<>(change -> {
-			if (change.isAdded() || change.isReplaced()) {
-				try {
-					Double.parseDouble(change.getControlNewText());
-				} catch (NumberFormatException e) {
-					change.setText("");
-				}
-			}
-			return change;
-		}));
 	}
 
-	@Override
-	public void setValue(Double v) {
-		this.setText(v == null? "" : v.toString());
-	}
-
-	@Override
-	public Double getValue() {
+	@Override protected Optional<Double> parseValue(String t) {
 		try {
-			return Double.parseDouble(this.getText());
+			return Optional.of(Double.parseDouble(t));
 		} catch (NumberFormatException e) {
-			return 0.0;
+			return Optional.empty();
 		}
+	}
+
+	@Override protected Double getDefaultValue() {return 0.0;}
+
+	@Override protected String showValue(Double i) {
+		return i.toString();
 	}
 }
 

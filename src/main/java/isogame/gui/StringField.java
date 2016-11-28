@@ -1,5 +1,7 @@
 package isogame.gui;
 
+import java.util.Optional;
+
 public class StringField extends TypedTextField<String> {
 	public StringField() {
 		super();
@@ -10,14 +12,14 @@ public class StringField extends TypedTextField<String> {
 		this.setText(v);
 	}
 
-	@Override
-	public String getValue() {
-		return this.getText();
+	@Override protected Optional<String> parseValue(String t) {
+		return Optional.of(t);
 	}
 
-	@Override
-	public void setValue(String value) {
-		this.setText(value == null? "" : value);
+	@Override protected String getDefaultValue() {return "";}
+
+	@Override protected String showValue(String i) {
+		return i;
 	}
 }
 

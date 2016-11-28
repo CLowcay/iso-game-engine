@@ -1,47 +1,32 @@
 package isogame.gui;
 
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
-import java.util.function.UnaryOperator;
+import java.util.Optional;
 
 public class PositiveIntegerField extends TypedTextField<Integer> {
+	@Override protected Optional<Integer> parseValue(String t) {
+		try {
+			return Optional.of(Integer.parseUnsignedInt(t));
+		} catch (NumberFormatException e) {
+			return Optional.empty();
+		}
+	}
+
+	@Override protected Integer getDefaultValue() {return 0;}
+
+	@Override protected String showValue(Integer i) {
+		return i.toString();
+	}
+
 	public PositiveIntegerField(int init) {
-		this();
-		this.setText((new Integer(init)).toString());
+		super(init);
 	}
 
 	public PositiveIntegerField(String text) {
-		this();
-		this.setText(text);
+		super(text);
 	}
 
 	public PositiveIntegerField() {
 		super();
-
-		this.setTextFormatter(new TextFormatter<>(change -> {
-			if (change.isAdded() || change.isReplaced()) {
-				try {
-					Integer.parseUnsignedInt(change.getText());
-				} catch (NumberFormatException e) {
-					change.setText("");
-				}
-			}
-			return change;
-		}));
-	}
-
-	@Override
-	public void setValue(Integer v) {
-		this.setText(v == null? "" : v.toString());
-	}
-
-	@Override
-	public Integer getValue() {
-		try {
-			return Integer.parseUnsignedInt(this.getText());
-		} catch (NumberFormatException e) {
-			return 0;
-		}
 	}
 }
 
