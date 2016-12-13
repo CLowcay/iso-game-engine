@@ -17,6 +17,7 @@ public class FloatingField extends TypedTextField<Double> {
 
 	@Override protected Optional<Double> parseValue(String t) {
 		try {
+			if (t.endsWith(".")) t = t + "0";
 			return Optional.of(Double.parseDouble(t));
 		} catch (NumberFormatException e) {
 			return Optional.empty();
