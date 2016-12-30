@@ -143,7 +143,7 @@ public class Stage implements HasJSONRepresentation {
 			if (rName == null) throw new CorruptDataException("Error in stage, missing name");
 			String name = (String) rName;
 
-			Library lib = Library.fromJSON(json, name, loc, global);
+			Library lib = Library.fromJSON(json, name, loc, global, false);
 
 			Object rTerrain = stageJSON.get("terrain");
 			Object rSprites = stageJSON.get("sprites");

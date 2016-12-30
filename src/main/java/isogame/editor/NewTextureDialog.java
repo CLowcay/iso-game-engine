@@ -86,7 +86,7 @@ public class NewTextureDialog extends Dialog<TerrainTexture> {
 		this.setResultConverter(clickedButton -> {
 			if (clickedButton == ButtonType.OK && !texture.getText().equals("")) {
 				try {
-					return new TerrainTexture(loc, id.getText(), texture.getText());
+					return new TerrainTexture(loc, id.getText(), texture.getText(), false);
 				} catch (CorruptDataException e) {
 					Alert err = new Alert(Alert.AlertType.ERROR);
 					err.setTitle("Cannot load texture image");

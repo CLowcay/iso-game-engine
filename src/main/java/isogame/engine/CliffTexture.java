@@ -40,30 +40,37 @@ public class CliffTexture implements HasJSONRepresentation {
 
 	public CliffTexture(
 		ResourceLocator loc,
-		String id, String urlWide, String urlNarrow
+		String id, String urlWide, String urlNarrow, boolean nofx
 	) throws CorruptDataException {
 		this.id = id;
 		this.urlWide = urlWide;
 		this.urlNarrow = urlNarrow;
 
-		try {
-			Image imgWide = new Image(loc.gfx(urlWide));
-			Image imgNarrow = new Image(loc.gfx(urlNarrow));
+		if (nofx) {
+			prerendered = null;
+			ul = null;
+			ur = null;
+			flat = null;
+		} else {
+			try {
+				Image imgWide = new Image(loc.gfx(urlWide));
+				Image imgNarrow = new Image(loc.gfx(urlNarrow));
 
-			ul = new ImagePattern(imgNarrow, -1, 0, 2, 1, true);
-			ur = new ImagePattern(imgNarrow,  0, 0, 2, 1, true);
-			flat = new ImagePattern(imgWide,  0, 0, 1, 1, true);
+				ul = new ImagePattern(imgNarrow, -1, 0, 2, 1, true);
+				ur = new ImagePattern(imgNarrow,  0, 0, 2, 1, true);
+				flat = new ImagePattern(imgWide,  0, 0, 1, 1, true);
 
-			prerendered = TilePrerenderer.prerenderCliff(this::getTexture);
-		} catch (IOException e) {
-			throw new CorruptDataException(
-				"Cannot locate resource " + urlWide + " or " + urlNarrow, e);
+				prerendered = TilePrerenderer.prerenderCliff(this::getTexture);
+			} catch (IOException e) {
+				throw new CorruptDataException(
+					"Cannot locate resource " + urlWide + " or " + urlNarrow, e);
+			}
 		}
 	}
 
 	public static CliffTexture fromJSON(
 		JSONObject json,
-		ResourceLocator loc
+		ResourceLocator loc, boolean nofx
 	) throws CorruptDataException
 	{
 		Object rId = json.get("id");
@@ -78,7 +85,7 @@ public class CliffTexture implements HasJSONRepresentation {
 			return new CliffTexture(loc,
 				(String) rId,
 				(String) rUrlWide,
-				(String) rUrlNarrow);
+				(String) rUrlNarrow, nofx);
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in cliff texture", e);
 		} catch (IllegalArgumentException e) {

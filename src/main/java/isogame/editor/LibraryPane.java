@@ -171,7 +171,7 @@ public class LibraryPane extends VBox {
 		globalLibraryFile = new File(dataRoot, "global_library.json");
 		global = Library.fromFile(
 			new FileInputStream(globalLibraryFile),
-				globalLibraryFile.toString(), loc, null);
+				globalLibraryFile.toString(), loc, null, false);
 
 		global.allTerrains().forEach(t -> addTexture(t, true));
 		global.allSprites().forEach(t -> addSprite(t, true));

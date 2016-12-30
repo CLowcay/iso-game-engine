@@ -40,25 +40,32 @@ public class TerrainTexture implements HasJSONRepresentation {
 	private final Map<SlopeType, Image> oddPrerendered;
 
 	public TerrainTexture(
-		ResourceLocator loc, String id, String url
+		ResourceLocator loc, String id, String url, boolean nofx
 	) throws CorruptDataException {
 		this.id = id;
 		this.url = url;
 
-		try {
-			Image texture = new Image(loc.gfx(url));
-			int w = (int) texture.getWidth();
-			int h = (int) texture.getHeight();
+		if (nofx) {
+			samplePaint = null;
+			evenPrerendered = null;
+			oddPrerendered = null;
 
-			Paint evenPaint = new ImagePattern(texture, 0, 0, 1, 1, true);
-			Paint oddPaint = new ImagePattern(texture, -0.5, -0.5, 1, 1, true);
-			samplePaint = evenPaint;
+		} else {
+			try {
+				Image texture = new Image(loc.gfx(url));
+				int w = (int) texture.getWidth();
+				int h = (int) texture.getHeight();
 
-			evenPrerendered = TilePrerenderer.prerenderTile(evenPaint);
-			oddPrerendered = TilePrerenderer.prerenderTile(oddPaint);
-		} catch (IOException e) {
-			throw new CorruptDataException(
-				"Cannot locate resource " + url, e);
+				Paint evenPaint = new ImagePattern(texture, 0, 0, 1, 1, true);
+				Paint oddPaint = new ImagePattern(texture, -0.5, -0.5, 1, 1, true);
+				samplePaint = evenPaint;
+
+				evenPrerendered = TilePrerenderer.prerenderTile(evenPaint);
+				oddPrerendered = TilePrerenderer.prerenderTile(oddPaint);
+			} catch (IOException e) {
+				throw new CorruptDataException(
+					"Cannot locate resource " + url, e);
+			}
 		}
 	}
 
@@ -70,8 +77,12 @@ public class TerrainTexture implements HasJSONRepresentation {
 		else return oddPrerendered.get(slope);
 	}
 
+	/**
+	 * @param nofx True if we are running in an environment where we cannot use
+	 * JavaFX
+	 * */
 	public static TerrainTexture fromJSON(
-		JSONObject json, ResourceLocator loc
+		JSONObject json, ResourceLocator loc, boolean nofx
 	) throws CorruptDataException
 	{
 		Object rId = json.get("id");
@@ -83,7 +94,7 @@ public class TerrainTexture implements HasJSONRepresentation {
 		try {
 			return new TerrainTexture(loc,
 				(String) rId,
-				(String) rUrl);
+				(String) rUrl, nofx);
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in texture", e);
 		} catch (IllegalArgumentException e) {

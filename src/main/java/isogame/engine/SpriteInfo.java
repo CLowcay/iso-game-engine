@@ -19,7 +19,6 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.engine;
 
 import isogame.resource.ResourceLocator;
-import javafx.scene.image.Image;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

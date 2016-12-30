@@ -185,7 +185,7 @@ public class Library {
 	 * */
 	public static Library fromFile(
 		InputStream inStream, String url,
-		ResourceLocator loc, Library parent
+		ResourceLocator loc, Library parent, boolean nofx
 	) throws IOException, CorruptDataException
 	{
 		try (BufferedReader in =
@@ -194,7 +194,7 @@ public class Library {
 			if (in == null) throw new FileNotFoundException("File not found " + url);
 			JSONParser parser = new JSONParser();
 			JSONObject json = (JSONObject) parser.parse(in);
-			return fromJSON(json, url, loc, parent);
+			return fromJSON(json, url, loc, parent, nofx);
 		} catch (ParseException e) {
 			throw new CorruptDataException(url + " is corrupted");
 		}
@@ -202,10 +202,11 @@ public class Library {
 
 	/**
 	 * Parse a library out of JSON data
+	 * @param nofx True if we cannot use JavaFX in this environment
 	 * */
 	public static Library fromJSON(
 		JSONObject json, String url,
-		ResourceLocator loc, Library parent
+		ResourceLocator loc, Library parent, boolean nofx
 	) throws CorruptDataException
 	{
 		try {
@@ -235,7 +236,7 @@ public class Library {
 				String id = (String) terrain.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				r.terrains.put(id, TerrainTexture.fromJSON(terrain, loc));
+				r.terrains.put(id, TerrainTexture.fromJSON(terrain, loc, nofx));
 			}
 
 			for (Object x : cliffTextures) {
@@ -243,7 +244,7 @@ public class Library {
 				String id = (String) cliffTerrain.get("id");
 				if (id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
-				r.cliffTextures.put(id, CliffTexture.fromJSON(cliffTerrain, loc));
+				r.cliffTextures.put(id, CliffTexture.fromJSON(cliffTerrain, loc, nofx));
 			}
 
 			return r;
