@@ -17,8 +17,8 @@ If the data directory is missing any necessary files or directories, the map
 editor should create them.  At present it just crashes.
 
 ## Keys
-* A: Rotate camera left
-* D: Rotate camera right
+* Q: Rotate camera left
+* E: Rotate camera right
 * Arrow keys: scroll
 
 ## Notes
