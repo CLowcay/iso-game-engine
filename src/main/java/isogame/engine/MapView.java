@@ -60,6 +60,9 @@ public class MapView extends Canvas {
 
 	public final View view = new View(960, 400);
 
+	public KeyCode keyRotateL = KeyCode.Q;
+	public KeyCode keyRotateR = KeyCode.E;
+
 	private final boolean debugMode;
 
 	public MapView(
@@ -92,16 +95,13 @@ public class MapView extends Canvas {
 			KeyCode k = event.getCode();
 			setScrollKey(k, true);
 			setScrollingAnimation();
-			switch (k) {
-				case A:
-				case D:
-					if (this.stage == null) return;
-					Point2D centre = view.getViewportCentre();
-					MapPoint centreP = view.tileAtMouse(centre, this.stage);
-					if (k == KeyCode.A) view.rotateLeft(); else view.rotateRight();
-					view.centreOnTile(this.stage, centreP);
-					scrolling.reset(view.getScrollPos());
-					break;
+			if (k == keyRotateL || k == keyRotateR) {
+				if (this.stage == null) return;
+				Point2D centre = view.getViewportCentre();
+				MapPoint centreP = view.tileAtMouse(centre, this.stage);
+				if (k == keyRotateL) view.rotateLeft(); else view.rotateRight();
+				view.centreOnTile(this.stage, centreP);
+				scrolling.reset(view.getScrollPos());
 			}
 		});
 		root.setOnKeyReleased(event -> {
