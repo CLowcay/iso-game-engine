@@ -30,6 +30,8 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.util.function.Function;
+import java.util.Map;
+import java.util.Optional;
  
 public class MapEditor extends Application {
 	public static void main(final String[] arguments) {
@@ -43,16 +45,23 @@ public class MapEditor extends Application {
 		BorderPane guiRoot = new BorderPane();
 
 		try {
-			File dataDir = getDataDir(primaryStage);
-			if (dataDir == null) System.exit(1);
+			Map<String, String> args = getParameters().getNamed();
+			
+			Optional<File> dataDir;
+			dataDir = Optional.ofNullable(args.get("basedir")).map(s -> new File(s));
+			if (!dataDir.isPresent()) {
+				dataDir = Optional.ofNullable(getDataDir(primaryStage));
+			}
 
-			ResourceLocator loc = new DevelopmentResourceLocator(dataDir);
+			if (!dataDir.isPresent()) System.exit(1);
+
+			ResourceLocator loc = new DevelopmentResourceLocator(dataDir.get());
 
 			ToggleGroup toolsGroup = new ToggleGroup();
 			EditorCanvas canvas = new EditorCanvas(root, primaryStage);
 			LibraryPane library = new LibraryPane(
-				dataDir, loc, toolsGroup, canvas);
-			MainMenu menuBar = new MainMenu(library, dataDir, loc, canvas);
+				dataDir.get(), loc, toolsGroup, canvas);
+			MainMenu menuBar = new MainMenu(library, dataDir.get(), loc, canvas);
 			ToolBar toolBar = new ToolBar(canvas, toolsGroup);
 
 			VBox top = new VBox();
