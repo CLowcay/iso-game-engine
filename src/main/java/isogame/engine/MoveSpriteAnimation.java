@@ -36,6 +36,7 @@ public class MoveSpriteAnimation extends Animation {
 	private final MapPoint target;
 	private MapPoint point;
 
+	private double jump = 0;
 	private double elevationDelta = 0;
 	private boolean fromFlatElevation = false;
 
@@ -65,6 +66,7 @@ public class MoveSpriteAnimation extends Animation {
 			fromFlatElevation = true;
 			if (tto.slope == SlopeType.NONE) {
 				elevationDelta = 0;
+				jump = tfrom.elevation - tto.elevation;
 			} else {
 				elevationDelta = tto.slope == direction.upThisWay()? -0.5 : 0.5;
 			}
@@ -179,6 +181,8 @@ public class MoveSpriteAnimation extends Animation {
 		double elevationOffset;
 		if (Math.abs(elevationDelta) == 1.0d) {
 			elevationOffset = elevationDelta * scale;
+		} else if (jump != 0d) {
+			elevationOffset = scale < 0.5d? 0d : jump;
 		} else if (fromFlatElevation)
 			elevationOffset = scale < 0.5d? 0d : elevationDelta * 2.0d * (scale - 0.5d);
 		else {
@@ -187,7 +191,7 @@ public class MoveSpriteAnimation extends Animation {
 
 		if (isTargetSlice) {
 			offset = offset.subtract(directionVector);
-			elevationOffset = elevationOffset - elevationDelta;
+			elevationOffset = elevationOffset - elevationDelta - jump;
 		}
 
 		gx.save();
