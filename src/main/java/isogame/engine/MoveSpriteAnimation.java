@@ -59,7 +59,9 @@ public class MoveSpriteAnimation extends Animation {
 	private void updateElevationDelta() {
 		Tile tfrom = terrain.getTile(point);
 		Tile tto = terrain.getTile(point.add(directionVector));
-		if (tfrom.slope == SlopeType.NONE) {
+		if (tfrom.slope == tto.slope && tfrom.elevation == tto.elevation) {
+			elevationDelta = 0;
+		} else if (tfrom.slope == SlopeType.NONE) {
 			fromFlatElevation = true;
 			if (tto.slope == SlopeType.NONE) {
 				elevationDelta = 0;
