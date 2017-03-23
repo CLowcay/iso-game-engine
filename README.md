@@ -7,14 +7,15 @@ This application requires Java 8 u40 or later.
 
 ## Building and running
 
-Install Apache buildr and type buildr run.
+Type ./gradlew shadowJar to build the map editor.
 
 The first time you run the map editor, you will be asked to browse to the data
 directory.  This is the directory in which you intend to store the game files
 as you edit them.
 
 If the data directory is missing any necessary files or directories, the map
-editor should create them.  At present it just crashes.
+editor should create them.  At present it just crashes.  A starter data
+directory is included in this repository at src/main/resources/gamedata.
 
 ## Keys
 * Q: Rotate camera left
