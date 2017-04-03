@@ -69,10 +69,10 @@ public class LibraryPane extends VBox {
 	private final Button newButton;
 
 	private final Map<String, ToggleButton> textureButtonsG = new HashMap<>();
-	private final Map<String, List<ToggleButton>> spriteButtonsG = new HashMap<>();
+	private final Map<String, ToggleButton> spriteButtonsG = new HashMap<>();
 	private final Map<String, List<ToggleButton>> cliffButtonsG = new HashMap<>();
 	private final Map<String, ToggleButton> textureButtonsL = new HashMap<>();
-	private final Map<String, List<ToggleButton>> spriteButtonsL = new HashMap<>();
+	private final Map<String, ToggleButton> spriteButtonsL = new HashMap<>();
 	private final Map<String, List<ToggleButton>> cliffButtonsL = new HashMap<>();
 
 	private final File globalLibraryFile;
@@ -333,8 +333,8 @@ public class LibraryPane extends VBox {
 	public void deleteSprite(String id) {
 		try {
 			local.deleteSprite(id);
-			List<ToggleButton> bs = spriteButtonsL.get(id);
-			if (bs != null) sprites.local.getChildren().removeAll(bs);
+			ToggleButton button = spriteButtonsL.get(id);
+			if (button != null) sprites.local.getChildren().removeAll(button);
 		} catch (CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
@@ -376,37 +376,29 @@ public class LibraryPane extends VBox {
 	}
 	
 	private void addSprite(SpriteInfo sprite, boolean isGlobal) {
-		ToolContextMenu menu = new ToolContextMenu(
+		final ToolContextMenu menu = new ToolContextMenu(
 			this, AssetType.SPRITE, sprite.id, isGlobal);
 		
-		ToggleButton u = makeSpriteButton(sprite, makeSpritePreview(sprite, FacingDirection.UP), FacingDirection.UP, menu);
-		ToggleButton d = makeSpriteButton(sprite, makeSpritePreview(sprite, FacingDirection.DOWN), FacingDirection.DOWN, menu);
-		ToggleButton l = makeSpriteButton(sprite, makeSpritePreview(sprite, FacingDirection.LEFT), FacingDirection.LEFT, menu);
-		ToggleButton r = makeSpriteButton(sprite, makeSpritePreview(sprite, FacingDirection.RIGHT), FacingDirection.RIGHT, menu);
+		final ToggleButton u = makeSpriteButton(sprite,
+			makeSpritePreview(sprite, FacingDirection.UP), FacingDirection.UP, menu);
 
 		if (isGlobal) {
-			sprites.global.getChildren().addAll(u, d, l, r);
-			spriteButtonsG.put(sprite.id, Arrays.asList(u, d, l, r));
+			sprites.global.getChildren().addAll(u);
+			spriteButtonsG.put(sprite.id, u);
 		} else {
-			sprites.local.getChildren().addAll(u, d, l, r);
-			spriteButtonsL.put(sprite.id, Arrays.asList(u, d, l, r));
+			sprites.local.getChildren().addAll(u);
+			spriteButtonsL.put(sprite.id, u);
 		}
 	}
 
 	private void redrawSpriteButtons(SpriteInfo sprite) {
-		List<ToggleButton> buttons = spriteButtonsL.get(sprite.id);
-		if (buttons == null) {
-			buttons = spriteButtonsG.get(sprite.id);
-			if (buttons == null) throw new RuntimeException(
+		ToggleButton button = spriteButtonsL.get(sprite.id);
+		if (button == null) {
+			button = spriteButtonsG.get(sprite.id);
+			if (button == null) throw new RuntimeException(
 				"Could not find sprite buttons to redraw.  This cannot happen");
 		}
-		if (buttons.size() != 4) throw new RuntimeException(
-			"Wrong number of sprite buttons, this cannot happen");
-
-		buttons.get(0).setGraphic(makeSpritePreview(sprite, FacingDirection.UP));
-		buttons.get(1).setGraphic(makeSpritePreview(sprite, FacingDirection.DOWN));
-		buttons.get(2).setGraphic(makeSpritePreview(sprite, FacingDirection.LEFT));
-		buttons.get(3).setGraphic(makeSpritePreview(sprite, FacingDirection.RIGHT));
+		button.setGraphic(makeSpritePreview(sprite, FacingDirection.UP));
 	}
 
 	private ToggleButton makeSpriteButton(
