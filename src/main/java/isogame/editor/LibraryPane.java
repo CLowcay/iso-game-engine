@@ -423,9 +423,9 @@ public class LibraryPane extends VBox {
 		SpriteInfo sprite, FacingDirection direction
 	) {
 		SpriteAnimation anim = sprite.defaultAnimation;
-		Canvas c = new Canvas(64, anim.h / 8);
+		Canvas c = new Canvas(64, anim.h / 4);
 		GraphicsContext gc = c.getGraphicsContext2D();
-		gc.scale(1.0d/8.0d, 1.0d/8.0d);
+		gc.scale(1.0d/4.0d, 1.0d/4.0d);
 		anim.renderFrame(gc,
 			0, (int) GlobalConstants.TILEW,
 			0, CameraAngle.UL, direction);
@@ -490,7 +490,7 @@ public class LibraryPane extends VBox {
 	) {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.translate(0, (1 - elevation) * 16);
-		gc.scale(1.0d/8.0d, 1.0d/8.0d);
+		gc.scale(1.0d/4.0d, 1.0d/4.0d);
 		try {
 			(new Tile(elevation, slope, global.getTerrain("blank"), tex))
 				.render(gc, null, CameraAngle.UL);

@@ -96,6 +96,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 			event -> idField.selectAll());
 
 		this.priorities.addAll(priorities);
+		priority.getSelectionModel().select(baseInfo.priority);
 
 		animList = FXCollections.observableArrayList(baseInfo.getAllAnimations());
 		anims = new ListView<>(animList);
@@ -128,7 +129,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 		listGroup.getChildren().addAll(anims, buttons);
 
 		grid.addRow(0, new Label("Sprite name"), idField);
-		grid.addRow(1, new Label("Priority"), priority);
+		grid.addRow(1, new Label("Layer"), priority);
 
 		grid.add(listGroup, 0, 2, 2, 1);
 
