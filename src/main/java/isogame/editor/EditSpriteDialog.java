@@ -26,6 +26,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -35,7 +36,9 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -43,6 +46,9 @@ import java.util.UUID;
  * */
 public class EditSpriteDialog extends Dialog<SpriteInfo> {
 	private final TextField idField;
+	private final ObservableList<String> priorities =
+		FXCollections.observableArrayList(new ArrayList<>());
+	private final ComboBox<String> priority = new ComboBox<>(priorities);
 	private final ListView<SpriteAnimation> anims;
 	private final ObservableList<SpriteAnimation> animList;
 	private final Button add = new Button("Add animation");
@@ -52,13 +58,16 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 	/**
 	 * @param info The sprite to edit or null to create a new sprite
 	 * */
-	public EditSpriteDialog(File dataRoot, ResourceLocator loc, SpriteInfo info) {
+	public EditSpriteDialog(
+		File dataRoot, ResourceLocator loc,
+		List<String> priorities, SpriteInfo info
+	) {
 		super();
 
 		boolean isNew;
 		final SpriteInfo baseInfo;
 		if (info == null) {
-			baseInfo = new SpriteInfo(UUID.randomUUID().toString(), null);
+			baseInfo = new SpriteInfo(UUID.randomUUID().toString(), 0, null);
 			isNew = true;
 		} else {
 			baseInfo = info;
@@ -85,6 +94,8 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 		idField.addEventHandler(
 			MouseEvent.MOUSE_CLICKED,
 			event -> idField.selectAll());
+
+		this.priorities.addAll(priorities);
 
 		animList = FXCollections.observableArrayList(baseInfo.getAllAnimations());
 		anims = new ListView<>(animList);
@@ -116,10 +127,10 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 		VBox listGroup = new VBox();
 		listGroup.getChildren().addAll(anims, buttons);
 
-		grid.add(new Label("Sprite name"), 0, 0);
-		grid.add(idField, 1, 0);
+		grid.addRow(0, new Label("Sprite name"), idField);
+		grid.addRow(1, new Label("Priority"), priority);
 
-		grid.add(listGroup, 0, 1, 2, 1);
+		grid.add(listGroup, 0, 2, 2, 1);
 
 		this.getDialogPane().setContent(grid);
 
@@ -130,16 +141,18 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 				for (int i = 0; i < animList.size(); i++) {
 					if (animList.get(i).id.equals("idle")) {
 						if (i != 0) {
-							SpriteAnimation a = animList.remove(i);
+							final SpriteAnimation a = animList.remove(i);
 							animList.add(0, a);
 						}
 						break;
 					}
 				}
 
-				Iterator<SpriteAnimation> it = animList.iterator();
+				final int p = priority.getSelectionModel().getSelectedIndex();
+
+				final Iterator<SpriteAnimation> it = animList.iterator();
 				if (!it.hasNext()) return null;
-				SpriteInfo i = new SpriteInfo(idField.getText(), it.next());
+				final SpriteInfo i = new SpriteInfo(idField.getText(), p, it.next());
 				while (it.hasNext()) {
 					i.addAnimation(it.next());
 				}

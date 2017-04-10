@@ -179,8 +179,7 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Add a sprite to the map.  It appears at the top of the z-order for its
-	 * tile.
+	 * Add a sprite to the map.  z-order is determined by sprite priority.
 	 * */
 	public void addSprite(Sprite sprite) {
 		allSprites.add(sprite);
@@ -229,7 +228,12 @@ public class Stage implements HasJSONRepresentation {
 			l = new LinkedList<>();
 			sprites.put(p, l);
 		}
-		l.add(sprite);
+
+		int i;
+		for (i = 0; i < l.size(); i++)
+			if (l.get(i).info.priority > sprite.info.priority) break;
+
+		l.add(i, sprite);
 	}
 
 	private void removeSpriteFromList(

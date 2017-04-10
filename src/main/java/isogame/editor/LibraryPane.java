@@ -93,6 +93,12 @@ public class LibraryPane extends VBox {
 		ToggleGroup toolsGroup, EditorCanvas canvas
 	) throws IOException, CorruptDataException {
 		super();
+
+		globalLibraryFile = new File(dataRoot, "global_library.json");
+		global = Library.fromFile(
+			new FileInputStream(globalLibraryFile),
+				globalLibraryFile.toString(), loc, null, false);
+
 		this.loc = loc;
 		this.setFocusTraversable(false);
 		this.canvas = canvas;
@@ -139,7 +145,7 @@ public class LibraryPane extends VBox {
 		newButton.setOnAction(event -> {
 			Node selected = palette.getContent();
 			if (selected == sprites) {
-				(new EditSpriteDialog(gfxRoot, loc, null))
+				(new EditSpriteDialog(gfxRoot, loc, global.priorities, null))
 					.showAndWait()
 					.ifPresent(sprite -> addSpriteToLibrary(sprite, false));
 			} else if (selected == textures) {
@@ -167,11 +173,6 @@ public class LibraryPane extends VBox {
 			selectTextures, selectSprites, selectCliffs, newButton);
 
 		this.getChildren().addAll(header, palette);
-
-		globalLibraryFile = new File(dataRoot, "global_library.json");
-		global = Library.fromFile(
-			new FileInputStream(globalLibraryFile),
-				globalLibraryFile.toString(), loc, null, false);
 
 		global.allTerrains().forEach(t -> addTexture(t, true));
 		global.allSprites().forEach(t -> addSprite(t, true));
@@ -268,7 +269,7 @@ public class LibraryPane extends VBox {
 	public void editSprite(String id) {
 		try {
 			SpriteInfo s = local != null ? local.getSprite(id) : global.getSprite(id);
-			(new EditSpriteDialog(gfxRoot, loc, s))
+			(new EditSpriteDialog(gfxRoot, loc, global.priorities, s))
 				.showAndWait()
 				.ifPresent(sprite -> {
 					try {

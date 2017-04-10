@@ -35,13 +35,17 @@ public class SpriteInfo implements HasJSONRepresentation {
 	public final SpriteAnimation defaultAnimation;
 	public final String id;
 
+	// sprites are rendered in order of priority starting with 0
+	public final int priority;
+
 	@Override
 	public String toString() {
 		return id;
 	}
 
-	public SpriteInfo(String id, SpriteAnimation defaultAnimation) {
+	public SpriteInfo(String id, int priority, SpriteAnimation defaultAnimation) {
 		this.id = id;
+		this.priority = priority;
 		this.defaultAnimation = defaultAnimation;
 		animations = new HashMap<>();
 		animationsOrdered = new ArrayList<>();
@@ -52,19 +56,21 @@ public class SpriteInfo implements HasJSONRepresentation {
 		JSONObject json, ResourceLocator loc
 	) throws CorruptDataException
 	{
-		Object rId = json.get("id");
-		Object rAnimations = json.get("animations");
+		final Object rId = json.get("id");
+		final Object rAnimations = json.get("animations");
+		final Object rPriority = json.get("priority");
 
 		if (rId == null) throw new CorruptDataException("Error in sprite, missing id");
 		if (rAnimations == null) throw new CorruptDataException("Error in sprite, missing animations");
 
 		try {
-			JSONArray animations = (JSONArray) rAnimations;
+			final JSONArray animations = (JSONArray) rAnimations;
 			@SuppressWarnings("unchecked")
-			Iterator<Object> i = animations.iterator();
+			final Iterator<Object> i = animations.iterator();
 			// Hazard: Editor must make sure that every sprite has at least one sprite
 			if (!i.hasNext()) throw new CorruptDataException("No animations defined for sprite");
-			SpriteInfo info = new SpriteInfo((String) rId,
+			final int priority = rPriority == null? 0 : ((Number) rPriority).intValue();
+			final SpriteInfo info = new SpriteInfo((String) rId, priority,
 				SpriteAnimation.fromJSON((JSONObject) i.next(), loc));
 			while (i.hasNext()) {
 				info.addAnimation(
@@ -88,11 +94,12 @@ public class SpriteInfo implements HasJSONRepresentation {
 	@Override
 	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
-		JSONArray a = new JSONArray();
+		final JSONArray a = new JSONArray();
 		animationsOrdered.forEach(x -> a.add(x.getJSON()));
 
 		JSONObject r = new JSONObject();
 		r.put("id", id);
+		r.put("priority", priority);
 		r.put("animations", a);
 
 		return r;
