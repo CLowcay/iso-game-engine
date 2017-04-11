@@ -222,8 +222,6 @@ public class Library {
 			final JSONArray terrains = (JSONArray) json.get("terrains");
 			final JSONArray cliffTextures = (JSONArray) json.get("cliffTextures");
 
-			if (priorities == null) throw new CorruptDataException(
-				"Missing priorities section in " + url);
 			if (sprites == null) throw new CorruptDataException(
 				"Missing sprites section in " + url);
 			if (terrains == null) throw new CorruptDataException(
@@ -231,7 +229,8 @@ public class Library {
 			if (cliffTextures == null) throw new CorruptDataException(
 				"Missing cliffTextures section in " + url);
 
-			for (Object x : priorities) r.priorities.add((String) x);
+			if (priorities != null)
+				for (Object x : priorities) r.priorities.add((String) x);
 
 			for (Object x : sprites) {
 				final JSONObject sprite = (JSONObject) x;
