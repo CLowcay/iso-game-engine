@@ -144,5 +144,9 @@ public class Sprite implements HasJSONRepresentation {
 		r.put("sprite", info.id);
 		return r;
 	}
+
+	@Override public String toString() {
+		return "Sprite " + info.toString() + " at " + pos.toString();
+	}
 }
 

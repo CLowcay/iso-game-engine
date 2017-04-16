@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -208,7 +209,7 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public List<Sprite> getSpritesByTile(MapPoint p) {
 		List<Sprite> l = sprites.get(p);
-		return l == null? new LinkedList<>() : l;
+		return l == null? new LinkedList<>() : new ArrayList<>(l);
 	}
 
 	/**
