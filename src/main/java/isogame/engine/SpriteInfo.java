@@ -40,6 +40,10 @@ public class SpriteInfo implements HasJSONRepresentation {
 
 	@Override
 	public String toString() {
+		return id;
+	}
+
+	public String debugString() {
 		return "Sprite:" + id + ":" + priority;
 	}
 
