@@ -21,7 +21,8 @@ package isogame.engine;
 import isogame.GlobalConstants;
 import javafx.scene.canvas.GraphicsContext;
 import java.util.Optional;
-import org.json.simple.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Sprite implements HasJSONRepresentation {
 	public final SpriteInfo info;
@@ -111,33 +112,27 @@ public class Sprite implements HasJSONRepresentation {
 	public static Sprite fromJSON(JSONObject json, Library lib)
 		throws CorruptDataException
 	{
-		Object rPos = json.get("pos");
-		Object rDirection = json.get("direction");
-		Object rSprite = json.get("sprite");
-		Object rAnimation = json.get("animation");
-
-		if (rPos == null) throw new CorruptDataException("Error in sprite, missing pos");
-		if (rDirection == null) throw new CorruptDataException("Error in sprite, missing direction");
-		if (rSprite == null) throw new CorruptDataException("Error in sprite, missing sprite id");
-		if (rAnimation == null) throw new CorruptDataException("Error in sprite, missing animation id");
-
 		try {
-			Sprite sprite = new Sprite(lib.getSprite((String) rSprite));
-			sprite.direction = FacingDirection.valueOf((String) rDirection);
-			sprite.pos = MapPoint.fromJSON((JSONObject) rPos);
-			sprite.setAnimation((String) rAnimation);
+			final JSONObject pos = json.getJSONObject("pos");
+			final String direction = json.getString("direction");
+			final String spriteID = json.getString("sprite");
+			final String animation = json.getString("animation");
+
+			Sprite sprite = new Sprite(lib.getSprite(spriteID));
+			sprite.direction = FacingDirection.valueOf(direction);
+			sprite.pos = MapPoint.fromJSON(pos);
+			sprite.setAnimation(animation);
 			return sprite;
-		} catch (ClassCastException e) {
-			throw new CorruptDataException("Type error in sprite", e);
+		} catch (JSONException e) {
+			throw new CorruptDataException("Error parsing sprite, " + e.getMessage(), e);
 		} catch (IllegalArgumentException e) {
 			throw new CorruptDataException("Type error in sprite", e);
 		}
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
-		JSONObject r = new JSONObject();
+		final JSONObject r = new JSONObject();
 		r.put("pos", pos.getJSON());
 		r.put("direction", direction.name());
 		r.put("animation", animation.id);

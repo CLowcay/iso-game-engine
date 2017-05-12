@@ -18,7 +18,7 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * An interface of objects that can be serialized to JSON.

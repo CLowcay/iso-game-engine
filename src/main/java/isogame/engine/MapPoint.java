@@ -18,7 +18,8 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 /**
  * A map coordinate.  See coordinates.txt for more information.
@@ -35,18 +36,13 @@ public class MapPoint implements HasJSONRepresentation {
 	public static MapPoint fromJSON(JSONObject json)
 		throws CorruptDataException
 	{
-		Object rX = json.get("x");
-		Object rY = json.get("y");
-
-		if (rX == null) throw new CorruptDataException("Error in point, missing x");
-		if (rY == null) throw new CorruptDataException("Error in point, missing y");
-
 		try {
-			return new MapPoint(
-				((Number) rX).intValue(),
-				((Number) rY).intValue());
-		} catch (ClassCastException e) {
-			throw new CorruptDataException("Type error in point", e);
+			final int x = json.getInt("x");
+			final int y = json.getInt("y");
+
+			return new MapPoint(x, y);
+		} catch (JSONException e) {
+			throw new CorruptDataException("Error in map point, " + e.getMessage(), e);
 		}
 	}
 
@@ -92,9 +88,8 @@ public class MapPoint implements HasJSONRepresentation {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
-		JSONObject r = new JSONObject();
+		final JSONObject r = new JSONObject();
 		r.put("x", new Integer(x));
 		r.put("y", new Integer(y));
 		return r;

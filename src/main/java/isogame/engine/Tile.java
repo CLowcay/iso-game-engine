@@ -21,7 +21,8 @@ package isogame.engine;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Paint;
-import org.json.simple.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import static isogame.engine.TilePrerenderer.OFFSETX;
 import static isogame.engine.TilePrerenderer.OFFSETY;
 import static isogame.GlobalConstants.ELEVATION_H;
@@ -81,42 +82,31 @@ public class Tile implements HasJSONRepresentation {
 	public static Tile fromJSON(JSONObject json, Library lib)
 		throws CorruptDataException
 	{
-		Object rP = json.get("p");
-		Object rElevation = json.get("elevation");
-		Object rSlope = json.get("slope");
-		Object rIsManaZone = json.get("isManaZone");
-		Object rStartZone = json.get("startZone");
-		Object rTexture = json.get("texture");
-		Object rCliffTexture = json.get("cliffTexture");
-
-		if (rP == null) throw new CorruptDataException("Error in tile, missing p");
-		if (rElevation == null) throw new CorruptDataException("Error in tile, missing elevation");
-		if (rSlope == null) throw new CorruptDataException("Error in tile, missing slope");
-		if (rIsManaZone == null) throw new CorruptDataException("Error in tile, missing isManaZone");
-		if (rStartZone == null) throw new CorruptDataException("Error in tile, missing startZone");
-		if (rTexture == null) throw new CorruptDataException("Error in tile, missing texture");
-
 		try {
+			final JSONObject p = json.getJSONObject("p");
+			final int elevation = json.getInt("elevation");
+			final String slope = json.getString("slope");
+			final boolean isManaZone = json.getBoolean("isManaZone");
+			final String startZone = json.getString("startZone");
+			final String texture = json.getString("texture");
+			final String cliffTexture = json.optString("cliffTexture", null);
+
 			return new Tile(
-				MapPoint.fromJSON((JSONObject) rP),
-				((Number) rElevation).intValue(),
-				SlopeType.valueOf((String) rSlope),
-				(Boolean) rIsManaZone,
-				StartZoneType.valueOf((String) rStartZone),
-				lib.getTerrain((String) rTexture),
-				rCliffTexture == null? null :
-					lib.getCliffTexture((String) rCliffTexture));
-		} catch (ClassCastException e) {
-			throw new CorruptDataException("Type error in tile", e);
+				MapPoint.fromJSON(p), elevation,
+				SlopeType.valueOf(slope), isManaZone,
+				StartZoneType.valueOf(startZone),
+				lib.getTerrain(texture),
+				cliffTexture == null? null : lib.getCliffTexture(cliffTexture));
+		} catch (JSONException e) {
+			throw new CorruptDataException("Error parsing tile, " + e.getMessage(), e);
 		} catch (IllegalArgumentException e) {
 			throw new CorruptDataException("Type error in tile", e);
 		}
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
-		JSONObject r = new JSONObject();
+		final JSONObject r = new JSONObject();
 		r.put("p", pos.getJSON());
 		r.put("elevation", new Integer(elevation));
 		r.put("slope", slope.name());

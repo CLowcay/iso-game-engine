@@ -32,10 +32,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A library of game assets.
@@ -98,7 +97,7 @@ public class Library {
 		final SpriteInfo i = sprites.get(id);
 		if (i == null) {
 			if (parent == null)
-				throw new CorruptDataException("Missing sprite " + id);
+				throw new CorruptDataException("Missing sprite \"" + id + "\"");
 			else return parent.getSprite(id);
 		} else return i;
 	}
@@ -107,7 +106,7 @@ public class Library {
 		final TerrainTexture r = terrains.get(id);
 		if (r == null) {
 			if (parent == null)
-				throw new CorruptDataException("Missing terrain texture " + id);
+				throw new CorruptDataException("Missing terrain texture \"" + id + "\"");
 			else return parent.getTerrain(id);
 		} else return r;
 	}
@@ -116,24 +115,24 @@ public class Library {
 		final CliffTexture r = cliffTextures.get(id);
 		if (r == null) {
 			if (parent == null)
-				throw new CorruptDataException("Missing cliff texture " + id);
+				throw new CorruptDataException("Missing cliff texture \"" + id + "\"");
 			else return parent.getCliffTexture(id);
 		} else return r;
 	}
 
 	public void deleteTerrain(String id) throws CorruptDataException {
 		if (terrains.remove(id) == null) throw
-			new CorruptDataException("No such terrain " + id);
+			new CorruptDataException("No such terrain \"" + id + "\"");
 	}
 
 	public void deleteSprite(String id) throws CorruptDataException {
 		if (sprites.remove(id) == null) throw
-			new CorruptDataException("No such sprite " + id);
+			new CorruptDataException("No such sprite \"" + id + "\"");
 	}
 
 	public void deleteCliffTexture(String id) throws CorruptDataException {
 		if (cliffTextures.remove(id) == null) throw
-			new CorruptDataException("No such cliff texture " + id);
+			new CorruptDataException("No such cliff texture \"" + id + "\"");
 	}
 
 	public void updateSprite(SpriteInfo sprite) throws CorruptDataException {
@@ -143,7 +142,7 @@ public class Library {
 			parent.updateSprite(sprite);
 		} else {
 			throw new CorruptDataException(
-				"Cannot update sprite because it doesn't exist yet: " + sprite.id);
+				"Cannot update sprite because it doesn't exist yet: \"" + sprite.id + "\"");
 		}
 	}
 
@@ -197,10 +196,15 @@ public class Library {
 			new BufferedReader(new InputStreamReader(inStream, "UTF-8"))
 		) {
 			if (in == null) throw new FileNotFoundException("File not found " + url);
-			final JSONParser parser = new JSONParser();
-			final JSONObject json = (JSONObject) parser.parse(in);
+
+			final StringBuilder raw = new StringBuilder();
+			String line = null;
+			while ((line = in.readLine()) != null) raw.append(line);
+
+			final JSONObject json = new JSONObject(raw.toString());
 			return fromJSON(json, url, loc, parent, nofx);
-		} catch (ParseException e) {
+
+		} catch (JSONException e) {
 			throw new CorruptDataException(url + " is corrupted");
 		}
 	}
@@ -217,10 +221,10 @@ public class Library {
 		try {
 			final Library r = new Library(parent);
 
-			final JSONArray priorities = (JSONArray) json.get("sprite_priorities");
-			final JSONArray sprites = (JSONArray) json.get("sprites");
-			final JSONArray terrains = (JSONArray) json.get("terrains");
-			final JSONArray cliffTextures = (JSONArray) json.get("cliffTextures");
+			final Object opriorities = json.opt("sprite_priorities");
+			final JSONArray sprites = json.getJSONArray("sprites");
+			final JSONArray terrains = json.getJSONArray("terrains");
+			final JSONArray cliffTextures = json.getJSONArray("cliffTextures");
 
 			if (sprites == null) throw new CorruptDataException(
 				"Missing sprites section in " + url);
@@ -229,8 +233,10 @@ public class Library {
 			if (cliffTextures == null) throw new CorruptDataException(
 				"Missing cliffTextures section in " + url);
 
-			if (priorities != null)
+			if (opriorities != null) {
+				final JSONArray priorities = (JSONArray) opriorities;
 				for (Object x : priorities) r.priorities.add((String) x);
+			}
 
 			for (Object x : sprites) {
 				final JSONObject sprite = (JSONObject) x;
@@ -259,6 +265,8 @@ public class Library {
 			return r;
 		} catch (ClassCastException e) {
 			throw new CorruptDataException(url + " is corrupted");
+		} catch (JSONException e) {
+			throw new CorruptDataException("Error parsing data: " + e.getMessage());
 		}
 	}
 
@@ -281,13 +289,13 @@ public class Library {
 			final JSONObject o = new JSONObject();
 
 			final JSONArray prioritiesArray = new JSONArray();
-			priorities.forEach(x -> prioritiesArray.add(x));
+			priorities.forEach(x -> prioritiesArray.put(x));
 			final JSONArray spriteArray = new JSONArray();
-			sprites.values().forEach(x -> spriteArray.add(x.getJSON()));
+			sprites.values().forEach(x -> spriteArray.put(x.getJSON()));
 			final JSONArray terrainArray = new JSONArray();
-			terrains.values().forEach(x -> terrainArray.add(x.getJSON()));
+			terrains.values().forEach(x -> terrainArray.put(x.getJSON()));
 			final JSONArray cliffArray = new JSONArray();
-			cliffTextures.values().forEach(x -> cliffArray.add(x.getJSON()));
+			cliffTextures.values().forEach(x -> cliffArray.put(x.getJSON()));
 
 			o.put("sprite_priorities", prioritiesArray);
 			o.put("sprites", spriteArray);

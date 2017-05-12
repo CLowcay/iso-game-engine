@@ -25,8 +25,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class SpriteInfo implements HasJSONRepresentation {
 	public final Map<String, SpriteAnimation> animations;
@@ -60,22 +61,19 @@ public class SpriteInfo implements HasJSONRepresentation {
 		JSONObject json, ResourceLocator loc
 	) throws CorruptDataException
 	{
-		final Object rId = json.get("id");
-		final Object rAnimations = json.get("animations");
-		final Object rPriority = json.get("priority");
-
-		if (rId == null) throw new CorruptDataException("Error in sprite, missing id");
-		if (rAnimations == null) throw new CorruptDataException("Error in sprite, missing animations");
-
 		try {
-			final JSONArray animations = (JSONArray) rAnimations;
+			final String id = json.getString("id");
+			final JSONArray animations = json.getJSONArray("animations");
+			final int priority = json.optInt("priority", 0);
+
 			@SuppressWarnings("unchecked")
 			final Iterator<Object> i = animations.iterator();
 			// Hazard: Editor must make sure that every sprite has at least one sprite
 			if (!i.hasNext()) throw new CorruptDataException("No animations defined for sprite");
-			final int priority = rPriority == null? 0 : ((Number) rPriority).intValue();
-			final SpriteInfo info = new SpriteInfo((String) rId, priority,
+
+			final SpriteInfo info = new SpriteInfo(id, priority,
 				SpriteAnimation.fromJSON((JSONObject) i.next(), loc));
+
 			while (i.hasNext()) {
 				info.addAnimation(
 					SpriteAnimation.fromJSON((JSONObject) i.next(), loc));
@@ -83,6 +81,8 @@ public class SpriteInfo implements HasJSONRepresentation {
 			return info;
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in sprite", e);
+		} catch (JSONException e) {
+			throw new CorruptDataException("Error parsing sprite info, " + e.getMessage(), e);
 		}
 	}
 
@@ -96,10 +96,9 @@ public class SpriteInfo implements HasJSONRepresentation {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
 		final JSONArray a = new JSONArray();
-		animationsOrdered.forEach(x -> a.add(x.getJSON()));
+		animationsOrdered.forEach(x -> a.put(x.getJSON()));
 
 		JSONObject r = new JSONObject();
 		r.put("id", id);

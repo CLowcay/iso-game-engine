@@ -23,8 +23,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class StageInfo implements HasJSONRepresentation {
 	public final int w;
@@ -42,19 +43,12 @@ public class StageInfo implements HasJSONRepresentation {
 	public static StageInfo fromJSON(JSONObject json, Library lib)
 		throws CorruptDataException
 	{
-		Object rW = json.get("w");
-		Object rH =  json.get("h");
-		Object rData = json.get("data");
-
-		if (rW == null) throw new CorruptDataException("Error in stage, missing w");
-		if (rH == null) throw new CorruptDataException("Error in stage, missing h");
-		if (rData == null) throw new CorruptDataException("Error in stage, missing data");
-
 		try {
-			JSONArray jsonData = (JSONArray) rData;
-			int w = ((Number) rW).intValue();
-			int h = ((Number) rH).intValue();
-			Tile[] data = new Tile[w * h];
+			final int w = json.getInt("w");
+			final int h =  json.getInt("h");
+			final JSONArray jsonData = json.getJSONArray("data");
+
+			final Tile[] data = new Tile[w * h];
 			int i = 0;
 			for (Object t : jsonData) {
 				data[i] = Tile.fromJSON((JSONObject) t, lib);
@@ -64,6 +58,8 @@ public class StageInfo implements HasJSONRepresentation {
 			return new StageInfo(w, h, data);
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in stage info", e);
+		} catch (JSONException e) {
+			throw new CorruptDataException("Error parsing stage info, " + e.getMessage(), e);
 		}
 	}
 
@@ -96,15 +92,12 @@ public class StageInfo implements HasJSONRepresentation {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
-		JSONArray a = new JSONArray();
+		final JSONArray a = new JSONArray();
 		int ndata = w * h;
-		for (int i = 0; i < ndata; i++) {
-			a.add(data[i].getJSON());
-		}
+		for (int i = 0; i < ndata; i++) a.put(data[i].getJSON());
 
-		JSONObject r = new JSONObject();
+		final JSONObject r = new JSONObject();
 		r.put("w", new Integer(w));
 		r.put("h", new Integer(h));
 		r.put("data", a);

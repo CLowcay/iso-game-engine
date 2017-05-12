@@ -31,23 +31,17 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONException;
 
 public class EditorCanvas extends MapView {
 	private Tool tool = null;
@@ -92,7 +86,7 @@ public class EditorCanvas extends MapView {
 					d.setHeaderText("Error in file " + r.toString());
 					d.setContentText(e.toString());
 					d.show();
-				} catch (ParseException e) {
+				} catch (JSONException e) {
 					Alert d = new Alert(Alert.AlertType.ERROR);
 					d.setHeaderText("Error in file " + r.toString());
 					d.setContentText(e.toString());

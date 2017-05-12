@@ -24,7 +24,8 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import java.io.IOException;
 import java.util.Map;
-import org.json.simple.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class CliffTexture implements HasJSONRepresentation {
 	// a paint for every direction the slope could be going.
@@ -73,30 +74,22 @@ public class CliffTexture implements HasJSONRepresentation {
 		ResourceLocator loc, boolean nofx
 	) throws CorruptDataException
 	{
-		Object rId = json.get("id");
-		Object rUrlWide = json.get("urlWide");
-		Object rUrlNarrow = json.get("urlNarrow");
-
-		if (rId == null) throw new CorruptDataException("Error in cliff texture, missing id");
-		if (rUrlWide == null) throw new CorruptDataException("Error in cliff texture, missing urlWide");
-		if (rUrlNarrow == null) throw new CorruptDataException("Error in cliff texture, missing urlNarrow");
-
 		try {
-			return new CliffTexture(loc,
-				(String) rId,
-				(String) rUrlWide,
-				(String) rUrlNarrow, nofx);
-		} catch (ClassCastException e) {
-			throw new CorruptDataException("Type error in cliff texture", e);
+			String id = json.getString("id");
+			String urlWide = json.getString("urlWide");
+			String urlNarrow = json.getString("urlNarrow");
+
+			return new CliffTexture(loc, id, urlWide, urlNarrow, nofx);
 		} catch (IllegalArgumentException e) {
 			throw new CorruptDataException("Bad filename in cliff texture", e);
+		} catch (JSONException e) {
+			throw new CorruptDataException("Error parsing cliff, " + e.getMessage(), e);
 		}
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
-		JSONObject r = new JSONObject();
+		final JSONObject r = new JSONObject();
 		r.put("id", id);
 		r.put("urlWide", urlWide);
 		r.put("urlNarrow", urlNarrow);

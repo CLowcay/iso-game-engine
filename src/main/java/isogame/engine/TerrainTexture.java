@@ -24,7 +24,8 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import java.io.IOException;
 import java.util.Map;
-import org.json.simple.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A texture for use on terrain.  This could be embellished later to make more
@@ -85,27 +86,21 @@ public class TerrainTexture implements HasJSONRepresentation {
 		JSONObject json, ResourceLocator loc, boolean nofx
 	) throws CorruptDataException
 	{
-		Object rId = json.get("id");
-		Object rUrl = json.get("url");
-
-		if (rId == null) throw new CorruptDataException("Error in texture, missing id");
-		if (rUrl == null) throw new CorruptDataException("Error in texture, missing url");
-
 		try {
-			return new TerrainTexture(loc,
-				(String) rId,
-				(String) rUrl, nofx);
-		} catch (ClassCastException e) {
-			throw new CorruptDataException("Type error in texture", e);
+			final String id = json.getString("id");
+			final String url = json.getString("url");
+
+			return new TerrainTexture(loc, id, url, nofx);
+		} catch (JSONException e) {
+			throw new CorruptDataException("Error parsing terrain texture, " + e.getMessage(), e);
 		} catch (IllegalArgumentException e) {
 			throw new CorruptDataException("Bad filename in texture", e);
 		}
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
-		JSONObject r = new JSONObject();
+		final JSONObject r = new JSONObject();
 		r.put("id", id);
 		r.put("url", url);
 

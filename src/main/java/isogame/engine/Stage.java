@@ -33,19 +33,15 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import static isogame.GlobalConstants.ELEVATION_H;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
@@ -115,15 +111,17 @@ public class Stage implements HasJSONRepresentation {
 
 	public static Stage fromFile(
 		File filename, ResourceLocator loc, Library global
-	) throws IOException, CorruptDataException, ParseException
+	) throws IOException, CorruptDataException, JSONException
 	{
 		try (BufferedReader in =
 			new BufferedReader(
 			new InputStreamReader(
 			new FileInputStream(filename), "UTF-8")))
 		{
-			JSONParser parser = new JSONParser();
-			JSONObject json = (JSONObject) parser.parse(in);
+			final StringBuilder raw = new StringBuilder();
+			String line = null;
+			while ((line = in.readLine()) != null) raw.append(line);
+			final JSONObject json = new JSONObject(raw.toString());
 
 			return Stage.fromJSON(json, loc, global);
 		}
@@ -134,45 +132,34 @@ public class Stage implements HasJSONRepresentation {
 	) throws CorruptDataException
 	{
 		try {
-			Object oStageJSON = json.get("stage");
-			if (oStageJSON == null) throw new CorruptDataException(
-				"Error in map file, missing stage");
+			final JSONObject stageJSON = json.getJSONObject("stage");
+			final String name = stageJSON.getString("name");
 
-			JSONObject stageJSON = (JSONObject) oStageJSON;
+			final Library lib = Library.fromJSON(json, name, loc, global, false);
 
-			Object rName = stageJSON.get("name");
-			if (rName == null) throw new CorruptDataException("Error in stage, missing name");
-			String name = (String) rName;
+			final JSONObject terrain = stageJSON.getJSONObject("terrain");
+			final JSONArray sprites = stageJSON.getJSONArray("sprites");
 
-			Library lib = Library.fromJSON(json, name, loc, global, false);
-
-			Object rTerrain = stageJSON.get("terrain");
-			Object rSprites = stageJSON.get("sprites");
-
-			if (rTerrain == null) throw new CorruptDataException("Error in stage, missing terrain");
-			if (rSprites == null) throw new CorruptDataException("Error in stage, missing sprites");
-
-			Stage r = new Stage(StageInfo.fromJSON((JSONObject) rTerrain, lib), lib);
+			final Stage r = new Stage(StageInfo.fromJSON(terrain, lib), lib);
 			r.name = name;
-			JSONArray sprites = (JSONArray) rSprites;
 			for (Object s : sprites) {
 				r.addSprite(Sprite.fromJSON((JSONObject) s, lib));
 			}
+
 			return r;
 		} catch (ClassCastException e) {
 			throw new CorruptDataException("Type error in stage", e);
+		} catch (JSONException e) {
+			throw new CorruptDataException("Error parsing stage, " + e.getMessage(), e);
 		}
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public JSONObject getJSON() {
-		JSONArray s = new JSONArray();
-		for (Sprite sprite : allSprites) {
-			s.add(sprite.getJSON());
-		}
+		final JSONArray s = new JSONArray();
+		for (Sprite sprite : allSprites) s.put(sprite.getJSON());
 
-		JSONObject r = new JSONObject();
+		final JSONObject r = new JSONObject();
 		r.put("name", name);
 		r.put("terrain", terrain.getJSON());
 		r.put("sprites", s);
