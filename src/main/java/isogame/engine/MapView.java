@@ -125,10 +125,12 @@ public class MapView extends Canvas {
 
 	private void centreView() {
 		if (stage == null) return;
+		centreOnTile(new MapPoint(stage.terrain.w/2, stage.terrain.h/2));
+	}
 
-		view.centreOnTile(stage, new MapPoint(
-			stage.terrain.w/2, stage.terrain.h/2));
-
+	public void centreOnTile(MapPoint tile) {
+		if (stage == null) return;
+		view.centreOnTile(stage, tile);
 		scrolling.reset(view.getScrollPos());
 	}
 
