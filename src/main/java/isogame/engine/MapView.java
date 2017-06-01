@@ -25,6 +25,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Node;
 import java.util.ArrayList;
@@ -60,10 +61,9 @@ public class MapView extends Canvas {
 
 	public final View view = new View(960, 400);
 
-	public KeyCode keyRotateL = KeyCode.Q;
-	public KeyCode keyRotateR = KeyCode.E;
-
 	private final boolean debugMode;
+
+	final public KeyBindingTable keyBindings = new KeyBindingTable();
 
 	public MapView(
 		Node root,
@@ -89,24 +89,35 @@ public class MapView extends Canvas {
 			view.setViewport((int) this.getWidth(), h.intValue());
 		});
 
+		// set the default keys
+		keyBindings.keys.put(new KeyCodeCombination(KeyCode.UP), KeyBinding.scrollUp);
+		keyBindings.keys.put(new KeyCodeCombination(KeyCode.DOWN), KeyBinding.scrollDown);
+		keyBindings.keys.put(new KeyCodeCombination(KeyCode.LEFT), KeyBinding.scrollLeft);
+		keyBindings.keys.put(new KeyCodeCombination(KeyCode.RIGHT), KeyBinding.scrollRight);
+		keyBindings.keys.put(new KeyCodeCombination(KeyCode.Q), KeyBinding.rotateLeft);
+		keyBindings.keys.put(new KeyCodeCombination(KeyCode.E), KeyBinding.rotateRight);
+
 		// Listen for events
 		root.addEventHandler(MouseEvent.ANY, mouseHandler);
 		root.setOnKeyPressed(event -> {
-			KeyCode k = event.getCode();
-			setScrollKey(k, true);
-			setScrollingAnimation();
-			if (k == keyRotateL || k == keyRotateR) {
-				if (this.stage == null) return;
-				Point2D centre = view.getViewportCentre();
-				MapPoint centreP = view.tileAtMouse(centre, this.stage);
-				if (k == keyRotateL) view.rotateLeft(); else view.rotateRight();
-				view.centreOnTile(this.stage, centreP);
-				scrolling.reset(view.getScrollPos());
-			}
+			keyBindings.getKeyAction(event).ifPresent(action -> {
+				setScrollKey(action, true);
+				setScrollingAnimation();
+				if (action == KeyBinding.rotateLeft || action == KeyBinding.rotateRight) {
+					if (this.stage == null) return;
+					final Point2D centre = view.getViewportCentre();
+					final MapPoint centreP = view.tileAtMouse(centre, this.stage);
+					if (action == KeyBinding.rotateLeft) view.rotateLeft(); else view.rotateRight();
+					view.centreOnTile(this.stage, centreP);
+					scrolling.reset(view.getScrollPos());
+				}
+			});
 		});
 		root.setOnKeyReleased(event -> {
-			setScrollKey(event.getCode(), false);
-			setScrollingAnimation();
+			keyBindings.getKeyAction(event).ifPresent(action -> {
+				setScrollKey(action, false);
+				setScrollingAnimation();
+			});
 		});
 
 		centreView();
@@ -214,13 +225,11 @@ public class MapView extends Canvas {
 	boolean kdown = false;
 	boolean kleft = false;
 	boolean kright = false;
-	private void setScrollKey(KeyCode key, boolean v) {
-		switch (key) {
-			case UP: kup = v; break;
-			case DOWN: kdown = v; break;
-			case LEFT: kleft = v; break;
-			case RIGHT: kright = v; break;
-		}
+	private void setScrollKey(KeyBinding action, boolean v) {
+		if (action == KeyBinding.scrollUp) kup = v;
+		else if (action == KeyBinding.scrollDown) kdown = v;
+		else if (action == KeyBinding.scrollLeft) kleft = v;
+		else if (action == KeyBinding.scrollRight) kright = v;
 	}
 
 	private void setScrollingAnimation() {
