@@ -13,6 +13,6 @@ public class KeyBinding {
 	public final static KeyBinding rotateLeft = new KeyBinding();
 	public final static KeyBinding rotateRight = new KeyBinding();
 
-	private KeyBinding() { super(); }
+	protected KeyBinding() { super(); }
 }
 
