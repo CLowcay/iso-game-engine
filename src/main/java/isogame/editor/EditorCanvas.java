@@ -231,7 +231,7 @@ public class EditorCanvas extends MapView {
 			oneList.clear(); oneList.add(p);
 			super.setHighlight(oneList, 0);
 		});
-		this.doOnSelection(p -> {
+		this.doOnSelection((p, button) -> {
 			if (tool != null && p != null) tool.apply(p, getStage(), view);
 			saved.setValue(false);
 		});

@@ -26,10 +26,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Node;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,7 +44,7 @@ import static isogame.GlobalConstants.TILEH;
 public class MapView extends Canvas {
 	private Stage stage = null;
 	private boolean enableAnimations = false;
-	private Consumer<MapPoint> onSelection = x -> {};
+	private BiConsumer<MapPoint, MouseButton> onSelection = (x, b) -> {};
 	private Consumer<MapPoint> onMouseOver = x -> {};
 	private Consumer<MapPoint> onMouseOverSprite = x -> {};
 	private Runnable onMouseOutSprite = () -> {};
@@ -179,7 +181,7 @@ public class MapView extends Canvas {
 						} else {
 							onMouseOver.accept(p);
 							if (event.isPrimaryButtonDown() && selectable.contains(p)) {
-								onSelection.accept(p);
+								onSelection.accept(p, event.getButton());
 							}
 						}
 					}
@@ -196,7 +198,7 @@ public class MapView extends Canvas {
 								onMouseOverSprite.accept(sprite);
 							}
 							if (event.isPrimaryButtonDown() && selectableSprites.contains(sprite)) {
-								onSelection.accept(sprite);
+								onSelection.accept(sprite, event.getButton());
 							}
 						}
 					}
@@ -210,14 +212,14 @@ public class MapView extends Canvas {
 
 					if (ps != null &&
 						selectableSprites.stream().anyMatch(s -> s.pos.equals(ps))) {
-						onSelection.accept(ps);
+						onSelection.accept(ps, event.getButton());
 
 					} else if (p != null && (selectable.contains(p) ||
 						selectableSprites.stream().anyMatch(s -> s.pos.equals(p)))) {
-						onSelection.accept(p);
+						onSelection.accept(p, event.getButton());
 
 					} else {
-						onSelection.accept(null);
+						onSelection.accept(null, event.getButton());
 					}
 				}
 			}
@@ -337,7 +339,7 @@ public class MapView extends Canvas {
 		return selectable.contains(p);
 	}
 
-	public void doOnSelection(Consumer<MapPoint> c) {
+	public void doOnSelection(BiConsumer<MapPoint, MouseButton> c) {
 		this.onSelection = c;
 	}
 
