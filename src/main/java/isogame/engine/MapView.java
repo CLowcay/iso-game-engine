@@ -116,6 +116,7 @@ public class MapView extends Canvas {
 					final Point2D centre = view.getViewportCentre();
 					final MapPoint centreP = view.tileAtMouse(centre, this.stage);
 					if (action == KeyBinding.rotateLeft) view.rotateLeft(); else view.rotateRight();
+					scrolling.setClamp(view.getScrollBounds(stage));
 					view.centreOnTile(this.stage, centreP);
 					scrolling.reset(view.getScrollPos());
 				}
@@ -129,6 +130,7 @@ public class MapView extends Canvas {
 			});
 		});
 
+		if (stage != null) scrolling.setClamp(view.getScrollBounds(stage));
 		centreView();
 	}
 
@@ -141,17 +143,6 @@ public class MapView extends Canvas {
 		if (stage == null) return;
 		view.centreOnTile(stage, tile);
 		scrolling.reset(view.getScrollPos());
-	}
-
-	private final static Rectangle2D viewportRect =
-		new Rectangle2D(0, 0, ISO_VIEWPORTW, ISO_VIEWPORTH);
-	
-	private void clampScrolling(Point2D v) {
-		if (!viewportRect.contains(v)) {
-			scrolling.reset(new Point2D(
-				Math.min(viewportRect.getMaxX(), Math.max(viewportRect.getMinX(), v.getX())),
-				Math.min(viewportRect.getMaxY(), Math.max(viewportRect.getMinY(), v.getY()))));
-		}
 	}
 
 	private AnimationTimer animateCanvas = new AnimationTimer() {
@@ -171,7 +162,6 @@ public class MapView extends Canvas {
 
 			if (stage != null) {
 				final Point2D v = scrolling.valueAt(now);
-				clampScrolling(v);
 				view.setScrollPos(v);
 				view.renderFrame(cx, enableAnimations? now : 0, stage, debugMode);
 			}
@@ -306,9 +296,10 @@ public class MapView extends Canvas {
 		this.stage = stage;
 
 		if (stage == null) return;
-		
+
 		setSelectable(new ArrayList<>());
 		stage.setHighlightColors(highlightColors);
+		scrolling.setClamp(view.getScrollBounds(stage));
 		centreView();
 	}
 

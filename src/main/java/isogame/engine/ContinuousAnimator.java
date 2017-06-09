@@ -19,6 +19,7 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.engine;
 
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 
 /**
  * Manages continuous (smooth) animations that can be started, stopped, and
@@ -27,6 +28,8 @@ import javafx.geometry.Point2D;
 public class ContinuousAnimator {
 	private Point2D vector;
 	private double speed;  // number of times per second we traverse the vector
+
+	private Rectangle2D clamp; // may be null.  Clamp the vector to this range.
 
 	private Point2D origin;
 	private long t0;
@@ -42,6 +45,7 @@ public class ContinuousAnimator {
 	public ContinuousAnimator() {
 		vector = new Point2D(0, 0);
 		origin = new Point2D(0, 0);
+		clamp = null;
 		t0 = 0;
 	}
 
@@ -61,11 +65,16 @@ public class ContinuousAnimator {
 		}
 	}
 
+	public void setClamp(Rectangle2D clamp) {
+		this.clamp = clamp;
+	}
+
 	/**
 	 * Reset the initial position
 	 * */
 	public void reset(Point2D origin) {
 		this.origin = origin;
+		t0IsNow = true;
 	}
 
 	public void start() {
@@ -97,6 +106,14 @@ public class ContinuousAnimator {
 				((double) (t - t0)) * (speed / 1000000000.0d)));
 		} else {
 			r = origin;
+		}
+
+		if (clamp != null && !clamp.contains(r)) {
+			r = new Point2D(
+				Math.min(clamp.getMaxX(), Math.max(clamp.getMinX(), r.getX())),
+				Math.min(clamp.getMaxY(), Math.max(clamp.getMinY(), r.getY())));
+			origin = r;
+			t0 = t;
 		}
 
 		if (stopping) {

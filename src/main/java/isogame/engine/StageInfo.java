@@ -123,6 +123,58 @@ public class StageInfo implements HasJSONRepresentation {
 	}
 
 	/**
+	 * Get the position of the tile that renders at the top of the map.
+	 * */
+	public MapPoint getTop(CameraAngle a) {
+		switch (a) {
+			case UL: return new MapPoint(0,     0);
+			case LL: return new MapPoint(0,     h - 1);
+			case LR: return new MapPoint(w - 1, h - 1);
+			case UR: return new MapPoint(w - 1, 0);
+			default: throw new RuntimeException("Invalid camera angle, this cannot happen");
+		}
+	}
+
+	/**
+	 * Get the position of the tile that renders at the bottom of the map.
+	 * */
+	public MapPoint getBottom(CameraAngle a) {
+		switch (a) {
+			case UL: return new MapPoint(w - 1, h - 1);
+			case LL: return new MapPoint(w - 1, 0);
+			case LR: return new MapPoint(0,     0);
+			case UR: return new MapPoint(0,     h - 1);
+			default: throw new RuntimeException("Invalid camera angle, this cannot happen");
+		}
+	}
+
+	/**
+	 * Get the position of the tile that renders at the left of the map.
+	 * */
+	public MapPoint getLeft(CameraAngle a) {
+		switch (a) {
+			case UL: return new MapPoint(0,     h - 1);
+			case LL: return new MapPoint(w - 1, h - 1);
+			case LR: return new MapPoint(w - 1, 0);
+			case UR: return new MapPoint(0,     0);
+			default: throw new RuntimeException("Invalid camera angle, this cannot happen");
+		}
+	}
+
+	/**
+	 * Get the position of the tile that renders at the right of the map.
+	 * */
+	public MapPoint getRight(CameraAngle a) {
+		switch (a) {
+			case UL: return new MapPoint(w - 1, 0);
+			case LL: return new MapPoint(0,     0);
+			case LR: return new MapPoint(0,     h - 1);
+			case UR: return new MapPoint(w - 1, h - 1);
+			default: throw new RuntimeException("Invalid camera angle, this cannot happen");
+		}
+	}
+
+	/**
 	 * Iterate over the tiles in this sort of order:
 	 * 0 2 5
 	 * 1 4 7

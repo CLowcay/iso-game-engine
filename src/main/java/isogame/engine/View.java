@@ -20,6 +20,7 @@ package isogame.engine;
 
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -106,6 +107,20 @@ public class View {
 		angle = angle.nextAnticlockwise();
 	}
 
+	private final static int overscroll = 3;
+
+	public Rectangle2D getScrollBounds(Stage stage) {
+		final Point2D pt = stage.toIsoCoord(stage.terrain.getTop(angle), angle);
+		final Point2D pb = stage.toIsoCoord(stage.terrain.getBottom(angle), angle);
+		final Point2D pl = stage.toIsoCoord(stage.terrain.getLeft(angle), angle);
+		final Point2D pr = stage.toIsoCoord(stage.terrain.getRight(angle), angle);
+		return new Rectangle2D(
+			pl.getX() - (overscroll * TILEW),
+			pt.getY() - (overscroll * TILEH),
+			pr.subtract(pl).getX() + (overscroll * TILEW * 2) - ISO_VIEWPORTW,
+			pb.subtract(pt).getY() + (overscroll * TILEH * 2) - ISO_VIEWPORTH);
+	}
+
 	public CameraAngle getCameraAngle() {
 		return angle;
 	}
@@ -172,7 +187,7 @@ public class View {
 		cx.setTransform(screenTransform);
 
 		stage.render(cx, angle, t, new BoundingBox(x, y - TILEH,
-				ISO_VIEWPORTW, ISO_VIEWPORTH + (2 * TILEH)), renderDebug);
+			ISO_VIEWPORTW, ISO_VIEWPORTH + (2 * TILEH)), renderDebug);
 
 		cx.restore();
 
