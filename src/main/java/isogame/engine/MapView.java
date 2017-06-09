@@ -50,6 +50,8 @@ public class MapView extends Canvas {
 	private BiConsumer<MapPoint, MouseButton> onSelection = (x, b) -> {};
 	private Consumer<MapPoint> onMouseOver = x -> {};
 	private Consumer<MapPoint> onMouseOverSprite = x -> {};
+	private Consumer<KeyBinding> onKeyPressed = x -> {};
+	private Consumer<KeyBinding> onKeyReleased = x -> {};
 	private Runnable onMouseOutSprite = () -> {};
 	private Runnable onMouseOut = () -> {};
 
@@ -106,6 +108,7 @@ public class MapView extends Canvas {
 		root.addEventHandler(MouseEvent.ANY, mouseHandler);
 		root.setOnKeyPressed(event -> {
 			keyBindings.getKeyAction(event).ifPresent(action -> {
+				onKeyPressed.accept(action);
 				setScrollKey(action, true);
 				setScrollingAnimation();
 				if (action == KeyBinding.rotateLeft || action == KeyBinding.rotateRight) {
@@ -120,6 +123,7 @@ public class MapView extends Canvas {
 		});
 		root.setOnKeyReleased(event -> {
 			keyBindings.getKeyAction(event).ifPresent(action -> {
+				onKeyReleased.accept(action);
 				setScrollKey(action, false);
 				setScrollingAnimation();
 			});
@@ -367,6 +371,14 @@ public class MapView extends Canvas {
 		this.onMouseOverSprite = c;
 	}
 
+	public void doOnKeyPressed(Consumer<KeyBinding> c) {
+		this.onKeyPressed = c;
+	}
+
+	public void doOnKeyReleased(Consumer<KeyBinding> c) {
+		this.onKeyReleased = c;
+	}
+
 	public void doOnMouseOutSprite(Runnable c) {
 		this.onMouseOutSprite = c;
 	}
@@ -379,5 +391,3 @@ public class MapView extends Canvas {
 		this.enableAnimations = enableAnimations;
 	}
 }
-
-
