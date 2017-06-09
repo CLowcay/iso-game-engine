@@ -22,6 +22,7 @@ import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
@@ -35,6 +36,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.HashSet;
 import java.util.Set;
+import static isogame.GlobalConstants.ISO_VIEWPORTH;
+import static isogame.GlobalConstants.ISO_VIEWPORTW;
 import static isogame.GlobalConstants.SCROLL_SPEED;
 import static isogame.GlobalConstants.TILEH;
 
@@ -136,6 +139,17 @@ public class MapView extends Canvas {
 		scrolling.reset(view.getScrollPos());
 	}
 
+	private final static Rectangle2D viewportRect =
+		new Rectangle2D(0, 0, ISO_VIEWPORTW, ISO_VIEWPORTH);
+	
+	private void clampScrolling(Point2D v) {
+		if (!viewportRect.contains(v)) {
+			scrolling.reset(new Point2D(
+				Math.min(viewportRect.getMaxX(), Math.max(viewportRect.getMinX(), v.getX())),
+				Math.min(viewportRect.getMaxY(), Math.max(viewportRect.getMinY(), v.getY()))));
+		}
+	}
+
 	private AnimationTimer animateCanvas = new AnimationTimer() {
 		int count0 = 0;
 		int count = 0;
@@ -152,7 +166,9 @@ public class MapView extends Canvas {
 			}
 
 			if (stage != null) {
-				view.setScrollPos(scrolling.valueAt(now));
+				final Point2D v = scrolling.valueAt(now);
+				clampScrolling(v);
+				view.setScrollPos(v);
 				view.renderFrame(cx, enableAnimations? now : 0, stage, debugMode);
 			}
 		}
