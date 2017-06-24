@@ -35,12 +35,16 @@ public class SelectionInfo {
 		this.spriteTile = spriteTile;
 	}
 
+	public boolean isEmpty() {
+		return !mouseTile.isPresent() && !spriteTile.isPresent();
+	}
+
 	public Optional<MapPoint> pointPriority() {
 		if (mouseTile.isPresent()) return mouseTile; else return spriteTile;
 	}
 
 	public Optional<MapPoint> spritePriority() {
-		if (mouseTile.isPresent()) return spriteTile; else return mouseTile;
+		if (spriteTile.isPresent()) return spriteTile; else return mouseTile;
 	}
 }
 

@@ -166,10 +166,16 @@ public class MapView extends Canvas {
 		}
 	};
 
+	MapPoint p0 = null;
+	MapPoint sprite0 = null;
+
+	public void resetMouseHandlers() {
+		p0 = null;
+		sprite0 = null;
+	}
+
 	private EventHandler<MouseEvent> mouseHandler =
 		new EventHandler<MouseEvent>() {
-			MapPoint p0 = null;
-			MapPoint sprite0 = null;
 
 			@Override
 			public void handle(MouseEvent event) {
