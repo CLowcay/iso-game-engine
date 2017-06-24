@@ -1,4 +1,4 @@
-/* © Callum Lowcay 2015, 2016
+/* © Callum Lowcay 2015, 2016, 2017
 
 This file is part of iso-game-engine.
 
@@ -18,26 +18,24 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Point2D;
-import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.Node;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.HashSet;
-import java.util.Set;
-import static isogame.GlobalConstants.ISO_VIEWPORTH;
-import static isogame.GlobalConstants.ISO_VIEWPORTW;
 import static isogame.GlobalConstants.SCROLL_SPEED;
 import static isogame.GlobalConstants.TILEH;
 
@@ -47,7 +45,7 @@ import static isogame.GlobalConstants.TILEH;
 public class MapView extends Canvas {
 	private Stage stage = null;
 	private boolean enableAnimations = false;
-	private BiConsumer<MapPoint, MouseButton> onSelection = (x, b) -> {};
+	private BiConsumer<SelectionInfo, MouseButton> onSelection = (x, b) -> {};
 	private Consumer<MapPoint> onMouseOver = x -> {};
 	private Consumer<MapPoint> onMouseOverSprite = x -> {};
 	private Consumer<KeyBinding> onKeyPressed = x -> {};
@@ -191,7 +189,7 @@ public class MapView extends Canvas {
 						} else {
 							onMouseOver.accept(p);
 							if (event.isPrimaryButtonDown() && selectable.contains(p)) {
-								onSelection.accept(p, event.getButton());
+								onSelection.accept(new SelectionInfo(Optional.of(p), Optional.empty()), event.getButton());
 							}
 						}
 					}
@@ -208,7 +206,7 @@ public class MapView extends Canvas {
 								onMouseOverSprite.accept(sprite);
 							}
 							if (event.isPrimaryButtonDown() && selectableSprites.contains(sprite)) {
-								onSelection.accept(sprite, event.getButton());
+								onSelection.accept(new SelectionInfo(Optional.empty(), Optional.of(sprite)), event.getButton());
 							}
 						}
 					}
@@ -220,17 +218,15 @@ public class MapView extends Canvas {
 					MapPoint ps = view.spriteAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
-					if (ps != null &&
-						selectableSprites.stream().anyMatch(s -> s.pos.equals(ps))) {
-						onSelection.accept(ps, event.getButton());
+					final boolean hasPoint = p != null && (selectable.contains(p) ||
+						selectableSprites.stream().anyMatch(s -> s.pos.equals(p)));
 
-					} else if (p != null && (selectable.contains(p) ||
-						selectableSprites.stream().anyMatch(s -> s.pos.equals(p)))) {
-						onSelection.accept(p, event.getButton());
+					final boolean hasSprite = ps != null &&
+						selectableSprites.stream().anyMatch(s -> s.pos.equals(ps));
 
-					} else {
-						onSelection.accept(null, event.getButton());
-					}
+					onSelection.accept(new SelectionInfo(
+						Optional.ofNullable(hasPoint? p : null),
+						Optional.ofNullable(hasSprite? ps : null)), event.getButton());
 				}
 			}
 		};
@@ -350,7 +346,7 @@ public class MapView extends Canvas {
 		return selectable.contains(p);
 	}
 
-	public void doOnSelection(BiConsumer<MapPoint, MouseButton> c) {
+	public void doOnSelection(BiConsumer<SelectionInfo, MouseButton> c) {
 		this.onSelection = c;
 	}
 
