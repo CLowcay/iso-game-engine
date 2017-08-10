@@ -20,14 +20,11 @@ package isogame.engine;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Paint;
 import org.json.JSONException;
 import org.json.JSONObject;
 import static isogame.engine.TilePrerenderer.OFFSETX;
 import static isogame.engine.TilePrerenderer.OFFSETY;
-import static isogame.GlobalConstants.ELEVATION_H;
 import static isogame.GlobalConstants.TILEH;
-import static isogame.GlobalConstants.TILEW;
 
 /**
  * Represents a single tile in a stage.
@@ -43,28 +40,28 @@ public class Tile implements HasJSONRepresentation {
 
 	private final boolean even;
 
-	public Tile(MapPoint p, TerrainTexture texture) {
+	public Tile(final MapPoint p, final TerrainTexture texture) {
 		this(p, 0, SlopeType.NONE, false, StartZoneType.NONE, texture, null);
 	}
 
 	public Tile(
-		int elevation,
-		SlopeType slope,
-		TerrainTexture texture,
-		CliffTexture cliffTexture
+		final int elevation,
+		final SlopeType slope,
+		final TerrainTexture texture,
+		final CliffTexture cliffTexture
 	) {
 		this(new MapPoint(0, 0), elevation, slope,
 			false, StartZoneType.NONE, texture, cliffTexture);
 	}
 
 	public Tile(
-		MapPoint pos,
-		int elevation,
-		SlopeType slope,
-		boolean isManaZone,
-		StartZoneType startZone,
-		TerrainTexture texture,
-		CliffTexture cliffTexture
+		final MapPoint pos,
+		final int elevation,
+		final SlopeType slope,
+		final boolean isManaZone,
+		final StartZoneType startZone,
+		final TerrainTexture texture,
+		final CliffTexture cliffTexture
 	) {
 		this.elevation = elevation;
 		this.pos = pos;
@@ -79,7 +76,7 @@ public class Tile implements HasJSONRepresentation {
 		this.startZone = startZone;
 	}
 
-	public static Tile fromJSON(JSONObject json, Library lib)
+	public static Tile fromJSON(final JSONObject json, final Library lib)
 		throws CorruptDataException
 	{
 		try {
@@ -139,28 +136,32 @@ public class Tile implements HasJSONRepresentation {
 	/**
 	 * Make a new tile with a different texture
 	 * */
-	public Tile newTexture(TerrainTexture tex) {
+	public Tile newTexture(final TerrainTexture tex) {
 		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
 	}
 
 	/**
 	 * Make a new tile with different elevation characteristics
 	 * */
-	public Tile newElevation(int elevation, SlopeType slope, CliffTexture cliffTexture) {
+	public Tile newElevation(
+		final int elevation,
+		final SlopeType slope,
+		final CliffTexture cliffTexture
+	) {
 		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
 	}
 
 	/**
 	 * Make a new tile with a different mana zone property
 	 * */
-	public Tile newManaZone(boolean isManaZone) {
+	public Tile newManaZone(final boolean isManaZone) {
 		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
 	}
 
 	/**
 	 * Make a new tile with a different start zone type
 	 * */
-	public Tile newStartZone(StartZoneType startZone) {
+	public Tile newStartZone(final StartZoneType startZone) {
 		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
 	}
 
@@ -168,7 +169,7 @@ public class Tile implements HasJSONRepresentation {
 		return new Tile(pos, elevation, slope, false, StartZoneType.NONE, tex, cliffTexture);
 	}
 
-	public SlopeType adjustSlopeForCameraAngle(CameraAngle angle) {
+	public SlopeType adjustSlopeForCameraAngle(final CameraAngle angle) {
 		int s;
 		int d;
 
@@ -201,17 +202,19 @@ public class Tile implements HasJSONRepresentation {
 		}
 	}
 
-	private double[] xs = new double[6];
-	private double[] ys = new double[6];
+	private final double[] xs = new double[6];
+	private final double[] ys = new double[6];
 
 	/**
 	 * Render this tile at (0,0).  If you need to draw the tile somewhere else,
 	 * do a translation before calling this method.
 	 * */
 	public void render(
-		GraphicsContext cx, Highlighter highlighter, CameraAngle angle
+		final GraphicsContext cx,
+		final Highlighter highlighter,
+		final CameraAngle angle
 	) {
-		SlopeType slope = adjustSlopeForCameraAngle(angle);
+		final SlopeType slope = adjustSlopeForCameraAngle(angle);
 
 		cx.drawImage(tex.getTexture(even, slope), -OFFSETX, -OFFSETY);
 		if (highlighter != null) highlighter.renderTop(cx, slope);
@@ -221,7 +224,7 @@ public class Tile implements HasJSONRepresentation {
 		}
 
 		if (elevation != 0) {
-			Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
+			final Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
 			for (int i = 0; i < elevation; i++) {
 				cx.translate(0, TILEH / 2);
 				cx.drawImage(epaint, -OFFSETX, -OFFSETY);

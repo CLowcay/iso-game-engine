@@ -58,8 +58,8 @@ public class MoveSpriteAnimation extends Animation {
 	private final static MapPoint rightPV = new MapPoint(1, 0);
 
 	private void updateElevationDelta() {
-		Tile tfrom = terrain.getTile(point);
-		Tile tto = terrain.getTile(point.add(directionVector));
+		final Tile tfrom = terrain.getTile(point);
+		final Tile tto = terrain.getTile(point.add(directionVector));
 		if (tfrom.slope == tto.slope && tfrom.elevation == tto.elevation) {
 			elevationDelta = 0;
 		} else if (tfrom.slope == SlopeType.NONE) {
@@ -81,10 +81,10 @@ public class MoveSpriteAnimation extends Animation {
 	}
 
 	public MoveSpriteAnimation(
-		MapPoint start, MapPoint target,
-		String spriteAnimation, double walkSpeed,
-		StageInfo terrain,
-		BiConsumer<MapPoint, MapPoint> crossBoundary
+		final MapPoint start, final MapPoint target,
+		final String spriteAnimation, final double walkSpeed,
+		final StageInfo terrain,
+		final BiConsumer<MapPoint, MapPoint> crossBoundary
 	) {
 		if (start.equals(target)) throw new RuntimeException(
 			"Start and end points of movement must be different");
@@ -124,7 +124,7 @@ public class MoveSpriteAnimation extends Animation {
 		updateElevationDelta();
 	}
 
-	@Override public void start(Sprite s) {
+	@Override public void start(final Sprite s) {
 		s.setAnimation(spriteAnimation);
 		s.direction = direction;
 		animator.start();
@@ -134,7 +134,7 @@ public class MoveSpriteAnimation extends Animation {
 	/**
 	 * @return true if the animation is now complete.
 	 * */
-	@Override public boolean updateAnimation(long t) {
+	@Override public boolean updateAnimation(final long t) {
 		double v1 = animator.valueAt(t).getX();
 		if (v1 >= targetv) {
 			v = targetv;
@@ -160,13 +160,13 @@ public class MoveSpriteAnimation extends Animation {
 	 * moving from.
 	 * */
 	public void renderSprite(
-		GraphicsContext gx,
-		CameraAngle angle,
-		Sprite s,
-		long t,
-		boolean isTargetSlice
+		final GraphicsContext gx,
+		final CameraAngle angle,
+		final Sprite s,
+		final long t,
+		final boolean isTargetSlice
 	) {
-		double scale = v - Math.floor(v);
+		final double scale = v - Math.floor(v);
 		Point2D directionVector;
 		boolean isLeftSlice;
 		switch (direction.transform(angle)) {

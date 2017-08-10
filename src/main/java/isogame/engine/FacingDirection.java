@@ -66,7 +66,7 @@ public enum FacingDirection {
 	 * 2: DOWN
 	 * 3: RIGHT
 	 * */
-	public int transform(CameraAngle angle) {
+	public int transform(final CameraAngle angle) {
 		int d = 0;
 		int a = 0;
 		switch (this) {
@@ -84,7 +84,7 @@ public enum FacingDirection {
 		return (d + a) % 4;
 	}
 
-	public FacingDirection inverseTransform(CameraAngle angle) {
+	public FacingDirection inverseTransform(final CameraAngle angle) {
 		int d = 0;
 		int a = 0;
 		switch (this) {
@@ -108,6 +108,5 @@ public enum FacingDirection {
 			default: throw new RuntimeException("This cannot happen");
 		}
 	}
-
 }
 

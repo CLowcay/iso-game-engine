@@ -41,7 +41,10 @@ public class TerrainTexture implements HasJSONRepresentation {
 	private final Map<SlopeType, Image> oddPrerendered;
 
 	public TerrainTexture(
-		ResourceLocator loc, String id, String url, boolean nofx
+		final ResourceLocator loc,
+		final String id,
+		final String url,
+		final boolean nofx
 	) throws CorruptDataException {
 		this.id = id;
 		this.url = url;
@@ -53,12 +56,12 @@ public class TerrainTexture implements HasJSONRepresentation {
 
 		} else {
 			try {
-				Image texture = new Image(loc.gfx(url));
+				final Image texture = new Image(loc.gfx(url));
 				int w = (int) texture.getWidth();
 				int h = (int) texture.getHeight();
 
-				Paint evenPaint = new ImagePattern(texture, 0, 0, 1, 1, true);
-				Paint oddPaint = new ImagePattern(texture, -0.5, -0.5, 1, 1, true);
+				final Paint evenPaint = new ImagePattern(texture, 0, 0, 1, 1, true);
+				final Paint oddPaint = new ImagePattern(texture, -0.5, -0.5, 1, 1, true);
 				samplePaint = evenPaint;
 
 				evenPrerendered = TilePrerenderer.prerenderTile(evenPaint);
@@ -73,7 +76,7 @@ public class TerrainTexture implements HasJSONRepresentation {
 	/**
 	 * Get an appropriate prerendered texture.
 	 * */
-	public Image getTexture(boolean even, SlopeType slope) {
+	public Image getTexture(final boolean even, final SlopeType slope) {
 		if (even) return evenPrerendered.get(slope);
 		else return oddPrerendered.get(slope);
 	}
@@ -83,7 +86,9 @@ public class TerrainTexture implements HasJSONRepresentation {
 	 * JavaFX
 	 * */
 	public static TerrainTexture fromJSON(
-		JSONObject json, ResourceLocator loc, boolean nofx
+		final JSONObject json,
+		final ResourceLocator loc,
+		final boolean nofx
 	) throws CorruptDataException
 	{
 		try {

@@ -20,12 +20,15 @@ package isogame.engine;
 
 import isogame.GlobalConstants;
 import isogame.resource.ResourceLocator;
+
+import java.io.IOException;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
-import java.io.IOException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,11 +59,11 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	private final double sf;
 
 	public SpriteAnimation(
-		ResourceLocator loc,
-		String id,
-		String url,
-		int frames,
-		int framerate
+		final ResourceLocator loc,
+		final String id,
+		final String url,
+		final int frames,
+		final int framerate
 	) throws CorruptDataException
 	{
 		this.frames = frames;
@@ -69,13 +72,13 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		this.url = url;
 
 		try {
-			Image buffer = new Image(loc.gfx(url));
+			final Image buffer = new Image(loc.gfx(url));
 			hitTester = buffer.getPixelReader();
 			hitW = (int) buffer.getWidth();
 			hitH = (int) buffer.getHeight();
 
-			double iw = buffer.getWidth() / ((double) frames);
-			double ih = buffer.getHeight() / 4.0d;
+			final double iw = buffer.getWidth() / ((double) frames);
+			final double ih = buffer.getHeight() / 4.0d;
 			sf = GlobalConstants.TILEW / iw;
 			w = (int) GlobalConstants.TILEW;
 			h = (int) ((GlobalConstants.TILEW / iw) * ih);
@@ -104,20 +107,24 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	 * @return true if the hit test passes.
 	 * */
 	public boolean hitTest(
-		int x, int y0, int frame, CameraAngle angle, FacingDirection direction
+		final int x,
+		final int y0,
+		final int frame,
+		final CameraAngle angle,
+		final FacingDirection direction
 	) {
-		int y = y0 + h - ((int) GlobalConstants.TILEH);
+		final int y = y0 + h - ((int) GlobalConstants.TILEH);
 		if (x < 0 || x >= w || y < 0 || y >= h) return false;
 
-		int rotation = direction.transform(angle);
-		int xt = (int) ((double) (x + (frame * GlobalConstants.TILEW)) / sf);
-		int yt = (int) ((double) (y + (rotation * h)) / sf);
+		final int rotation = direction.transform(angle);
+		final int xt = (int) ((double) (x + (frame * GlobalConstants.TILEW)) / sf);
+		final int yt = (int) ((double) (y + (rotation * h)) / sf);
 
 		return hitTester.getColor(xt, yt).isOpaque();
 	}
 
 	public static SpriteAnimation fromJSON(
-		JSONObject json, ResourceLocator loc
+		final JSONObject json, final ResourceLocator loc
 	) throws CorruptDataException
 	{
 		try {
@@ -133,14 +140,14 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	}
 
 	public void renderFrame(
-		GraphicsContext cx,
-		int xoff, int w1,
-		int frame,
-		CameraAngle angle,
-		FacingDirection direction
+		final GraphicsContext cx,
+		final int xoff, int w1,
+		final int frame0,
+		final CameraAngle angle,
+		final FacingDirection direction
 	) {
-		frame = frame % frames;
-		int rotation = direction.transform(angle);
+		final int frame = frame0 % frames;
+		final int rotation = direction.transform(angle);
 		cx.setFill(frameTextures[(frame * 4) + rotation]);
 		cx.fillRect(xoff, 0, w1, h);
 	}

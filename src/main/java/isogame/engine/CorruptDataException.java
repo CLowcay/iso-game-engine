@@ -23,11 +23,11 @@ public class CorruptDataException extends Exception {
 		super();
 	}
 
-	public CorruptDataException(String msg) {
+	public CorruptDataException(final String msg) {
 		super(msg);
 	}
 
-	public CorruptDataException(String msg, Exception cause) {
+	public CorruptDataException(final String msg, final Exception cause) {
 		super(msg, cause);
 	}
 }

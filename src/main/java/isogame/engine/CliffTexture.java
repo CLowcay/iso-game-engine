@@ -19,11 +19,14 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.engine;
 
 import isogame.resource.ResourceLocator;
+
+import java.io.IOException;
+import java.util.Map;
+
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
-import java.io.IOException;
-import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,8 +43,11 @@ public class CliffTexture implements HasJSONRepresentation {
 	private final Map<SlopeType, Image> prerendered;
 
 	public CliffTexture(
-		ResourceLocator loc,
-		String id, String urlWide, String urlNarrow, boolean nofx
+		final ResourceLocator loc,
+		final String id,
+		final String urlWide,
+		final String urlNarrow,
+		final boolean nofx
 	) throws CorruptDataException {
 		this.id = id;
 		this.urlWide = urlWide;
@@ -54,8 +60,8 @@ public class CliffTexture implements HasJSONRepresentation {
 			flat = null;
 		} else {
 			try {
-				Image imgWide = new Image(loc.gfx(urlWide));
-				Image imgNarrow = new Image(loc.gfx(urlNarrow));
+				final Image imgWide = new Image(loc.gfx(urlWide));
+				final Image imgNarrow = new Image(loc.gfx(urlNarrow));
 
 				ul = new ImagePattern(imgNarrow, -1, 0, 2, 1, true);
 				ur = new ImagePattern(imgNarrow,  0, 0, 2, 1, true);
@@ -70,14 +76,14 @@ public class CliffTexture implements HasJSONRepresentation {
 	}
 
 	public static CliffTexture fromJSON(
-		JSONObject json,
-		ResourceLocator loc, boolean nofx
+		final JSONObject json,
+		final ResourceLocator loc, final boolean nofx
 	) throws CorruptDataException
 	{
 		try {
-			String id = json.getString("id");
-			String urlWide = json.getString("urlWide");
-			String urlNarrow = json.getString("urlNarrow");
+			final String id = json.getString("id");
+			final String urlWide = json.getString("urlWide");
+			final String urlNarrow = json.getString("urlNarrow");
 
 			return new CliffTexture(loc, id, urlWide, urlNarrow, nofx);
 		} catch (IllegalArgumentException e) {
@@ -97,7 +103,7 @@ public class CliffTexture implements HasJSONRepresentation {
 		return r;
 	}
 
-	public Paint getTexture(SlopeType s) {
+	public Paint getTexture(final SlopeType s) {
 		switch (s) {
 			case N: return ur;
 			case S: return flat;
@@ -116,7 +122,7 @@ public class CliffTexture implements HasJSONRepresentation {
 	/**
 	 * Get an appropriate prerendered texture.
 	 * */
-	public Image getPreTexture(SlopeType slope) {
+	public Image getPreTexture(final SlopeType slope) {
 		return prerendered.get(slope);
 	}
 }

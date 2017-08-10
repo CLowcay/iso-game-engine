@@ -19,12 +19,14 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.engine;
 
 import isogame.resource.ResourceLocator;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,7 +50,9 @@ public class SpriteInfo implements HasJSONRepresentation {
 		return "Sprite:" + id + ":" + priority;
 	}
 
-	public SpriteInfo(String id, int priority, SpriteAnimation defaultAnimation) {
+	public SpriteInfo(
+		final String id, final int priority, final SpriteAnimation defaultAnimation
+	) {
 		this.id = id;
 		this.priority = priority;
 		this.defaultAnimation = defaultAnimation;
@@ -58,7 +62,7 @@ public class SpriteInfo implements HasJSONRepresentation {
 	}
 
 	public static SpriteInfo fromJSON(
-		JSONObject json, ResourceLocator loc
+		final JSONObject json, final ResourceLocator loc
 	) throws CorruptDataException
 	{
 		try {
@@ -90,7 +94,7 @@ public class SpriteInfo implements HasJSONRepresentation {
 		return animations.values();
 	}
 
-	public void addAnimation(SpriteAnimation animation) {
+	public void addAnimation(final SpriteAnimation animation) {
 		animations.put(animation.id, animation);
 		animationsOrdered.add(animation);
 	}
@@ -100,7 +104,7 @@ public class SpriteInfo implements HasJSONRepresentation {
 		final JSONArray a = new JSONArray();
 		animationsOrdered.forEach(x -> a.put(x.getJSON()));
 
-		JSONObject r = new JSONObject();
+		final JSONObject r = new JSONObject();
 		r.put("id", id);
 		r.put("priority", priority);
 		r.put("animations", a);

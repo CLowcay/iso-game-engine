@@ -18,15 +18,15 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.SnapshotParameters;
-import java.util.function.Function;
-import java.util.HashMap;
-import java.util.Map;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
 
@@ -41,13 +41,13 @@ class TilePrerenderer {
 	public static final double OFFSETX = 4;
 	public static final double OFFSETY = 4 + (TILEH / 2);
 
-	public static Map<SlopeType, Image> prerenderTile(Paint texture) {
+	public static Map<SlopeType, Image> prerenderTile(final Paint texture) {
 		sp.setFill(Color.TRANSPARENT);
-		Canvas canvas = new Canvas(canvasW, canvasH);
-		GraphicsContext cx = canvas.getGraphicsContext2D();
+		final Canvas canvas = new Canvas(canvasW, canvasH);
+		final GraphicsContext cx = canvas.getGraphicsContext2D();
 		cx.translate(OFFSETX, OFFSETY);
 
-		Map<SlopeType, Image> r = new HashMap<>();
+		final Map<SlopeType, Image> r = new HashMap<>();
 
 		// NONE
 		xs[0] = TILEW / 2; ys[0] = -2;
@@ -102,14 +102,14 @@ class TilePrerenderer {
 	}
 
 	public static Map<SlopeType, Image> prerenderCliff(
-		Function<SlopeType, Paint> texture
+		final Function<SlopeType, Paint> texture
 	) {
 		sp.setFill(Color.TRANSPARENT);
-		Canvas canvas = new Canvas(canvasW, canvasH);
-		GraphicsContext cx = canvas.getGraphicsContext2D();
+		final Canvas canvas = new Canvas(canvasW, canvasH);
+		final GraphicsContext cx = canvas.getGraphicsContext2D();
 		cx.translate(OFFSETX, OFFSETY);
 
-		Map<SlopeType, Image> r = new HashMap<>();
+		final Map<SlopeType, Image> r = new HashMap<>();
 
 		// NONE
 		xs[0] = 0;         ys[0] = 0;

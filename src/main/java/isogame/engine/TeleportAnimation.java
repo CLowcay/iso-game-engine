@@ -18,8 +18,8 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import javafx.scene.canvas.GraphicsContext;
 import java.util.function.BiConsumer;
+
 
 /**
  * An animation to teleport a sprite instantly from one square to another.
@@ -30,8 +30,9 @@ public class TeleportAnimation extends Animation {
 	private final BiConsumer<MapPoint, MapPoint> crossBoundary;
 
 	public TeleportAnimation(
-		MapPoint start, MapPoint target,
-		BiConsumer<MapPoint, MapPoint> crossBoundary
+		final MapPoint start,
+		final MapPoint target,
+		final BiConsumer<MapPoint, MapPoint> crossBoundary
 	) {
 		this.start = start;
 		this.target = target;
@@ -39,14 +40,14 @@ public class TeleportAnimation extends Animation {
 	}
 
 
-	@Override public void start(Sprite s) {
+	@Override public void start(final Sprite s) {
 		return;
 	}
 
 	/**
 	 * @return true if the animation is now complete.
 	 * */
-	@Override public boolean updateAnimation(long t) {
+	@Override public boolean updateAnimation(final long t) {
 		crossBoundary.accept(start, target);
 		return true;
 	}

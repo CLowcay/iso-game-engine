@@ -18,8 +18,8 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A map coordinate.  See coordinates.txt for more information.
@@ -28,12 +28,12 @@ public class MapPoint implements HasJSONRepresentation {
 	public final int x;
 	public final int y;
 
-	public MapPoint(int x, int y) {
+	public MapPoint(final int x, final int y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	public static MapPoint fromJSON(JSONObject json)
+	public static MapPoint fromJSON(final JSONObject json)
 		throws CorruptDataException
 	{
 		try {
@@ -46,7 +46,7 @@ public class MapPoint implements HasJSONRepresentation {
 		}
 	}
 
-	public MapPoint add(MapPoint p) {
+	public MapPoint add(final MapPoint p) {
 		return new MapPoint(x + p.x, y + p.y);
 	}
 
@@ -55,21 +55,21 @@ public class MapPoint implements HasJSONRepresentation {
 	 * @param p The point to add
 	 * @param s The scale factor to apply to p
 	 * */
-	public MapPoint addScale(MapPoint p, int s) {
+	public MapPoint addScale(final MapPoint p, final int s) {
 		return new MapPoint(x + s * p.x, y + s * p.y);
 	}
 
 	/**
 	 * compute this - p.
 	 * */
-	public MapPoint subtract(MapPoint p) {
+	public MapPoint subtract(final MapPoint p) {
 		return new MapPoint(x - p.x, y - p.y);
 	}
 
 	/**
 	 * Compute the manhattan distance
 	 * */
-	public int distance(MapPoint p) {
+	public int distance(final MapPoint p) {
 		return Math.abs(p.x - x) + Math.abs(p.y - y);
 	}
 
@@ -96,9 +96,9 @@ public class MapPoint implements HasJSONRepresentation {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj instanceof MapPoint) {
-			MapPoint p = (MapPoint) obj;
+			final MapPoint p = (MapPoint) obj;
 			return p.x == x && p.y == y;
 		} else {
 			return false;

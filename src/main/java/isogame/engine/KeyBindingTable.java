@@ -12,7 +12,7 @@ import java.util.Optional;
 public class KeyBindingTable {
 	public final Map<KeyCodeCombination, KeyBinding> keys = new HashMap<>();
 
-	public Optional<KeyBinding> getKeyAction(KeyEvent e) {
+	public Optional<KeyBinding> getKeyAction(final KeyEvent e) {
 		for (KeyCodeCombination k : keys.keySet()) {
 			if (k.match(e)) return Optional.of(keys.get(k));
 		}

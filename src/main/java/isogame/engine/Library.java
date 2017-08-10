@@ -19,11 +19,12 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.engine;
 
 import isogame.resource.ResourceLocator;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -32,6 +33,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,12 +90,12 @@ public class Library {
 
 	public final List<String> priorities = new ArrayList<>();
 
-	public Sprite newSprite(String id) throws CorruptDataException {
+	public Sprite newSprite(final String id) throws CorruptDataException {
 		final SpriteInfo i = getSprite(id);
 		return new Sprite(i);
 	}
 
-	public SpriteInfo getSprite(String id) throws CorruptDataException {
+	public SpriteInfo getSprite(final String id) throws CorruptDataException {
 		final SpriteInfo i = sprites.get(id);
 		if (i == null) {
 			if (parent == null)
@@ -102,7 +104,7 @@ public class Library {
 		} else return i;
 	}
 
-	public TerrainTexture getTerrain(String id) throws CorruptDataException {
+	public TerrainTexture getTerrain(final String id) throws CorruptDataException {
 		final TerrainTexture r = terrains.get(id);
 		if (r == null) {
 			if (parent == null)
@@ -111,7 +113,7 @@ public class Library {
 		} else return r;
 	}
 
-	public CliffTexture getCliffTexture(String id) throws CorruptDataException {
+	public CliffTexture getCliffTexture(final String id) throws CorruptDataException {
 		final CliffTexture r = cliffTextures.get(id);
 		if (r == null) {
 			if (parent == null)
@@ -120,22 +122,22 @@ public class Library {
 		} else return r;
 	}
 
-	public void deleteTerrain(String id) throws CorruptDataException {
+	public void deleteTerrain(final String id) throws CorruptDataException {
 		if (terrains.remove(id) == null) throw
 			new CorruptDataException("No such terrain \"" + id + "\"");
 	}
 
-	public void deleteSprite(String id) throws CorruptDataException {
+	public void deleteSprite(final String id) throws CorruptDataException {
 		if (sprites.remove(id) == null) throw
 			new CorruptDataException("No such sprite \"" + id + "\"");
 	}
 
-	public void deleteCliffTexture(String id) throws CorruptDataException {
+	public void deleteCliffTexture(final String id) throws CorruptDataException {
 		if (cliffTextures.remove(id) == null) throw
 			new CorruptDataException("No such cliff texture \"" + id + "\"");
 	}
 
-	public void updateSprite(SpriteInfo sprite) throws CorruptDataException {
+	public void updateSprite(final SpriteInfo sprite) throws CorruptDataException {
 		if (sprites.containsKey(sprite.id)) {
 			sprites.put(sprite.id, sprite);
 		} else if (parent != null) {
@@ -158,15 +160,15 @@ public class Library {
 		return cliffTextures.values();
 	}
 
-	public void addSprite(SpriteInfo sprite) {
+	public void addSprite(final SpriteInfo sprite) {
 		sprites.put(sprite.id, sprite);
 	}
 
-	public void addTerrain(TerrainTexture terrain) {
+	public void addTerrain(final TerrainTexture terrain) {
 		terrains.put(terrain.id, terrain);
 	}
 
-	public void addCliffTexture(CliffTexture cliffTexture) {
+	public void addCliffTexture(final CliffTexture cliffTexture) {
 		cliffTextures.put(cliffTexture.id, cliffTexture);
 	}
 
@@ -179,7 +181,7 @@ public class Library {
 	/**
 	 * Create an empty library
 	 * */
-	public Library(Library parent) {
+	public Library(final Library parent) {
 		this.parent = parent;
 	}
 
@@ -188,8 +190,8 @@ public class Library {
 	 * @param inStream The input stream.  It will be closed automatically.
 	 * */
 	public static Library fromFile(
-		InputStream inStream, String url,
-		ResourceLocator loc, Library parent, boolean nofx
+		final InputStream inStream, final String url,
+		final ResourceLocator loc, final Library parent, final boolean nofx
 	) throws IOException, CorruptDataException
 	{
 		try (BufferedReader in =
@@ -214,8 +216,8 @@ public class Library {
 	 * @param nofx True if we cannot use JavaFX in this environment
 	 * */
 	public static Library fromJSON(
-		JSONObject json, String url,
-		ResourceLocator loc, Library parent, boolean nofx
+		final JSONObject json, final String url,
+		final ResourceLocator loc, final Library parent, final boolean nofx
 	) throws CorruptDataException
 	{
 		try {
@@ -273,7 +275,7 @@ public class Library {
 	/**
 	 * Write this library to an output stream.
 	 * */
-	public void writeToStream(OutputStream outStream) throws IOException {
+	public void writeToStream(final OutputStream outStream) throws IOException {
 		writeToStream(outStream, null);
 	}
 
@@ -282,7 +284,9 @@ public class Library {
 	 * file.
 	 * */
 	@SuppressWarnings("unchecked")
-	public void writeToStream(OutputStream outStream, Stage stage) throws IOException {
+	public void writeToStream(
+		final OutputStream outStream, final Stage stage
+	) throws IOException {
 		try (PrintWriter out =
 			new PrintWriter(new OutputStreamWriter(outStream, "UTF-8"));
 		) {

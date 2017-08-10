@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +33,9 @@ public class StageInfo implements HasJSONRepresentation {
 	public final int h;
 	private final Tile[] data;
 
-	public StageInfo(int w, int h, Tile[] data) throws CorruptDataException {
+	public StageInfo(
+		final int w, final int h, final Tile[] data
+	) throws CorruptDataException {
 		this.w = w;
 		this.h = h;
 		this.data = data;
@@ -40,7 +43,7 @@ public class StageInfo implements HasJSONRepresentation {
 			throw new CorruptDataException("Incorrect number of tiles in stage");
 	}
 
-	public static StageInfo fromJSON(JSONObject json, Library lib)
+	public static StageInfo fromJSON(final JSONObject json, final Library lib)
 		throws CorruptDataException
 	{
 		try {
@@ -83,11 +86,11 @@ public class StageInfo implements HasJSONRepresentation {
 			.collect(Collectors.toList());
 	}
 
-	public boolean usesTerrainTexture(TerrainTexture tex) {
+	public boolean usesTerrainTexture(final TerrainTexture tex) {
 		return Arrays.stream(data).anyMatch(t -> t.tex == tex);
 	}
 
-	public boolean usesCliffTexture(CliffTexture tex) {
+	public boolean usesCliffTexture(final CliffTexture tex) {
 		return Arrays.stream(data).anyMatch(t -> t.cliffTexture == tex);
 	}
 
@@ -104,13 +107,13 @@ public class StageInfo implements HasJSONRepresentation {
 		return r;
 	}
 
-	public Tile getTile(MapPoint pos) throws IndexOutOfBoundsException {
+	public Tile getTile(final MapPoint pos) throws IndexOutOfBoundsException {
 		if (pos.x < 0 || pos.y < 0 || pos.x >= w || pos.y >= h)
 			throw new IndexOutOfBoundsException();
 		return data[(pos.y * w) + pos.x];
 	}
 
-	public void setTile(Tile tile)
+	public void setTile(final Tile tile)
 		throws IndexOutOfBoundsException
 	{
 		if (tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= w || tile.pos.y >= h)
@@ -118,14 +121,14 @@ public class StageInfo implements HasJSONRepresentation {
 		data[(tile.pos.y * w) + tile.pos.x] = tile;
 	}
 
-	public boolean hasTile(MapPoint pos) {
+	public boolean hasTile(final MapPoint pos) {
 		return pos.x >= 0 && pos.y >= 0 && pos.x < w && pos.y < h;
 	}
 
 	/**
 	 * Get the position of the tile that renders at the top of the map.
 	 * */
-	public MapPoint getTop(CameraAngle a) {
+	public MapPoint getTop(final CameraAngle a) {
 		switch (a) {
 			case UL: return new MapPoint(0,     0);
 			case LL: return new MapPoint(0,     h - 1);
@@ -138,7 +141,7 @@ public class StageInfo implements HasJSONRepresentation {
 	/**
 	 * Get the position of the tile that renders at the bottom of the map.
 	 * */
-	public MapPoint getBottom(CameraAngle a) {
+	public MapPoint getBottom(final CameraAngle a) {
 		switch (a) {
 			case UL: return new MapPoint(w - 1, h - 1);
 			case LL: return new MapPoint(w - 1, 0);
@@ -151,7 +154,7 @@ public class StageInfo implements HasJSONRepresentation {
 	/**
 	 * Get the position of the tile that renders at the left of the map.
 	 * */
-	public MapPoint getLeft(CameraAngle a) {
+	public MapPoint getLeft(final CameraAngle a) {
 		switch (a) {
 			case UL: return new MapPoint(0,     h - 1);
 			case LL: return new MapPoint(w - 1, h - 1);
@@ -164,7 +167,7 @@ public class StageInfo implements HasJSONRepresentation {
 	/**
 	 * Get the position of the tile that renders at the right of the map.
 	 * */
-	public MapPoint getRight(CameraAngle a) {
+	public MapPoint getRight(final CameraAngle a) {
 		switch (a) {
 			case UL: return new MapPoint(w - 1, 0);
 			case LL: return new MapPoint(0,     0);
@@ -186,7 +189,7 @@ public class StageInfo implements HasJSONRepresentation {
 	 * the back to the front, so objects closer to the camera properly obscure
 	 * objects that are further away.
 	 * */
-	public Iterator<Tile> iterateTiles(CameraAngle a) {
+	public Iterator<Tile> iterateTiles(final CameraAngle a) {
 		// coordinates of the next tile to return
 		final int x0;
 		final int y0;
@@ -275,7 +278,9 @@ public class StageInfo implements HasJSONRepresentation {
 	 * Iterate over the tiles in the correct order to do mouse collision
 	 * detection when the mouse is at point p with elevation 0.
 	 * */
-	public Iterator<Tile> iterateCollisionDetection(MapPoint p, CameraAngle a) {
+	public Iterator<Tile> iterateCollisionDetection(
+		final MapPoint p, final CameraAngle a
+	) {
 		/* WARNING: This method is complicated and subtle, but absolutely essential
 		 * for reliable collision detection.  Think very carefully before modifying
 		 * this code.

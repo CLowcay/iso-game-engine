@@ -19,10 +19,12 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.engine;
 
 import isogame.GlobalConstants;
-import javafx.scene.canvas.GraphicsContext;
+
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
+
+import javafx.scene.canvas.GraphicsContext;
 
 public class AnimationChain {
 	private Runnable onFinished = () -> {};
@@ -30,13 +32,13 @@ public class AnimationChain {
 	private final Queue<Animation> queuedAnimations = new LinkedList<>();
 	private final Sprite sprite;
 
-	public AnimationChain(Sprite sprite) {
+	public AnimationChain(final Sprite sprite) {
 		this.sprite = sprite;
 		sprite.setAnimationChain(this);
 	}
 
 	private boolean chainRunning = false;
-	public void doOnFinished(Runnable onFinished) {
+	public void doOnFinished(final Runnable onFinished) {
 		this.onFinished = onFinished;
 	}
 
@@ -54,7 +56,7 @@ public class AnimationChain {
 	/**
 	 * @return true if the entire animation chain is finished
 	 * */
-	public boolean updateAnimation(long t) {
+	public boolean updateAnimation(final long t) {
 		if (!activeAnimation.isPresent()) {
 			activeAnimation = Optional.ofNullable(queuedAnimations.poll());
 			activeAnimation.ifPresent(a -> {
@@ -79,11 +81,11 @@ public class AnimationChain {
 	 * Render a sprite taking into account any animation effects.
 	 * */
 	public void renderSprite(
-		GraphicsContext gx,
-		CameraAngle angle,
-		Sprite s,
-		long t,
-		boolean isTargetSlice
+		final GraphicsContext gx,
+		final CameraAngle angle,
+		final Sprite s,
+		final long t,
+		final boolean isTargetSlice
 	) {
 		if (activeAnimation.isPresent()) {
 			activeAnimation.get().renderSprite(gx, angle, s, t, isTargetSlice);
@@ -94,7 +96,7 @@ public class AnimationChain {
 		}
 	}
 
-	public void queueAnimation(Animation a) {
+	public void queueAnimation(final Animation a) {
 		queuedAnimations.add(a);
 	}
 }

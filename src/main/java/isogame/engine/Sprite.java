@@ -64,7 +64,7 @@ public class Sprite implements HasJSONRepresentation {
 	 * @param r The decal renderer function, null to deregister the current decal
 	 * renderer.
 	 * */
-	public void setDecalRenderer(SpriteDecalRenderer r) {
+	public void setDecalRenderer(final SpriteDecalRenderer r) {
 		renderDecal = Optional.ofNullable(r);
 	}
 
@@ -74,7 +74,9 @@ public class Sprite implements HasJSONRepresentation {
 	 * @param y coordinate transformed relative to the origin of this sprite
 	 * @return true if the point collides, otherwise false
 	 * */
-	public boolean hitTest(double x, double y, CameraAngle angle) {
+	public boolean hitTest(
+		final double x, final double y, final CameraAngle angle
+	) {
 		return animation.hitTest((int) x, (int) y, frame, angle, direction);
 	}
 
@@ -83,9 +85,13 @@ public class Sprite implements HasJSONRepresentation {
 	 * WARNING: does not preserve the current translation.
 	 * */
 	public void renderFrame(
-		GraphicsContext cx, int xoff, int w, long t, CameraAngle angle
+		final GraphicsContext cx,
+		final int xoff,
+		final int w,
+		final long t,
+		final CameraAngle angle
 	) {
-		int frame = frameAnimator.frameAt(t);
+		final int frame = frameAnimator.frameAt(t);
 
 		cx.translate(0, GlobalConstants.TILEH - animation.h);
 		animation.renderFrame(cx, xoff, w, frame, angle, direction);
@@ -102,14 +108,14 @@ public class Sprite implements HasJSONRepresentation {
 	/**
 	 * Set the animation for rendering this sprite.
 	 * */
-	public void setAnimation(String animation) {
+	public void setAnimation(final String animation) {
 		this.animation = info.animations.get(animation);
 		this.frame = 0;
 		this.frameAnimator = new FrameAnimator(
 			this.animation.frames, this.animation.framerate);
 	}
 
-	public static Sprite fromJSON(JSONObject json, Library lib)
+	public static Sprite fromJSON(final JSONObject json, final Library lib)
 		throws CorruptDataException
 	{
 		try {
@@ -118,7 +124,7 @@ public class Sprite implements HasJSONRepresentation {
 			final String spriteID = json.getString("sprite");
 			final String animation = json.getString("animation");
 
-			Sprite sprite = new Sprite(lib.getSprite(spriteID));
+			final Sprite sprite = new Sprite(lib.getSprite(spriteID));
 			sprite.direction = FacingDirection.valueOf(direction);
 			sprite.pos = MapPoint.fromJSON(pos);
 			sprite.setAnimation(animation);

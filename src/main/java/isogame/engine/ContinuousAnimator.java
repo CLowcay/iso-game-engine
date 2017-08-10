@@ -54,7 +54,7 @@ public class ContinuousAnimator {
 	 * @param vector The direction to move
 	 * @param speed The number of times per second we traverse the entire vector
 	 * */
-	public void setAnimation(Point2D vector, double speed) {
+	public void setAnimation(final Point2D vector, final double speed) {
 		if (running && (!vector.equals(this.vector) || speed != this.speed)) {
 			animationChanging = true;
 			this.vector1 = vector;
@@ -65,14 +65,14 @@ public class ContinuousAnimator {
 		}
 	}
 
-	public void setClamp(Rectangle2D clamp) {
+	public void setClamp(final Rectangle2D clamp) {
 		this.clamp = clamp;
 	}
 
 	/**
 	 * Reset the initial position
 	 * */
-	public void reset(Point2D origin) {
+	public void reset(final Point2D origin) {
 		this.origin = origin;
 		t0IsNow = true;
 	}
@@ -93,7 +93,7 @@ public class ContinuousAnimator {
 	 * Compute the position at time t.
 	 * @param t The time at which to compute the position.
 	 * */
-	public Point2D valueAt(long t) {
+	public Point2D valueAt(final long t) {
 		if (t0IsNow) {
 			t0 = t;
 			t0IsNow = false;

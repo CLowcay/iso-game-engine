@@ -19,18 +19,11 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.engine;
 
 import isogame.resource.ResourceLocator;
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Point2D;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.transform.Affine;
-import javafx.scene.transform.NonInvertibleTransformException;
-import javafx.scene.transform.Rotate;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +32,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javafx.geometry.BoundingBox;
+import javafx.geometry.Point2D;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
+import javafx.scene.transform.Rotate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,12 +80,12 @@ public class Stage implements HasJSONRepresentation {
 	public final CollisionDetector collisions;
 
 	public Stage clone() {
-		Stage r = new Stage(this.terrain, this.localLibrary);
+		final Stage r = new Stage(this.terrain, this.localLibrary);
 		for (Sprite s : allSprites) r.addSprite(s);
 		return r;
 	}
 
-	public Stage(StageInfo terrain, Library localLibrary) {
+	public Stage(final StageInfo terrain, final Library localLibrary) {
 		this.terrain = terrain;
 		this.localLibrary = localLibrary;
 		this.collisions = new CollisionDetector(this);
@@ -94,8 +94,8 @@ public class Stage implements HasJSONRepresentation {
 		slicedSprites = new HashMap<>();
 
 		// set the camera angle rotations
-		double xPivot = ((double) terrain.w) / 2.0d;
-		double yPivot = ((double) terrain.h) / 2.0d;
+		final double xPivot = ((double) terrain.w) / 2.0d;
+		final double yPivot = ((double) terrain.h) / 2.0d;
 		rUL = new Rotate();
 		rLL = new Rotate(90, xPivot, yPivot);
 		rLR = new Rotate(180, xPivot, yPivot);
@@ -110,7 +110,7 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	public static Stage fromFile(
-		File filename, ResourceLocator loc, Library global
+		final File filename, final ResourceLocator loc, final Library global
 	) throws IOException, CorruptDataException, JSONException
 	{
 		try (BufferedReader in =
@@ -128,7 +128,7 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	public static Stage fromJSON(
-		JSONObject json, ResourceLocator loc, Library global
+		final JSONObject json, final ResourceLocator loc, final Library global
 	) throws CorruptDataException
 	{
 		try {
@@ -169,7 +169,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Add a sprite to the map.  z-order is determined by sprite priority.
 	 * */
-	public void addSprite(Sprite sprite) {
+	public void addSprite(final Sprite sprite) {
 		allSprites.add(sprite);
 		addSpriteToList(sprite, sprite.pos, sprites);
 	}
@@ -178,7 +178,7 @@ public class Stage implements HasJSONRepresentation {
 	 * Add a sprite to the map, removing any sprites already at the same
 	 * location.
 	 * */
-	public void replaceSprite(Sprite sprite) {
+	public void replaceSprite(final Sprite sprite) {
 		clearTileOfSprites(sprite.pos);
 		addSprite(sprite);
 	}
@@ -186,7 +186,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Remove a single sprite.
 	 * */
-	public void removeSprite(Sprite sprite) {
+	public void removeSprite(final Sprite sprite) {
 		allSprites.remove(sprite);
 		removeSpriteFromList(sprite, sprite.pos, sprites);
 	}
@@ -194,7 +194,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Get all the sprites on a tile.
 	 * */
-	public List<Sprite> getSpritesByTile(MapPoint p) {
+	public List<Sprite> getSpritesByTile(final MapPoint p) {
 		List<Sprite> l = sprites.get(p);
 		return l == null? new LinkedList<>() : new ArrayList<>(l);
 	}
@@ -202,14 +202,16 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Remove all the sprites on a given tile.
 	 * */
-	public void clearTileOfSprites(MapPoint p) {
+	public void clearTileOfSprites(final MapPoint p) {
 		List<Sprite> l = sprites.get(p);
 		if (l != null) allSprites.removeAll(l);
 		sprites.remove(p);
 	}
 
 	private void addSpriteToList(
-		Sprite sprite, MapPoint p, Map<MapPoint, List<Sprite>> sprites
+		final Sprite sprite,
+		final MapPoint p,
+		final Map<MapPoint, List<Sprite>> sprites
 	) {
 		List<Sprite> l = sprites.get(p);
 		if (l == null) {
@@ -225,9 +227,11 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	private void removeSpriteFromList(
-		Sprite sprite, MapPoint p, Map<MapPoint, List<Sprite>> sprites
+		final Sprite sprite,
+		final MapPoint p,
+		final Map<MapPoint, List<Sprite>> sprites
 	) {
-		List<Sprite> l = sprites.get(p);
+		final List<Sprite> l = sprites.get(p);
 		if (l != null) l.remove(sprite);
 	}
 
@@ -235,11 +239,11 @@ public class Stage implements HasJSONRepresentation {
 	 * Register a new animation chain with this stage.  Must be invoked in order
 	 * to activate the animations.
 	 * */
-	public void registerAnimationChain(AnimationChain chain) {
+	public void registerAnimationChain(final AnimationChain chain) {
 		animationChains.add(chain);
 	}
 
-	public void deregisterAnimationChain(AnimationChain chain) {
+	public void deregisterAnimationChain(final AnimationChain chain) {
 		animationChains.remove(chain);
 		chain.terminateChain();
 	}
@@ -249,7 +253,11 @@ public class Stage implements HasJSONRepresentation {
 	 * @param animation The walking animation to use.
 	 * */
 	public void queueMoveSprite(
-		Sprite s, MapPoint start, MapPoint target, String animation, double speed
+		final Sprite s,
+		final MapPoint start,
+		final MapPoint target,
+		final String animation,
+		final double speed
 	) {
 		AnimationChain chain = s.getAnimationChain();
 		if (chain == null) {
@@ -276,7 +284,7 @@ public class Stage implements HasJSONRepresentation {
 	 * Queue a teleport "animation".  Instantly moves the character sprite from
 	 * one location to another.
 	 * */
-	public void queueTeleportSprite(Sprite s, MapPoint target) {
+	public void queueTeleportSprite(final Sprite s, final MapPoint target) {
 		AnimationChain chain = s.getAnimationChain();
 		if (chain == null) {
 			chain = new AnimationChain(s);
@@ -295,7 +303,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Rotate all the sprites on a particular tile.
 	 * */
-	public void rotateSprites(MapPoint p) {
+	public void rotateSprites(final MapPoint p) {
 		List<Sprite> l = sprites.get(p);
 		if (l != null) for (Sprite s : l) s.rotate();
 	}
@@ -303,21 +311,21 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Does this stage use that TerrainTexture.
 	 * */
-	public boolean usesTerrainTexture(TerrainTexture tex) {
+	public boolean usesTerrainTexture(final TerrainTexture tex) {
 		return terrain.usesTerrainTexture(tex);
 	}
 
 	/**
 	 * Does this stage use that Sprite.
 	 * */
-	public boolean usesSprite(SpriteInfo info) {
+	public boolean usesSprite(final SpriteInfo info) {
 		return allSprites.stream().anyMatch(s -> s.info == info);
 	}
 
 	/**
 	 * Does this stage use that CliffTexture.
 	 * */
-	public boolean usesCliffTexture(CliffTexture tex) {
+	public boolean usesCliffTexture(final CliffTexture tex) {
 		return terrain.usesCliffTexture(tex);
 	}
 
@@ -325,8 +333,8 @@ public class Stage implements HasJSONRepresentation {
 	 * Get the upper left hand coordinate of a tile in iso space,
 	 * assuming no elevation.
 	 * */
-	public Point2D toIsoCoord(MapPoint p, CameraAngle a) {
-		Point2D in = new Point2D(p.x, p.y);
+	public Point2D toIsoCoord(final MapPoint p, final CameraAngle a) {
+		final Point2D in = new Point2D(p.x, p.y);
 		switch (a) {
 			case UL: return isoTransform.transform(rUL.transform(in));
 			case LL: return isoTransform.transform(rLL.transform(in));
@@ -340,7 +348,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Convert an iso coordinate to the (uncorrected) map tile that lives there.
 	 * */
-	public MapPoint fromIsoCoord(Point2D in, CameraAngle a) {
+	public MapPoint fromIsoCoord(final Point2D in, final CameraAngle a) {
 		Point2D t;
 		try {
 			switch (a) {
@@ -368,7 +376,7 @@ public class Stage implements HasJSONRepresentation {
 	 * Get the upper left hand coordinate of a tile in iso space, accounting for
 	 * its elevation.
 	 * */
-	public Point2D correctedIsoCoord(MapPoint p, CameraAngle a) {
+	public Point2D correctedIsoCoord(final MapPoint p, final CameraAngle a) {
 		return toIsoCoord(p, a).add(0, ELEVATION_H * terrain.getTile(p).elevation);
 	}
 
@@ -378,7 +386,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Set the highlighting colour scheme.
 	 * */
-	public void setHighlightColors(Highlighter[] highlightColors) {
+	public void setHighlightColors(final Highlighter[] highlightColors) {
 		this.highlightColors = highlightColors;
 	}
 
@@ -389,7 +397,7 @@ public class Stage implements HasJSONRepresentation {
 	 * highlights at once, but only the highest priority highlight is actually
 	 * rendered.  Lower number == lower priority
 	 * */
-	public void setHighlight(MapPoint p, int priority) {
+	public void setHighlight(final MapPoint p, final int priority) {
 		if (priority < 0 || priority >= highlightColors.length) {
 			throw new RuntimeException("Invalid highlight priority " + priority);
 		}
@@ -420,7 +428,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Clear a highlighting level.
 	 * */
-	public void clearHighlighting(Integer priority) {
+	public void clearHighlighting(final Integer priority) {
 		highlighting.values().forEach(h -> h.remove(priority));
 	}
 
@@ -434,7 +442,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Is that tile highlighted.
 	 * */
-	public boolean isHighlighted(MapPoint p) {
+	public boolean isHighlighted(final MapPoint p) {
 		return highlighting.containsKey(p) && highlighting.get(p).size() > 0;
 	}
 
@@ -445,22 +453,26 @@ public class Stage implements HasJSONRepresentation {
 	 * @param visible Bounding box for the visible part of the map
 	 * @param renderDebug Render debugging information
 	 * */
-	public void render(GraphicsContext cx, CameraAngle angle,
-		long t, BoundingBox visible, boolean renderDebug
+	public void render(
+		final GraphicsContext cx,
+		final CameraAngle angle,
+		final long t,
+		final BoundingBox visible,
+		final boolean renderDebug
 	) {
 		for (AnimationChain chain : animationChains) {
 			chain.updateAnimation(t);
 		}
 
 		terrain.iterateTiles(angle).forEachRemaining(tile -> {
-			Point2D p = correctedIsoCoord(tile.pos, angle);
-			double x = p.getX();
-			double y = p.getY();
+			final Point2D p = correctedIsoCoord(tile.pos, angle);
+			final double x = p.getX();
+			final double y = p.getY();
 
 			if (visible.intersects(x, y, TILEW, TILEH)) {
 				// get the highlight color
 				Highlighter hcolor = null;
-				LinkedList<Integer> h = highlighting.get(tile.pos);
+				final LinkedList<Integer> h = highlighting.get(tile.pos);
 				if (h != null) {
 					Integer i = h.peekFirst();
 					if (i != null) hcolor = highlightColors[i];
@@ -496,9 +508,13 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	private void doSprite(
-		GraphicsContext cx, CameraAngle angle, long t, Sprite s, boolean sliced
+		final GraphicsContext cx,
+		final CameraAngle angle,
+		final long t,
+		final Sprite s,
+		final boolean sliced
 	) {
-		AnimationChain chain = s.getAnimationChain();
+		final AnimationChain chain = s.getAnimationChain();
 		if (chain != null) {
 			chain.renderSprite(cx, angle, s, t, sliced);
 		} else {

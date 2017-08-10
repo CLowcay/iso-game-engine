@@ -28,7 +28,7 @@ public class FrameAnimator {
 	 * @param nframes Number of frames in the animation
 	 * @param fps Frames per second
 	 * */
-	public FrameAnimator(int nframes, int fps) {
+	public FrameAnimator(final int nframes, final int fps) {
 		this.nframes = nframes;
 		framePeriod = 1000000000l / (long) fps;
 	}
@@ -36,7 +36,7 @@ public class FrameAnimator {
 	/**
 	 * Reset the initial frame
 	 * */
-	public void reset(int frame0, long now) {
+	public void reset(final int frame0, final long now) {
 		this.frame0 = frame0;
 		this.t0 = now;
 	}
@@ -45,7 +45,7 @@ public class FrameAnimator {
 	 * Compute the frame to use at time t
 	 * @param t The time at which to get the current frame
 	 * */
-	public int frameAt(long t) {
+	public int frameAt(final long t) {
 		return (int) ((frame0 + ((t - t0) / framePeriod)) % nframes);
 	}
 }

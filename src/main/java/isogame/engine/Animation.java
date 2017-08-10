@@ -22,12 +22,12 @@ import javafx.scene.canvas.GraphicsContext;
 import static isogame.GlobalConstants.TILEW;
 
 public abstract class Animation {
-	public abstract void start(Sprite s);
+	public abstract void start(final Sprite s);
 
 	/**
 	 * @return true if the animation is now complete.
 	 * */
-	public abstract boolean updateAnimation(long t);
+	public abstract boolean updateAnimation(final long t);
 
 	/**
 	 * Render a sprite taking into account this movement animation.
@@ -36,11 +36,11 @@ public abstract class Animation {
 	 * moving from.
 	 * */
 	public void renderSprite(
-		GraphicsContext gx,
-		CameraAngle angle,
-		Sprite s,
-		long t,
-		boolean isTargetSlice
+		final GraphicsContext gx,
+		final CameraAngle angle,
+		final Sprite s,
+		final long t,
+		final boolean isTargetSlice
 	) {
 		gx.save();
 		s.renderFrame(gx, 0, (int) TILEW, t, angle);

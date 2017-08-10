@@ -34,22 +34,22 @@ public class Highlighter {
 	private final Map<SlopeType, Image> tileTexture;
 	private final Map<SlopeType, Image> cliffTexture;
 
-	public Highlighter(Color color) {
+	public Highlighter(final Color color) {
 		this.color = color;
 
 		tileTexture = TilePrerenderer.prerenderTile(color);
 		cliffTexture = TilePrerenderer.prerenderCliff(s -> color);
 	}
 
-	public void renderTop(GraphicsContext cx, SlopeType slope) {
+	public void renderTop(final GraphicsContext cx, final SlopeType slope) {
 		cx.drawImage(tileTexture.get(slope), -OFFSETX, -OFFSETY);
 	}
 
-	public void renderCliff(GraphicsContext cx, SlopeType slope) {
+	public void renderCliff(final GraphicsContext cx, final SlopeType slope) {
 		cx.drawImage(cliffTexture.get(slope), -OFFSETX, -OFFSETY);
 	}
 
-	public void renderElevation(GraphicsContext cx) {
+	public void renderElevation(final GraphicsContext cx) {
 		cx.drawImage(cliffTexture.get(SlopeType.NONE), -OFFSETX, -OFFSETY);
 	}
 }

@@ -71,11 +71,11 @@ public class MapView extends Canvas {
 	final public KeyBindingTable keyBindings = new KeyBindingTable();
 
 	public MapView(
-		Node root,
-		Stage stage,
-		boolean enableAnimations,
-		boolean debugMode,
-		Highlighter[] highlightColors
+		final Node root,
+		final Stage stage,
+		final boolean enableAnimations,
+		final boolean debugMode,
+		final Highlighter[] highlightColors
 	) {
 		super();
 		cx = this.getGraphicsContext2D();
@@ -137,7 +137,7 @@ public class MapView extends Canvas {
 		centreOnTile(new MapPoint(stage.terrain.w/2, stage.terrain.h/2));
 	}
 
-	public void centreOnTile(MapPoint tile) {
+	public void centreOnTile(final MapPoint tile) {
 		if (stage == null) return;
 		view.centreOnTile(stage, tile);
 		scrolling.reset(view.getScrollPos());
@@ -149,7 +149,7 @@ public class MapView extends Canvas {
 		long now0 = 0;
 
 		@Override
-		public void handle(long now) {
+		public void handle(final long now) {
 			count++;
 			if (now0 == 0) now0 = now;
 			if ((now - now0) >= 5000000000l) {
@@ -178,14 +178,14 @@ public class MapView extends Canvas {
 		new EventHandler<MouseEvent>() {
 
 			@Override
-			public void handle(MouseEvent event) {
+			public void handle(final MouseEvent event) {
 				if (stage == null) return;
 
-				EventType etype = event.getEventType();
+				final EventType etype = event.getEventType();
 				if (etype == MouseEvent.MOUSE_MOVED ||
 					etype == MouseEvent.MOUSE_DRAGGED
 				) {
-					MapPoint p = view.tileAtMouse(
+					final MapPoint p = view.tileAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
 					if (p != p0) {
@@ -200,7 +200,7 @@ public class MapView extends Canvas {
 						}
 					}
 
-					MapPoint sprite = view.spriteAtMouse(
+					final MapPoint sprite = view.spriteAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
 					if (sprite0 != sprite) {
@@ -218,10 +218,10 @@ public class MapView extends Canvas {
 					}
 
 				} else if (etype == MouseEvent.MOUSE_PRESSED) {
-					MapPoint p = view.tileAtMouse(
+					final MapPoint p = view.tileAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
-					MapPoint ps = view.spriteAtMouse(
+					final MapPoint ps = view.spriteAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
 					final boolean hasPoint = p != null && (selectable.contains(p) ||
@@ -241,7 +241,7 @@ public class MapView extends Canvas {
 	boolean kdown = false;
 	boolean kleft = false;
 	boolean kright = false;
-	private void setScrollKey(KeyBinding action, boolean v) {
+	private void setScrollKey(final KeyBinding action, final boolean v) {
 		if (action == KeyBinding.scrollUp) kup = v;
 		else if (action == KeyBinding.scrollDown) kdown = v;
 		else if (action == KeyBinding.scrollLeft) kleft = v;
@@ -294,7 +294,7 @@ public class MapView extends Canvas {
 		animateCanvas.stop();
 	}
 
-	public void setStage(Stage stage) {
+	public void setStage(final Stage stage) {
 		this.stage = stage;
 
 		if (stage == null) return;
@@ -309,7 +309,9 @@ public class MapView extends Canvas {
 		return stage;
 	}
 
-	public void setHighlight(Collection<MapPoint> pts, int priority) {
+	public void setHighlight(
+		final Collection<MapPoint> pts, final int priority
+	) {
 		if (stage == null) return;
 
 		stage.clearHighlighting(priority);
@@ -327,60 +329,60 @@ public class MapView extends Canvas {
 		}
 	}
 
-	public void setSelectable(Collection<MapPoint> pts) {
+	public void setSelectable(final Collection<MapPoint> pts) {
 		if (stage == null) return;
 
 		selectable.clear();
 		selectable.addAll(pts);
 	}
 
-	public void setSelectableSprites(Collection<Sprite> pts) {
+	public void setSelectableSprites(final Collection<Sprite> pts) {
 		if (stage == null) return;
 
 		selectableSprites.clear();
 		selectableSprites.addAll(pts);
 	}
 
-	public void setMouseOverSprites(Collection<Sprite> sprites) {
+	public void setMouseOverSprites(final Collection<Sprite> sprites) {
 		if (stage == null) return;
 		
 		mouseOverSprites.clear();
 		mouseOverSprites.addAll(sprites);
 	}
 
-	public boolean isSelectable(MapPoint p) {
+	public boolean isSelectable(final MapPoint p) {
 		return selectable.contains(p);
 	}
 
-	public void doOnSelection(BiConsumer<SelectionInfo, MouseButton> c) {
+	public void doOnSelection(final BiConsumer<SelectionInfo, MouseButton> c) {
 		this.onSelection = c;
 	}
 
-	public void doOnMouseOver(Consumer<MapPoint> c) {
+	public void doOnMouseOver(final Consumer<MapPoint> c) {
 		this.onMouseOver = c;
 	}
 
-	public void doOnMouseOverSprite(Consumer<MapPoint> c) {
+	public void doOnMouseOverSprite(final Consumer<MapPoint> c) {
 		this.onMouseOverSprite = c;
 	}
 
-	public void doOnKeyPressed(Consumer<KeyBinding> c) {
+	public void doOnKeyPressed(final Consumer<KeyBinding> c) {
 		this.onKeyPressed = c;
 	}
 
-	public void doOnKeyReleased(Consumer<KeyBinding> c) {
+	public void doOnKeyReleased(final Consumer<KeyBinding> c) {
 		this.onKeyReleased = c;
 	}
 
-	public void doOnMouseOutSprite(Runnable c) {
+	public void doOnMouseOutSprite(final Runnable c) {
 		this.onMouseOutSprite = c;
 	}
 
-	public void doOnMouseOut(Runnable r) {
+	public void doOnMouseOut(final Runnable r) {
 		this.onMouseOut = r;
 	}
 
-	public void enableAnimations(boolean enableAnimations) {
+	public void enableAnimations(final boolean enableAnimations) {
 		this.enableAnimations = enableAnimations;
 	}
 }

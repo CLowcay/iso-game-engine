@@ -49,7 +49,7 @@ public class View {
 	/**
 	 * Create a view with an initial viewport.
 	 * */
-	public View(int w, int h) {
+	public View(final int w, final int h) {
 		viewportW = w;
 		viewportH = h;
 		angle = CameraAngle.UL;
@@ -65,7 +65,7 @@ public class View {
 	 * Calculate the viewport, adding letterboxing (black bars) to ensure the
 	 * aspect ratio is 16:9.
 	 * */
-	public void setViewport(int w, int h) {
+	public void setViewport(final int w, final int h) {
 		lx = 0;
 		ly = 0;
 
@@ -88,7 +88,7 @@ public class View {
 		updateScreenTransform();
 	}
 
-	public void centreOnTile(Stage stage, MapPoint pos) {
+	public void centreOnTile(final Stage stage, final MapPoint pos) {
 		Point2D centre = stage.toIsoCoord(pos, angle);
 		x = centre.getX() - ((ISO_VIEWPORTW - TILEW) / 2.0);
 		y = centre.getY() - ((ISO_VIEWPORTH - TILEH) / 2.0);
@@ -109,7 +109,7 @@ public class View {
 
 	private final static int overscroll = 3;
 
-	public Rectangle2D getScrollBounds(Stage stage) {
+	public Rectangle2D getScrollBounds(final Stage stage) {
 		final Point2D pt = stage.toIsoCoord(stage.terrain.getTop(angle), angle);
 		final Point2D pb = stage.toIsoCoord(stage.terrain.getBottom(angle), angle);
 		final Point2D pl = stage.toIsoCoord(stage.terrain.getLeft(angle), angle);
@@ -125,7 +125,7 @@ public class View {
 		return angle;
 	}
 
-	public void setScrollPos(Point2D p) {
+	public void setScrollPos(final Point2D p) {
 		this.x = p.getX();
 		this.y = p.getY();
 		updateScreenTransform();
@@ -139,7 +139,7 @@ public class View {
 	 * Get the tile at the mouse position.
 	 * @return null if there is no tile under the mouse.
 	 * */
-	public MapPoint tileAtMouse(Point2D mouse, Stage stage) {
+	public MapPoint tileAtMouse(final Point2D mouse, final Stage stage) {
 		try {
 			return stage.collisions.mouseTileCollision(
 				screenTransform.inverseTransform(mouse), angle);
@@ -152,7 +152,7 @@ public class View {
 	 * Get the sprite at the mouse position.
 	 * @return null if there is no sprite under the mouse.
 	 * */
-	public MapPoint spriteAtMouse(Point2D mouse, Stage stage) {
+	public MapPoint spriteAtMouse(final Point2D mouse, final Stage stage) {
 		try {
 			return stage.collisions.mouseSpriteCollision(
 				screenTransform.inverseTransform(mouse), angle);
@@ -178,7 +178,10 @@ public class View {
 	 * @param renderDebug Render debug information
 	 * */
 	public void renderFrame(
-		GraphicsContext cx, long t, Stage stage, boolean renderDebug
+		final GraphicsContext cx,
+		final long t,
+		final Stage stage,
+		final boolean renderDebug
 	) {
 		cx.setFill(Color.WHITE);
 		cx.fillRect(lx, ly, viewportW, viewportH);

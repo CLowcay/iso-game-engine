@@ -18,17 +18,17 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import javafx.geometry.Point2D;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import javafx.geometry.Point2D;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
 
 public class CollisionDetector {
 	private final Stage stage;
 
-	public CollisionDetector(Stage stage) {
+	public CollisionDetector(final Stage stage) {
 		this.stage = stage;
 	}
 
@@ -37,9 +37,11 @@ public class CollisionDetector {
 	 * elevation.
 	 * @return null if there is no tile at the mouse position.
 	 * */
-	public MapPoint mouseTileCollision(Point2D in, CameraAngle a) {
-		MapPoint p = stage.fromIsoCoord(in, a);
-		Iterator<Tile> it = stage.terrain.iterateCollisionDetection(p, a);
+	public MapPoint mouseTileCollision(
+		final Point2D in, final CameraAngle a
+	) {
+		final MapPoint p = stage.fromIsoCoord(in, a);
+		final Iterator<Tile> it = stage.terrain.iterateCollisionDetection(p, a);
 
 		Tile tile;
 		while (it.hasNext()) {
@@ -48,11 +50,11 @@ public class CollisionDetector {
 			// compute a polygon representing the position and shape of the tile.
 			// Then we will do a test to see if the mouse point is inside the
 			// polygon.
-			double[] xs = new double[6];
-			double[] ys = new double[6];
+			final double[] xs = new double[6];
+			final double[] ys = new double[6];
 			int pts;
 
-			double extension = (TILEH * ((double) tile.elevation)) / 2;
+			final double extension = (TILEH * ((double) tile.elevation)) / 2;
 			switch (tile.adjustSlopeForCameraAngle(a)) {
 				case NONE:
 					if (tile.elevation == 0) {
@@ -113,7 +115,7 @@ public class CollisionDetector {
 					"Invalid slope type. This cannot happen");
 			}
 
-			Point2D cp = stage.correctedIsoCoord(tile.pos, a);
+			final Point2D cp = stage.correctedIsoCoord(tile.pos, a);
 			if (isPointInPolygon(xs, ys, pts, in.getX() - cp.getX(), in.getY() - cp.getY())) {
 				return tile.pos;
 			}
@@ -127,9 +129,11 @@ public class CollisionDetector {
 	 * elevation etc.  Does a pixel perfect hit test.
 	 * @return null if there is no sprite at the mouse position
 	 * */
-	public MapPoint mouseSpriteCollision(Point2D in, CameraAngle a) {
-		MapPoint p = stage.fromIsoCoord(in, a);
-		Iterator<Tile> it = stage.terrain.iterateCollisionDetection(p, a);
+	public MapPoint mouseSpriteCollision(
+		final Point2D in, final CameraAngle a
+	) {
+		final MapPoint p = stage.fromIsoCoord(in, a);
+		final Iterator<Tile> it = stage.terrain.iterateCollisionDetection(p, a);
 
 		Tile tile;
 		while (it.hasNext()) {
@@ -140,7 +144,7 @@ public class CollisionDetector {
 				l = l.subList(0, l.size());
 				Collections.reverse(l);
 				for (Sprite s : l) {
-					Point2D sp = in.subtract(stage.correctedIsoCoord(tile.pos, a));
+					final Point2D sp = in.subtract(stage.correctedIsoCoord(tile.pos, a));
 					if (s.hitTest(sp.getX(), sp.getY(), a)) return tile.pos;
 				}
 			}
@@ -153,7 +157,11 @@ public class CollisionDetector {
 	 * Determine if a point lies inside a convex polygon.
 	 * */
 	private boolean isPointInPolygon(
-		double[] xs, double[] ys, int pts, double x, double y
+		final double[] xs,
+		final double[] ys,
+		final int pts,
+		final double x,
+		final double y
 	) {
 		double t = 0;
 
@@ -161,13 +169,13 @@ public class CollisionDetector {
 		// polygon by checking it lies on the same side of each line on the
 		// perimeter of the polygon.
 		for (int i = 0; i < pts; i++) {
-			double lx0 = xs[i];
-			double ly0 = ys[i];
-			double lx1 = xs[(i + 1) % pts];
-			double ly1 = ys[(i + 1) % pts];
+			final double lx0 = xs[i];
+			final double ly0 = ys[i];
+			final double lx1 = xs[(i + 1) % pts];
+			final double ly1 = ys[(i + 1) % pts];
 
 			// the sign of this cross product determines which side the point is on.
-			double det = ((lx1 - lx0) * (y - ly0)) - ((ly1 - ly0) * (x - lx0));
+			final double det = ((lx1 - lx0) * (y - ly0)) - ((ly1 - ly0) * (x - lx0));
 			if (det > 0 && t < 0 || det < 0 && t > 0) {
 				return false;
 			} else if (det != 0) {
