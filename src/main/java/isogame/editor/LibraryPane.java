@@ -18,8 +18,7 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.editor;
 
-import javafx.scene.paint.Color;
-
+import isogame.GlobalConstants;
 import isogame.engine.AssetType;
 import isogame.engine.CameraAngle;
 import isogame.engine.CliffTexture;
@@ -31,23 +30,8 @@ import isogame.engine.SpriteAnimation;
 import isogame.engine.SpriteInfo;
 import isogame.engine.TerrainTexture;
 import isogame.engine.Tile;
-import isogame.GlobalConstants;
 import isogame.resource.ResourceLocator;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TitledPane;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.scene.Node;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -56,6 +40,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
 public class LibraryPane extends VBox {
 	private final GlobalLocalPane sprites;
@@ -89,8 +86,8 @@ public class LibraryPane extends VBox {
 	}
 
 	public LibraryPane(
-		File dataRoot, ResourceLocator loc,
-		ToggleGroup toolsGroup, EditorCanvas canvas
+		final File dataRoot, final ResourceLocator loc,
+		final ToggleGroup toolsGroup, final EditorCanvas canvas
 	) throws IOException, CorruptDataException {
 		super();
 
@@ -106,7 +103,7 @@ public class LibraryPane extends VBox {
 
 		gfxRoot = new File(dataRoot, "gfx");
 
-		HBox header = new HBox();
+		final HBox header = new HBox();
 		ToggleButton selectTextures = new ToggleButton("Textures");
 		selectTextures.setSelected(true);
 		ToggleButton selectSprites = new ToggleButton("Sprites");
@@ -143,7 +140,7 @@ public class LibraryPane extends VBox {
 
 		newButton.setDisable(true);
 		newButton.setOnAction(event -> {
-			Node selected = palette.getContent();
+			final Node selected = palette.getContent();
 			if (selected == sprites) {
 				(new EditSpriteDialog(gfxRoot, loc, global.priorities, null))
 					.showAndWait()
@@ -208,7 +205,7 @@ public class LibraryPane extends VBox {
 		try {
 			global.writeToStream(new FileOutputStream(globalLibraryFile));
 		} catch (IOException e) {
-			Alert d = new Alert(Alert.AlertType.ERROR);
+			final Alert d = new Alert(Alert.AlertType.ERROR);
 			d.setHeaderText("Cannot save global library to " +
 				globalLibraryFile.toString());
 			d.setContentText(e.toString());
@@ -219,7 +216,7 @@ public class LibraryPane extends VBox {
 	/**
 	 * To be called when loading a new map file.
 	 * */
-	public void setLocalLibrary(Library local) {
+	public void setLocalLibrary(final Library local) {
 		closeLocal();
 		newButton.setDisable(false);
 		local.allTerrains().forEach(t -> addTexture(t, false));
@@ -228,7 +225,9 @@ public class LibraryPane extends VBox {
 		this.local = local;
 	}
 
-	public void addTextureToLibrary(TerrainTexture tex, boolean isGlobal) {
+	public void addTextureToLibrary(
+		final TerrainTexture tex, final boolean isGlobal
+	) {
 		if (isGlobal) {
 			global.addTerrain(tex);
 			addTexture(tex, isGlobal);
@@ -239,7 +238,9 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	public void addSpriteToLibrary(SpriteInfo sprite, boolean isGlobal) {
+	public void addSpriteToLibrary(
+		final SpriteInfo sprite, final boolean isGlobal
+	) {
 		if (isGlobal) {
 			global.addSprite(sprite);
 			addSprite(sprite, isGlobal);
@@ -250,7 +251,9 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	public void addCliffTextureToLibrary(CliffTexture tex, boolean isGlobal) {
+	public void addCliffTextureToLibrary(
+		final CliffTexture tex, final boolean isGlobal
+	) {
 		if (isGlobal) {
 			global.addCliffTexture(tex);
 			addCliffTexture(tex, isGlobal);
@@ -261,14 +264,15 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	public void editTexture(String id) {
+	public void editTexture(final String id) {
 		// TODO: complete this
 		return;
 	}
 
-	public void editSprite(String id) {
+	public void editSprite(final String id) {
 		try {
-			SpriteInfo s = local != null ? local.getSprite(id) : global.getSprite(id);
+			final SpriteInfo s =
+				local != null ? local.getSprite(id) : global.getSprite(id);
 			(new EditSpriteDialog(gfxRoot, loc, global.priorities, s))
 				.showAndWait()
 				.ifPresent(sprite -> {
@@ -286,14 +290,14 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	public void editCliffTexture(String id) {
+	public void editCliffTexture(final String id) {
 		// TODO: complete this
 		return;
 	}
 
-	public void makeTextureGlobal(String id) {
+	public void makeTextureGlobal(final String id) {
 		try {
-			TerrainTexture tex = local.getTerrain(id);
+			final TerrainTexture tex = local.getTerrain(id);
 			deleteTexture(id);
 			addTextureToLibrary(tex, true);
 		} catch (CorruptDataException e) {
@@ -301,9 +305,9 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	public void makeSpriteGlobal(String id) {
+	public void makeSpriteGlobal(final String id) {
 		try {
-			SpriteInfo sprite = local.getSprite(id);
+			final SpriteInfo sprite = local.getSprite(id);
 			deleteSprite(id);
 			addSpriteToLibrary(sprite, true);
 		} catch (CorruptDataException e) {
@@ -311,9 +315,9 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	public void makeCliffTextureGlobal(String id) {
+	public void makeCliffTextureGlobal(final String id) {
 		try {
-			CliffTexture tex = local.getCliffTexture(id);
+			final CliffTexture tex = local.getCliffTexture(id);
 			deleteCliffTexture(id);
 			addCliffTextureToLibrary(tex, true);
 		} catch (CorruptDataException e) {
@@ -321,43 +325,43 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	public void deleteTexture(String id) {
+	public void deleteTexture(final String id) {
 		try {
 			local.deleteTerrain(id);
-			ToggleButton b = textureButtonsL.get(id);
+			final ToggleButton b = textureButtonsL.get(id);
 			if (b != null) textures.local.getChildren().removeAll(b);
 		} catch (CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
 
-	public void deleteSprite(String id) {
+	public void deleteSprite(final String id) {
 		try {
 			local.deleteSprite(id);
-			ToggleButton button = spriteButtonsL.get(id);
+			final ToggleButton button = spriteButtonsL.get(id);
 			if (button != null) sprites.local.getChildren().removeAll(button);
 		} catch (CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
 
-	public void deleteCliffTexture(String id) {
+	public void deleteCliffTexture(final String id) {
 		try {
 			local.deleteCliffTexture(id);
-			List<ToggleButton> bs = cliffButtonsL.get(id);
+			final List<ToggleButton> bs = cliffButtonsL.get(id);
 			if (bs != null) cliffTextures.local.getChildren().removeAll(bs);
 		} catch (CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
 
-	private void addTexture(TerrainTexture tex, boolean isGlobal) {
-		Canvas preview = new Canvas(64, 32);
-		GraphicsContext gc = preview.getGraphicsContext2D();
+	private void addTexture(final TerrainTexture tex, final boolean isGlobal) {
+		final Canvas preview = new Canvas(64, 32);
+		final GraphicsContext gc = preview.getGraphicsContext2D();
 		gc.setFill(tex.samplePaint);
 		gc.fillRect(0, 0, 64, 32);
 
-		ToggleButton t = new ToggleButton("", preview);
+		final ToggleButton t = new ToggleButton("", preview);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(toolsGroup);
 		t.setContextMenu(new ToolContextMenu(this, AssetType.TEXTURE, tex.id, isGlobal));
@@ -376,7 +380,7 @@ public class LibraryPane extends VBox {
 		}
 	}
 	
-	private void addSprite(SpriteInfo sprite, boolean isGlobal) {
+	private void addSprite(final SpriteInfo sprite, final boolean isGlobal) {
 		final ToolContextMenu menu = new ToolContextMenu(
 			this, AssetType.SPRITE, sprite.id, isGlobal);
 		
@@ -392,7 +396,7 @@ public class LibraryPane extends VBox {
 		}
 	}
 
-	private void redrawSpriteButtons(SpriteInfo sprite) {
+	private void redrawSpriteButtons(final SpriteInfo sprite) {
 		ToggleButton button = spriteButtonsL.get(sprite.id);
 		if (button == null) {
 			button = spriteButtonsG.get(sprite.id);
@@ -403,9 +407,12 @@ public class LibraryPane extends VBox {
 	}
 
 	private ToggleButton makeSpriteButton(
-		SpriteInfo sprite, Canvas preview, FacingDirection direction, ToolContextMenu menu
+		final SpriteInfo sprite,
+		final Canvas preview,
+		final FacingDirection direction,
+		final ToolContextMenu menu
 	) {
-		ToggleButton t = new ToggleButton("", preview);
+		final ToggleButton t = new ToggleButton("", preview);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(toolsGroup);
 
@@ -420,11 +427,11 @@ public class LibraryPane extends VBox {
 	}
 
 	private Canvas makeSpritePreview(
-		SpriteInfo sprite, FacingDirection direction
+		final SpriteInfo sprite, final FacingDirection direction
 	) {
-		SpriteAnimation anim = sprite.defaultAnimation;
-		Canvas c = new Canvas(64, anim.h / 4);
-		GraphicsContext gc = c.getGraphicsContext2D();
+		final SpriteAnimation anim = sprite.defaultAnimation;
+		final Canvas c = new Canvas(64, anim.h / 4);
+		final GraphicsContext gc = c.getGraphicsContext2D();
 		gc.scale(1.0d/4.0d, 1.0d/4.0d);
 		anim.renderFrame(gc,
 			0, (int) GlobalConstants.TILEW,
@@ -432,23 +439,25 @@ public class LibraryPane extends VBox {
 		return c;
 	}
 
-	private void addCliffTexture(CliffTexture tex, boolean isGlobal) {
-		Canvas n = new Canvas(64, 48);
-		Canvas s = new Canvas(64, 48);
-		Canvas w = new Canvas(64, 48);
-		Canvas e = new Canvas(64, 48);
-		Canvas up = new Canvas(64, 48);
-		Canvas down = new Canvas(64, 48);
+	private void addCliffTexture(
+		final CliffTexture tex, final boolean isGlobal
+	) {
+		final Canvas n = new Canvas(64, 48);
+		final Canvas s = new Canvas(64, 48);
+		final Canvas w = new Canvas(64, 48);
+		final Canvas e = new Canvas(64, 48);
+		final Canvas up = new Canvas(64, 48);
+		final Canvas down = new Canvas(64, 48);
 
-		ToolContextMenu menu = new ToolContextMenu(
+		final ToolContextMenu menu = new ToolContextMenu(
 			this, AssetType.CLIFF_TEXTURE, tex.id, isGlobal);
 
-		ToggleButton bn = makeCliffButton(tex, n, SlopeType.N, 0, menu);
-		ToggleButton bs = makeCliffButton(tex, s, SlopeType.S, 0, menu);
-		ToggleButton bw = makeCliffButton(tex, w, SlopeType.W, 0, menu);
-		ToggleButton be = makeCliffButton(tex, e, SlopeType.E, 0, menu);
-		ToggleButton bup = makeCliffButton(tex, up, SlopeType.NONE, 1, menu);
-		ToggleButton bdown = makeCliffButton(tex, down, SlopeType.NONE, 0, menu);
+		final ToggleButton bn = makeCliffButton(tex, n, SlopeType.N, 0, menu);
+		final ToggleButton bs = makeCliffButton(tex, s, SlopeType.S, 0, menu);
+		final ToggleButton bw = makeCliffButton(tex, w, SlopeType.W, 0, menu);
+		final ToggleButton be = makeCliffButton(tex, e, SlopeType.E, 0, menu);
+		final ToggleButton bup = makeCliffButton(tex, up, SlopeType.NONE, 1, menu);
+		final ToggleButton bdown = makeCliffButton(tex, down, SlopeType.NONE, 0, menu);
 
 		bn.setOnAction(event -> {
 			if (bn.isSelected()) canvas.setTool(new ElevationTool(tex, 0, SlopeType.N));
@@ -485,10 +494,10 @@ public class LibraryPane extends VBox {
 	}
 
 	private ToggleButton makeCliffButton(
-		CliffTexture tex, Canvas canvas,
-		SlopeType slope, int elevation, ToolContextMenu menu
+		final CliffTexture tex, final Canvas canvas,
+		final SlopeType slope, final int elevation, final ToolContextMenu menu
 	) {
-		GraphicsContext gc = canvas.getGraphicsContext2D();
+		final GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.translate(0, (1 - elevation) * 16);
 		gc.scale(1.0d/4.0d, 1.0d/4.0d);
 		try {
@@ -498,7 +507,7 @@ public class LibraryPane extends VBox {
 			throw new RuntimeException("Missing blank texture");
 		}
 
-		ToggleButton t = new ToggleButton("", canvas);
+		final ToggleButton t = new ToggleButton("", canvas);
 		t.setFocusTraversable(false);
 		t.setToggleGroup(toolsGroup);
 		if (menu != null) t.setContextMenu(menu);

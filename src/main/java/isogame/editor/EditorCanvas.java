@@ -25,47 +25,52 @@ import isogame.engine.MapPoint;
 import isogame.engine.MapView;
 import isogame.engine.Stage;
 import isogame.resource.ResourceLocator;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.Node;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Window;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.Node;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Window;
+
 import org.json.JSONException;
 
 public class EditorCanvas extends MapView {
 	private Tool tool = null;
 	private final Window window;
 
-	SimpleBooleanProperty saved = new SimpleBooleanProperty(true);
+	final SimpleBooleanProperty saved = new SimpleBooleanProperty(true);
 	File stageFile = null;
 	Library localLibrary = null;
 
 	/**
 	 * Load a stage from a file.
 	 * */
-	public void loadStage(LibraryPane library,
-		ResourceLocator loc, File dataDir
+	public void loadStage(
+		final LibraryPane library,
+		final ResourceLocator loc,
+		final File dataDir
 	) {
 		if (promptSaveContinue(library, dataDir)) {
-			FileChooser fc = new FileChooser();
+			final FileChooser fc = new FileChooser();
 			fc.setTitle("Open map file");
 			fc.setInitialDirectory(dataDir);
 			fc.getExtensionFilters().addAll(new ExtensionFilter("Map Files", "*.map"));
-			File r = fc.showOpenDialog(window);
+			final File r = fc.showOpenDialog(window);
 			if (r != null) {
 				try {
-					Stage stage = Stage.fromFile(r,
+					final Stage stage = Stage.fromFile(r,
 						loc, library.getGlobalLibrary());
 					library.setLocalLibrary(stage.localLibrary);
 
@@ -77,22 +82,12 @@ public class EditorCanvas extends MapView {
 					saved.setValue(true);
 					tool = null;
 				} catch (IOException e) {
-					Alert d = new Alert(Alert.AlertType.ERROR);
+					final Alert d = new Alert(Alert.AlertType.ERROR);
 					d.setHeaderText("Cannot read file " + r.toString());
 					d.setContentText(e.toString());
 					d.show();
-				} catch (CorruptDataException e) {
-					Alert d = new Alert(Alert.AlertType.ERROR);
-					d.setHeaderText("Error in file " + r.toString());
-					d.setContentText(e.toString());
-					d.show();
-				} catch (JSONException e) {
-					Alert d = new Alert(Alert.AlertType.ERROR);
-					d.setHeaderText("Error in file " + r.toString());
-					d.setContentText(e.toString());
-					d.show();
-				} catch (ClassCastException e) {
-					Alert d = new Alert(Alert.AlertType.ERROR);
+				} catch (CorruptDataException|JSONException|ClassCastException e) {
+					final Alert d = new Alert(Alert.AlertType.ERROR);
 					d.setHeaderText("Error in file " + r.toString());
 					d.setContentText(e.toString());
 					d.show();
@@ -104,8 +99,8 @@ public class EditorCanvas extends MapView {
 	/**
 	 * Save the current stage.
 	 * */
-	public void saveStage(File dataDir) {
-		Stage stage = getStage();
+	public void saveStage(final File dataDir) {
+		final Stage stage = getStage();
 		if (saved.getValue() || stage == null) return;
 		if (stageFile == null) {
 			saveStageAs(dataDir);
@@ -125,20 +120,20 @@ public class EditorCanvas extends MapView {
 	/**
 	 * Save the current stage under a new name.
 	 * */
-	public void saveStageAs(File dataDir) {
-		Stage stage = getStage();
+	public void saveStageAs(final File dataDir) {
+		final Stage stage = getStage();
 		if (stage == null) return;
 
-		FileChooser fc = new FileChooser();
+		final FileChooser fc = new FileChooser();
 		fc.setTitle("Save map file");
 		fc.setInitialDirectory(dataDir);
 		fc.getExtensionFilters().addAll(new ExtensionFilter("Map Files", "*.map"));
 		File r = fc.showSaveDialog(window);
 		if (r != null) {
 			// automatically append .map if the user didn't give an extension
-			String name = r.getName();
+			final String name = r.getName();
 			if (name.lastIndexOf('.') == -1) {
-				File p = r.getAbsoluteFile().getParentFile();
+				final File p = r.getAbsoluteFile().getParentFile();
 				r = new File(p, name + ".map");
 			}
 			stageFile = r;
@@ -152,19 +147,21 @@ public class EditorCanvas extends MapView {
 	 * Prompt the user to save before closing a stage.
 	 * @return true if the close action should continue, otherwise false.
 	 * */
-	public boolean promptSaveContinue(LibraryPane library, File dataDir) {
+	public boolean promptSaveContinue(
+		final LibraryPane library, final File dataDir
+	) {
 		if (saved.getValue()) {
 			return true;
 		} else {
-			Alert d = new Alert(Alert.AlertType.CONFIRMATION, null, 
+			final Alert d = new Alert(Alert.AlertType.CONFIRMATION, null, 
 				ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
 			d.setHeaderText("Save first?");
 
-			Optional<ButtonType> r = d.showAndWait();
+			final Optional<ButtonType> r = d.showAndWait();
 			if (!r.isPresent()) {
 				return false;
 			} else {
-				ButtonType bt = r.get();
+				final ButtonType bt = r.get();
 				if (bt == ButtonType.YES) {
 					saveStage(dataDir);
 					return true;
@@ -180,7 +177,9 @@ public class EditorCanvas extends MapView {
 	/**
 	 * Make a new stage.
 	 * */
-	public void newStage(LibraryPane library, File dataDir) {
+	public void newStage(
+		final LibraryPane library, final File dataDir
+	) {
 		if (!promptSaveContinue(library, dataDir)) return;
 
 		try {
@@ -194,7 +193,7 @@ public class EditorCanvas extends MapView {
 					saved.setValue(false);
 				});
 		} catch (CorruptDataException e) {
-			Alert d = new Alert(Alert.AlertType.ERROR);
+			final Alert d = new Alert(Alert.AlertType.ERROR);
 			d.setHeaderText("Cannot create map");
 			d.setContentText(
 				"You may be missing some textures.\n\nException was:\n" +
@@ -208,11 +207,13 @@ public class EditorCanvas extends MapView {
 	}
 
 	private boolean enableAnimations = false;
-	public void enableAnimations(boolean enable) {
+	public void enableAnimations(final boolean enable) {
 		enableAnimations = enable;
 	}
 
-	public EditorCanvas(Node root, Window window) throws CorruptDataException {
+	public EditorCanvas(
+		final Node root, final Window window
+	) throws CorruptDataException {
 		super(root, null, true, true,
 			new Highlighter[] {new Highlighter(Color.rgb(0x00, 0x00, 0xFF, 0.2))});
 

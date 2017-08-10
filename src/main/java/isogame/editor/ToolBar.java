@@ -19,6 +19,7 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.editor;
 
 import isogame.engine.StartZoneType;
+
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
@@ -44,7 +45,7 @@ public class ToolBar extends FlowPane {
 	private final ToggleButton specialDelete =
 		new ToggleButton("", new ImageView("/editor_assets/scross.png"));
 	
-	public ToolBar(EditorCanvas canvas, ToggleGroup group) {
+	public ToolBar(final EditorCanvas canvas, final ToggleGroup group) {
 		super();
 
 		playStop.setTooltip(new Tooltip("Start or stop animations"));

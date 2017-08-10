@@ -22,6 +22,10 @@ import isogame.engine.CorruptDataException;
 import isogame.engine.SpriteAnimation;
 import isogame.gui.PositiveIntegerField;
 import isogame.resource.ResourceLocator;
+
+import java.io.File;
+import java.util.UUID;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -33,16 +37,15 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.UUID;
 
 /**
  * Dialog box to create new sprites
  * */
 public class EditSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 	public EditSpriteAnimationDialog(
-		File dataDirectory, ResourceLocator loc, SpriteAnimation anim
+		final File dataDirectory,
+		final ResourceLocator loc,
+		final SpriteAnimation anim
 	) {
 		super();
 
@@ -61,7 +64,7 @@ public class EditSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 		grid.setVgap(10);
 		grid.setPadding(new Insets(20, 150, 10, 10));
 
-		TextField id = new TextField();
+		final TextField id = new TextField();
 		if (anim == null) {
 			id.setText(UUID.randomUUID().toString());
 		} else {
@@ -69,10 +72,10 @@ public class EditSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 		}
 		id.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> id.selectAll());
 
-		TextField spriteFile = new TextField();
+		final TextField spriteFile = new TextField();
 		spriteFile.setEditable(false);
 
-		Button browse = new Button("Browse...");
+		final Button browse = new Button("Browse...");
 		browse.setOnAction(event -> {
 			FileChooser fc = new FileChooser();
 			fc.setTitle("Browse for sprite image");
@@ -94,8 +97,8 @@ public class EditSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 		grid.add(spriteFile, 1, 1);
 		grid.add(browse, 2, 1);
 
-		PositiveIntegerField frames = new PositiveIntegerField();
-		PositiveIntegerField framerate = new PositiveIntegerField();
+		final PositiveIntegerField frames = new PositiveIntegerField();
+		final PositiveIntegerField framerate = new PositiveIntegerField();
 
 		if (anim != null) {
 			spriteFile.setText(anim.url);
@@ -122,7 +125,7 @@ public class EditSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 					return new SpriteAnimation(loc,
 						id.getText(), spriteFile.getText(), nframes, rframerate);
 				} catch (CorruptDataException e) {
-					Alert err = new Alert(Alert.AlertType.ERROR);
+					final Alert err = new Alert(Alert.AlertType.ERROR);
 					err.setTitle("Cannot load sprite image");
 					err.setContentText(e.getMessage());
 					err.showAndWait();

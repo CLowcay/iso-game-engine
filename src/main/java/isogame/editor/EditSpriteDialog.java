@@ -21,6 +21,13 @@ package isogame.editor;
 import isogame.engine.SpriteAnimation;
 import isogame.engine.SpriteInfo;
 import isogame.resource.ResourceLocator;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -35,11 +42,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * A dialog for creating and editing sprites
@@ -59,8 +61,8 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 	 * @param info The sprite to edit or null to create a new sprite
 	 * */
 	public EditSpriteDialog(
-		File dataRoot, ResourceLocator loc,
-		List<String> priorities, SpriteInfo info
+		final File dataRoot, final ResourceLocator loc,
+		final List<String> priorities, final SpriteInfo info
 	) {
 		super();
 
@@ -84,7 +86,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 		this.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		// The dialog content
-		GridPane grid = new GridPane();
+		final GridPane grid = new GridPane();
 		grid.setHgap(10);
 		grid.setVgap(10);
 		grid.setPadding(new Insets(20, 150, 10, 10));
@@ -111,21 +113,21 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 		});
 
 		edit.setOnAction(event -> {
-			SpriteAnimation anim = anims.getSelectionModel().getSelectedItem();
+			final SpriteAnimation anim = anims.getSelectionModel().getSelectedItem();
 			(new EditSpriteAnimationDialog(dataRoot, loc, anim))
 				.showAndWait()
 				.ifPresent(a -> animList.set(animList.indexOf(anim), a));
 		});
 
 		remove.setOnAction(event -> {
-			SpriteAnimation a = anims.getFocusModel().getFocusedItem();
+			final SpriteAnimation a = anims.getFocusModel().getFocusedItem();
 			if (a != null) animList.remove(a);
 		});
 
-		FlowPane buttons = new FlowPane();
+		final FlowPane buttons = new FlowPane();
 		buttons.getChildren().addAll(add, edit, remove);
 
-		VBox listGroup = new VBox();
+		final VBox listGroup = new VBox();
 		listGroup.getChildren().addAll(anims, buttons);
 
 		grid.addRow(0, new Label("Sprite name"), idField);

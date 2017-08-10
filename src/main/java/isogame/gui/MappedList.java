@@ -18,30 +18,32 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.gui;
 
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
-import java.util.ArrayList;
-import java.util.function.Function;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class MappedList<E, F> extends TransformationList<E, F> {
 	private Function<F, E> map;
 
-	public MappedList(ObservableList<? extends F> source, Function<F, E> map) {
+	public MappedList(
+		final ObservableList<? extends F> source, final Function<F, E> map
+	) {
 		super(source);
 		this.map = map;
 	}
 
 	@Override
-	public int getSourceIndex(int index) {
+	public int getSourceIndex(final int index) {
 		return index;
 	}
 
 	@Override
-	public E get(int i) {
+	public E get(final int i) {
 		return map.apply(getSource().get(i));
 	}
 
@@ -51,7 +53,7 @@ public class MappedList<E, F> extends TransformationList<E, F> {
 	}
 
 	@Override
-	protected void sourceChanged(ListChangeListener.Change<? extends F> c) {
+	protected void sourceChanged(final ListChangeListener.Change<? extends F> c) {
 		// adapted from https://gist.github.com/TomasMikula/8883719
 		fireChange(new Change<E>(this) {
 			@Override
@@ -70,7 +72,7 @@ public class MappedList<E, F> extends TransformationList<E, F> {
 			public boolean wasPermutated() {return c.wasPermutated();}
 
 			@Override
-			public int getPermutation(int i) {return c.getPermutation(i);}
+			public int getPermutation(final int i) {return c.getPermutation(i);}
 
 			@Override
 			public int getFrom() {return c.getFrom();}

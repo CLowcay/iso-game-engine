@@ -27,14 +27,14 @@ import isogame.engine.View;
 public class TerrainTextureTool extends Tool {
 	private final TerrainTexture texture;
 
-	public TerrainTextureTool(TerrainTexture texture) {
+	public TerrainTextureTool(final TerrainTexture texture) {
 		this.texture = texture;
 	}
 
 	@Override
-	public void apply(MapPoint p, Stage stage, View view) {
+	public void apply(final MapPoint p, final Stage stage, final View view) {
 		if (stage.terrain.hasTile(p)) {
-			Tile t = stage.terrain.getTile(p);
+			final Tile t = stage.terrain.getTile(p);
 			stage.terrain.setTile(t.newTexture(texture));
 		}
 	}

@@ -25,11 +25,14 @@ import javafx.scene.control.MenuItem;
 
 public class ToolContextMenu extends ContextMenu {
 	public ToolContextMenu(
-		LibraryPane library, AssetType type, String id, boolean isGlobal
+		final LibraryPane library,
+		final AssetType type,
+		final String id,
+		final boolean isGlobal
 	) {
 		super();
 
-		MenuItem edit = new MenuItem("Edit " + type.toString());
+		final MenuItem edit = new MenuItem("Edit " + type.toString());
 		edit.setOnAction(event -> {
 			switch (type) {
 				case TEXTURE: library.editTexture(id); break;
@@ -38,7 +41,7 @@ public class ToolContextMenu extends ContextMenu {
 			}
 		});
 
-		MenuItem global = new MenuItem("Make global");
+		final MenuItem global = new MenuItem("Make global");
 		global.setOnAction(event -> {
 			switch (type) {
 				case TEXTURE: library.makeTextureGlobal(id); break;
@@ -47,7 +50,7 @@ public class ToolContextMenu extends ContextMenu {
 			}
 		});
 
-		MenuItem delete = new MenuItem("Delete");
+		final MenuItem delete = new MenuItem("Delete");
 		delete.setOnAction(event -> {
 			// TODO: check that the texture is not in use
 			switch (type) {

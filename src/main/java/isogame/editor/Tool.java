@@ -26,6 +26,6 @@ import isogame.engine.View;
  * Abstract superclass of map editing tools
  * */
 public abstract class Tool {
-	public abstract void apply(MapPoint p, Stage stage, View v);
+	public abstract void apply(final MapPoint p, final Stage stage, final View v);
 }
 

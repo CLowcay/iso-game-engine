@@ -21,11 +21,11 @@ package isogame.gui;
 import java.util.Optional;
 
 public class FloatingField extends TypedTextField<Double> {
-	public FloatingField(double init) {
+	public FloatingField(final double init) {
 		super(init);
 	}
 
-	public FloatingField(String text) {
+	public FloatingField(final String text) {
 		super(text);
 	}
 

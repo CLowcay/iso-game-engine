@@ -18,24 +18,24 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.gui;
 
+import java.util.Optional;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
-import java.util.Optional;
 
 /**
  * A text field that can only contain values of a specified format.
  * */
 public abstract class TypedTextField<T> extends TextField {
-	protected abstract Optional<T> parseValue(String t);
+	protected abstract Optional<T> parseValue(final String t);
 	protected abstract T getDefaultValue();
 	protected abstract String showValue(T v);
 
-	public TypedTextField(T init) {
+	public TypedTextField(final T init) {
 		this();
 		this.setText((showValue(init)).toString());
 	}
 
-	public TypedTextField(String text) {
+	public TypedTextField(final String text) {
 		this();
 		this.setText(text);
 	}
@@ -53,7 +53,7 @@ public abstract class TypedTextField<T> extends TextField {
 		}));
 	}
 
-	public void setValue(T v) {
+	public void setValue(final T v) {
 		this.setText(v == null? "" : showValue(v));
 	}
 

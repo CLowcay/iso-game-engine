@@ -19,44 +19,46 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.editor;
 
 import isogame.resource.ResourceLocator;
+
+import java.io.File;
+
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
-import java.io.File;
 
 public class MainMenu extends MenuBar {
 	public MainMenu(
-		LibraryPane libraryPane,
-		File dataDir,
-		ResourceLocator loc,
-		EditorCanvas canvas
+		final LibraryPane libraryPane,
+		final File dataDir,
+		final ResourceLocator loc,
+		final EditorCanvas canvas
 	) {
 		super();
 
-		Menu menuFile = new Menu("File");
+		final Menu menuFile = new Menu("File");
 
-		MenuItem fileNew = new MenuItem("New");
+		final MenuItem fileNew = new MenuItem("New");
 		fileNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
 		fileNew.setOnAction(event -> canvas.newStage(libraryPane, dataDir));
 
-		MenuItem fileOpen = new MenuItem("Open");
+		final MenuItem fileOpen = new MenuItem("Open");
 		fileOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
 		fileOpen.setOnAction(event -> canvas.loadStage(
 			libraryPane, loc, dataDir));
 
-		MenuItem fileSave = new MenuItem("Save");
+		final MenuItem fileSave = new MenuItem("Save");
 		fileSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
 		fileSave.setOnAction(event -> canvas.saveStage(dataDir));
 		fileSave.disableProperty().bind(canvas.saved);
 
-		MenuItem fileSaveAs = new MenuItem("Save As...");
+		final MenuItem fileSaveAs = new MenuItem("Save As...");
 		fileSaveAs.setAccelerator(KeyCombination.keyCombination("Shift+Ctrl+S"));
 		fileSaveAs.setOnAction(event -> canvas.saveStageAs(dataDir));
 
-		MenuItem fileExit = new MenuItem("Exit");
+		final MenuItem fileExit = new MenuItem("Exit");
 		fileExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
 		fileExit.setOnAction(event -> {
 			if (canvas.promptSaveContinue(libraryPane, dataDir)) {
@@ -67,9 +69,9 @@ public class MainMenu extends MenuBar {
 		menuFile.getItems().addAll(
 			fileNew, fileOpen, fileSave, fileSaveAs, new SeparatorMenuItem(), fileExit);
 
-		Menu menuWindow = new Menu("Window");
+		final Menu menuWindow = new Menu("Window");
 
-		CheckMenuItem showLibrary = new CheckMenuItem("Show library");
+		final CheckMenuItem showLibrary = new CheckMenuItem("Show library");
 		showLibrary.setSelected(true);
 		showLibrary.setAccelerator(KeyCombination.keyCombination("F2"));
 		libraryPane.visibleProperty().bind(showLibrary.selectedProperty());

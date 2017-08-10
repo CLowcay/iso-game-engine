@@ -20,18 +20,19 @@ package isogame.editor;
  
 import isogame.resource.DevelopmentResourceLocator;
 import isogame.resource.ResourceLocator;
+
+import java.io.File;
+import java.util.Map;
+import java.util.Optional;
+
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.Scene;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import java.io.File;
-import java.util.function.Function;
-import java.util.Map;
-import java.util.Optional;
  
 public class MapEditor extends Application {
 	public static void main(final String[] arguments) {
@@ -39,13 +40,13 @@ public class MapEditor extends Application {
 	}
 
 	@Override
-	public void start(Stage primaryStage) {
-		StackPane root = new StackPane();
-		Scene scene = new Scene(root, 960, 540);
-		BorderPane guiRoot = new BorderPane();
+	public void start(final Stage primaryStage) {
+		final StackPane root = new StackPane();
+		final Scene scene = new Scene(root, 960, 540);
+		final BorderPane guiRoot = new BorderPane();
 
 		try {
-			Map<String, String> args = getParameters().getNamed();
+			final Map<String, String> args = getParameters().getNamed();
 			
 			Optional<File> dataDir;
 			dataDir = Optional.ofNullable(args.get("basedir")).map(s -> new File(s));
@@ -55,16 +56,17 @@ public class MapEditor extends Application {
 
 			if (!dataDir.isPresent()) System.exit(1);
 
-			ResourceLocator loc = new DevelopmentResourceLocator(dataDir.get());
+			final ResourceLocator loc =
+				new DevelopmentResourceLocator(dataDir.get());
 
-			ToggleGroup toolsGroup = new ToggleGroup();
-			EditorCanvas canvas = new EditorCanvas(root, primaryStage);
-			LibraryPane library = new LibraryPane(
+			final ToggleGroup toolsGroup = new ToggleGroup();
+			final EditorCanvas canvas = new EditorCanvas(root, primaryStage);
+			final LibraryPane library = new LibraryPane(
 				dataDir.get(), loc, toolsGroup, canvas);
-			MainMenu menuBar = new MainMenu(library, dataDir.get(), loc, canvas);
-			ToolBar toolBar = new ToolBar(canvas, toolsGroup);
+			final MainMenu menuBar = new MainMenu(library, dataDir.get(), loc, canvas);
+			final ToolBar toolBar = new ToolBar(canvas, toolsGroup);
 
-			VBox top = new VBox();
+			final VBox top = new VBox();
 			top.getChildren().addAll(menuBar, toolBar);
 
 			guiRoot.setTop(top);
@@ -84,10 +86,10 @@ public class MapEditor extends Application {
 		}
 	}
 
-	public File getDataDir(Stage primaryStage) {
+	public File getDataDir(final Stage primaryStage) {
 		final DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle("Select data directory...");
-		File dataDir = directoryChooser.showDialog(primaryStage);
+		final File dataDir = directoryChooser.showDialog(primaryStage);
 		return dataDir;
 	}
 }

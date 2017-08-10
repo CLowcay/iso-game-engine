@@ -30,16 +30,18 @@ public class ElevationTool extends Tool {
 	private final int de;
 	private final SlopeType slope;
 
-	public ElevationTool(CliffTexture texture, int de, SlopeType slope) {
+	public ElevationTool(
+		final CliffTexture texture, final int de, final SlopeType slope
+	) {
 		this.texture = texture;
 		this.de = de;
 		this.slope = slope;
 	}
 
 	@Override
-	public void apply(MapPoint p, Stage stage, View view) {
+	public void apply(final MapPoint p, final Stage stage, final View view) {
 		if (stage.terrain.hasTile(p)) {
-			Tile t = stage.terrain.getTile(p);
+			final Tile t = stage.terrain.getTile(p);
 			if (de < 0 && t.slope != SlopeType.NONE) {
 				stage.terrain.setTile(t.newElevation(
 					t.elevation, SlopeType.NONE, texture));

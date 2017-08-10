@@ -25,9 +25,9 @@ import isogame.engine.View;
 
 public class DeleteSpecialTool extends Tool {
 	@Override
-	public void apply(MapPoint p, Stage stage, View view) {
+	public void apply(final MapPoint p, final Stage stage, final View view) {
 		if (stage.terrain.hasTile(p)) {
-			Tile t = stage.terrain.getTile(p);
+			final Tile t = stage.terrain.getTile(p);
 			stage.terrain.setTile(t.clearSpecialProperties());
 		}
 	}

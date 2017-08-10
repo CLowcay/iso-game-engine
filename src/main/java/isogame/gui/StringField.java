@@ -25,18 +25,18 @@ public class StringField extends TypedTextField<String> {
 		super();
 	}
 
-	public StringField(String v) {
+	public StringField(final String v) {
 		super();
 		this.setText(v);
 	}
 
-	@Override protected Optional<String> parseValue(String t) {
+	@Override protected Optional<String> parseValue(final String t) {
 		return Optional.of(t);
 	}
 
 	@Override protected String getDefaultValue() {return "";}
 
-	@Override protected String showValue(String i) {
+	@Override protected String showValue(final String i) {
 		return i;
 	}
 }

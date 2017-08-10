@@ -18,19 +18,19 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.gui;
 
+import java.util.function.Supplier;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView.TreeTableViewSelectionModel;
 import javafx.util.Callback;
-import java.util.function.Supplier;
 
 public class TypedTextFieldTreeTableCell<S, T> extends TreeTableCell<S, T> {
 	public static <S, T> Callback<TreeTableColumn<S, T>, TreeTableCell<S, T>>
 		forTreeTableColumn(
-			Supplier<TypedTextField<T>> constructor,
-			TreeTableViewSelectionModel<S> selection
+			final Supplier<TypedTextField<T>> constructor,
+			final TreeTableViewSelectionModel<S> selection
 	) {
 		return (column -> new TypedTextFieldTreeTableCell<S, T>(constructor, selection));
 	}
@@ -38,8 +38,8 @@ public class TypedTextFieldTreeTableCell<S, T> extends TreeTableCell<S, T> {
 	private final Supplier<TypedTextField<T>> constructor;
 	private final TreeTableViewSelectionModel<S> selection;
 	public TypedTextFieldTreeTableCell(
-		Supplier<TypedTextField<T>> constructor,
-		TreeTableViewSelectionModel<S> selection
+		final Supplier<TypedTextField<T>> constructor,
+		final TreeTableViewSelectionModel<S> selection
 	) {
 		this.constructor = constructor;
 		this.selection = selection;
@@ -53,9 +53,12 @@ public class TypedTextFieldTreeTableCell<S, T> extends TreeTableCell<S, T> {
 		textField.focusedProperty().addListener((arg0, arg1, arg2) -> {
 			if (!arg2) commitEdit(textField.getValue());
 		});
-		ChangeListener<Number> selectionChanged = new ChangeListener<Number>() {
+		final ChangeListener<Number> selectionChanged = new ChangeListener<Number>() {
 			@Override
-			public void changed(ObservableValue<? extends Number> arg0, Number arg1, Number arg2) {
+			public void changed(
+				final ObservableValue<? extends Number> arg0,
+				final Number arg1, final Number arg2
+			) {
 				commitEdit(textField.getValue());
 				selection.selectedIndexProperty().removeListener(this);
 			}
@@ -66,7 +69,7 @@ public class TypedTextFieldTreeTableCell<S, T> extends TreeTableCell<S, T> {
 	}
 
 	@Override
-	public void commitEdit(T v) {
+	public void commitEdit(final T v) {
 		super.commitEdit(v);
 	}
 
@@ -91,7 +94,7 @@ public class TypedTextFieldTreeTableCell<S, T> extends TreeTableCell<S, T> {
 	}
 
 	@Override
-	public void updateItem(T item, boolean empty) {
+	public void updateItem(final T item, final boolean empty) {
 		super.updateItem(item, empty);
 
 		if (empty) {

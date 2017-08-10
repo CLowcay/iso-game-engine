@@ -21,7 +21,7 @@ package isogame.gui;
 import java.util.Optional;
 
 public class PositiveIntegerField extends TypedTextField<Integer> {
-	@Override protected Optional<Integer> parseValue(String t) {
+	@Override protected Optional<Integer> parseValue(final String t) {
 		try {
 			return Optional.of(Integer.parseUnsignedInt(t));
 		} catch (NumberFormatException e) {
@@ -31,15 +31,15 @@ public class PositiveIntegerField extends TypedTextField<Integer> {
 
 	@Override protected Integer getDefaultValue() {return 0;}
 
-	@Override protected String showValue(Integer i) {
+	@Override protected String showValue(final Integer i) {
 		return i.toString();
 	}
 
-	public PositiveIntegerField(int init) {
+	public PositiveIntegerField(final int init) {
 		super(init);
 	}
 
-	public PositiveIntegerField(String text) {
+	public PositiveIntegerField(final String text) {
 		super(text);
 	}
 

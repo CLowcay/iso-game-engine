@@ -29,7 +29,7 @@ public class GlobalLocalPane extends VBox {
 	public final Pane global;
 	public final Pane local;
 
-	GlobalLocalPane(Pane global, Pane local) {
+	GlobalLocalPane(final Pane global, final Pane local) {
 		super();
 
 		this.global = global;
@@ -38,11 +38,11 @@ public class GlobalLocalPane extends VBox {
 		global.setFocusTraversable(false);
 		local.setFocusTraversable(false);
 
-		Node l1 = new Label("Global");
-		Node l2 = new Label("Local");
-		Node v1 = new VBox(l1, global);
-		Node v2 = new Separator(Orientation.HORIZONTAL);
-		Node v3 = new VBox(l2, local);
+		final Node l1 = new Label("Global");
+		final Node l2 = new Label("Local");
+		final Node v1 = new VBox(l1, global);
+		final Node v2 = new Separator(Orientation.HORIZONTAL);
+		final Node v3 = new VBox(l2, local);
 
 		this.getChildren().addAll(v1, v2, v3);
 

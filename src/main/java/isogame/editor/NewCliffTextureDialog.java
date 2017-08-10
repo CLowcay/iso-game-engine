@@ -21,6 +21,10 @@ package isogame.editor;
 import isogame.engine.CliffTexture;
 import isogame.engine.CorruptDataException;
 import isogame.resource.ResourceLocator;
+
+import java.io.File;
+import java.util.UUID;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -35,15 +39,14 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.UUID;
 
 /**
  * Dialog box to create new terrain textures
  * */
 public class NewCliffTextureDialog extends Dialog<CliffTexture> {
-	public NewCliffTextureDialog(File dataDirectory, ResourceLocator loc) {
+	public NewCliffTextureDialog(
+		final File dataDirectory, final ResourceLocator loc
+	) {
 		super();
 
 		// Set up the header and footer
@@ -52,22 +55,22 @@ public class NewCliffTextureDialog extends Dialog<CliffTexture> {
 		this.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		// The dialog content
-		GridPane grid = new GridPane();
+		final GridPane grid = new GridPane();
 		grid.setHgap(10);
 		grid.setVgap(10);
 		grid.setPadding(new Insets(20, 150, 10, 10));
 
-		TextField id = new TextField();
+		final TextField id = new TextField();
 		id.setText(UUID.randomUUID().toString());
 		id.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> id.selectAll());
 
-		TextField wide = new TextField();
-		TextField narrow = new TextField();
+		final TextField wide = new TextField();
+		final TextField narrow = new TextField();
 		wide.setEditable(false);
 		narrow.setEditable(false);
 
-		Button browseWide = new Button("Browse...");
-		Button browseNarrow = new Button("Browse...");
+		final Button browseWide = new Button("Browse...");
+		final Button browseNarrow = new Button("Browse...");
 		browseWide.setOnAction(new BrowseButtonAction(
 			this.getOwner(), dataDirectory, wide));
 		browseNarrow.setOnAction(new BrowseButtonAction(
@@ -115,20 +118,22 @@ public class NewCliffTextureDialog extends Dialog<CliffTexture> {
 		private File dataDirectory;
 		private Window parent;
 
-		public BrowseButtonAction(Window parent, File dataDirectory, TextField result) {
+		public BrowseButtonAction(
+			final Window parent, final File dataDirectory, final TextField result
+		) {
 			this.result = result;
 			this.dataDirectory = dataDirectory;
 			this.parent = parent;
 		}
 
 		@Override
-		public void handle(ActionEvent event) {
-			FileChooser fc = new FileChooser();
+		public void handle(final ActionEvent event) {
+			final FileChooser fc = new FileChooser();
 			fc.setTitle("Browse for texture file");
 			fc.setInitialDirectory(dataDirectory);
 			fc.getExtensionFilters().addAll(new ExtensionFilter("Graphics files",
 				"*.png", "*.PNG", "*.jpg", "*.jpeg", "*.JPG", "*.JPEG", "*.bmp", "*.BMP"));
-			File r = fc.showOpenDialog(parent);
+			final File r = fc.showOpenDialog(parent);
 			if (r != null) {
 				result.setText(dataDirectory.toPath().relativize(r.toPath()).toString());
 			}
