@@ -31,9 +31,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import javafx.collections.ObservableList;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -444,6 +448,38 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public boolean isHighlighted(final MapPoint p) {
 		return highlighting.containsKey(p) && highlighting.get(p).size() > 0;
+	}
+
+	private CameraAngle currentAngle = null;
+
+	/**
+	 * Update the scene graph for a new frame
+	 * @param graph The scene graph
+	 * @param t The current timestamp in nanoseconds
+	 * @param a The new camera angle
+	 * */
+	public void update(
+		final ObservableList<Node> graph, final long t, final CameraAngle a
+	) {
+		if (a != currentAngle) {
+			currentAngle = a;
+			rebuildSceneGraph(t, graph);
+		}
+	}
+
+	/**
+	 * Reconstruct the scene graph
+	 * */
+	private void rebuildSceneGraph(
+		final long t, final ObservableList<Node> graph
+	) {
+		graph.clear();
+		terrain.iterateTiles(currentAngle).forEachRemaining(tile -> {
+			final Point2D p = correctedIsoCoord(tile.pos, currentAngle);
+			final double x = p.getX();
+			final double y = p.getY();
+			tile.rebuildSceneGraph(graph, x, y, currentAngle);
+		});
 	}
 
 	/**

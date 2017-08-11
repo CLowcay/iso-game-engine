@@ -18,14 +18,6 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.editor;
 
-import isogame.engine.CorruptDataException;
-import isogame.engine.Highlighter;
-import isogame.engine.Library;
-import isogame.engine.MapPoint;
-import isogame.engine.MapView;
-import isogame.engine.Stage;
-import isogame.resource.ResourceLocator;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -35,16 +27,22 @@ import java.util.Optional;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
 
 import org.json.JSONException;
+
+import isogame.engine.CorruptDataException;
+import isogame.engine.Highlighter;
+import isogame.engine.Library;
+import isogame.engine.MapPoint;
+import isogame.engine.MapView;
+import isogame.engine.Stage;
+import isogame.resource.ResourceLocator;
 
 public class EditorCanvas extends MapView {
 	private Tool tool = null;
@@ -221,9 +219,6 @@ public class EditorCanvas extends MapView {
 
 		this.window = window;
 
-		final GraphicsContext cx = this.getGraphicsContext2D();
-		cx.setFont(new Font(100));
-
 		final Collection<MapPoint> emptyList = new ArrayList<>();
 		final Collection<MapPoint> oneList = new ArrayList<>();
 
@@ -235,7 +230,7 @@ public class EditorCanvas extends MapView {
 		this.doOnSelection((selection, button) -> {
 			if (tool != null) {
 				selection.pointPriority().ifPresent(p ->
-					tool.apply(p, getStage(), view));
+					tool.apply(p, getStage(), this));
 			}
 			saved.setValue(false);
 		});

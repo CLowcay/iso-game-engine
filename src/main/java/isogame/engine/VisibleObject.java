@@ -1,4 +1,4 @@
-/* © Callum Lowcay 2015, 2016
+/* © Callum Lowcay 2015, 2016, 2017
 
 This file is part of iso-game-engine.
 
@@ -16,22 +16,17 @@ You should have received a copy of the GNU General Public License
 along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-package isogame;
+package isogame.engine;
 
-/**
- * Any global configuration goes here so it's easy to find when we need to
- * change it.
- * */
-public class GlobalConstants {
-	public static final double TILEW = 192;
-	public static final double TILEH = 96;
+import javafx.scene.Node;
+import java.util.Collection;
+import java.util.function.Consumer;
 
-	public static final double ELEVATION_H = -48;
+public abstract class VisibleObject {
+	protected Consumer<Collection<Node>> onChange = x -> {};
 
-	public static final double ISO_VIEWPORTW = 1920;
-	public static final double ISO_VIEWPORTH = 1080;
-
-	// number of tile height scrolled in one second
-	public static final double SCROLL_SPEED = 8;
+	public final void setOnChange(final Consumer<Collection<Node>> handler) {
+		onChange = handler;
+	}
 }
 

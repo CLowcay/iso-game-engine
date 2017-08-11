@@ -54,6 +54,8 @@ public class AnimationChain {
 	}
 
 	/**
+	 * Update the animation
+	 * TODO: extend this so that it also updates the scene graph
 	 * @return true if the entire animation chain is finished
 	 * */
 	public boolean updateAnimation(final long t) {

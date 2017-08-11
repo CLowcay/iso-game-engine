@@ -42,7 +42,7 @@ import static isogame.GlobalConstants.TILEH;
 /**
  * Draws a scrolling, rotating map.
  * */
-public class MapView extends Canvas {
+public class MapView extends View {
 	private Stage stage = null;
 	private boolean enableAnimations = false;
 	private BiConsumer<SelectionInfo, MouseButton> onSelection = (x, b) -> {};
@@ -62,10 +62,6 @@ public class MapView extends Canvas {
 
 	private final Highlighter[] highlightColors;
 
-	private final GraphicsContext cx;
-
-	public final View view = new View(960, 400);
-
 	private final boolean debugMode;
 
 	final public KeyBindingTable keyBindings = new KeyBindingTable();
@@ -77,8 +73,7 @@ public class MapView extends Canvas {
 		final boolean debugMode,
 		final Highlighter[] highlightColors
 	) {
-		super();
-		cx = this.getGraphicsContext2D();
+		super(960, 400);
 
 		this.stage = stage;
 		this.enableAnimations = enableAnimations;
@@ -86,13 +81,6 @@ public class MapView extends Canvas {
 		this.highlightColors = highlightColors;
 
 		if (stage != null) stage.setHighlightColors(highlightColors);
-
-		this.widthProperty().addListener((obs, w0, w) -> {
-			view.setViewport(w.intValue(), (int) this.getHeight());
-		});
-		this.heightProperty().addListener((obs, h0, h) -> {
-			view.setViewport((int) this.getWidth(), h.intValue());
-		});
 
 		// set the default keys
 		keyBindings.keys.put(new KeyCodeCombination(KeyCode.UP), KeyBinding.scrollUp);
@@ -111,12 +99,13 @@ public class MapView extends Canvas {
 				setScrollingAnimation();
 				if (action == KeyBinding.rotateLeft || action == KeyBinding.rotateRight) {
 					if (this.stage == null) return;
-					final Point2D centre = view.getViewportCentre();
-					final MapPoint centreP = view.tileAtMouse(centre, this.stage);
-					if (action == KeyBinding.rotateLeft) view.rotateLeft(); else view.rotateRight();
-					scrolling.setClamp(view.getScrollBounds(stage));
-					view.centreOnTile(this.stage, centreP);
-					scrolling.reset(view.getScrollPos());
+					final Point2D centre = getViewportCentre();
+					final MapPoint centreP = tileAtMouse(centre, this.stage);
+					if (action == KeyBinding.rotateLeft) rotateLeft();
+						else rotateRight();
+					scrolling.setClamp(getScrollBounds(stage));
+					centreOnTile(this.stage, centreP);
+					scrolling.reset(getScrollPos());
 				}
 			});
 		});
@@ -128,7 +117,7 @@ public class MapView extends Canvas {
 			});
 		});
 
-		if (stage != null) scrolling.setClamp(view.getScrollBounds(stage));
+		if (stage != null) scrolling.setClamp(getScrollBounds(stage));
 		centreView();
 	}
 
@@ -139,29 +128,24 @@ public class MapView extends Canvas {
 
 	public void centreOnTile(final MapPoint tile) {
 		if (stage == null) return;
-		view.centreOnTile(stage, tile);
-		scrolling.reset(view.getScrollPos());
+		this.centreOnTile(stage, tile);
+		scrolling.reset(this.getScrollPos());
 	}
 
 	private AnimationTimer animateCanvas = new AnimationTimer() {
-		int count0 = 0;
-		int count = 0;
-		long now0 = 0;
+		long count = 1;
+		long target = 0;
+
+		private final long targetDuration = 16666666l;
 
 		@Override
 		public void handle(final long now) {
-			count++;
-			if (now0 == 0) now0 = now;
-			if ((now - now0) >= 5000000000l) {
-				System.err.println("fps: " + ((count - count0) / 5));
-				now0 = now0 + 5000000000l;
-				count0 = count;
-			}
+			if (target == 0) target = now;
 
-			if (stage != null) {
-				final Point2D v = scrolling.valueAt(now);
-				view.setScrollPos(v);
-				view.renderFrame(cx, enableAnimations? now : 0, stage, debugMode);
+			if (stage != null && (target - now) < targetDuration) {
+				setScrollPos(scrolling.valueAt(target));
+				update(enableAnimations? now : 0, stage);
+				while (target <= now) target = target + targetDuration;
 			}
 		}
 	};
@@ -185,7 +169,7 @@ public class MapView extends Canvas {
 				if (etype == MouseEvent.MOUSE_MOVED ||
 					etype == MouseEvent.MOUSE_DRAGGED
 				) {
-					final MapPoint p = view.tileAtMouse(
+					final MapPoint p = tileAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
 					if (p != p0) {
@@ -200,7 +184,7 @@ public class MapView extends Canvas {
 						}
 					}
 
-					final MapPoint sprite = view.spriteAtMouse(
+					final MapPoint sprite = spriteAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
 					if (sprite0 != sprite) {
@@ -218,10 +202,10 @@ public class MapView extends Canvas {
 					}
 
 				} else if (etype == MouseEvent.MOUSE_PRESSED) {
-					final MapPoint p = view.tileAtMouse(
+					final MapPoint p = tileAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
-					final MapPoint ps = view.spriteAtMouse(
+					final MapPoint ps = spriteAtMouse(
 						new Point2D(event.getX(), event.getY()), stage);
 
 					final boolean hasPoint = p != null && (selectable.contains(p) ||
@@ -301,7 +285,7 @@ public class MapView extends Canvas {
 
 		setSelectable(new ArrayList<>());
 		stage.setHighlightColors(highlightColors);
-		scrolling.setClamp(view.getScrollBounds(stage));
+		scrolling.setClamp(getScrollBounds(stage));
 		centreView();
 	}
 

@@ -18,18 +18,24 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
+import java.util.ArrayList;
+import java.util.List;
+import javafx.collections.ObservableList;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import org.json.JSONException;
 import org.json.JSONObject;
+import static isogame.GlobalConstants.TILEH;
 import static isogame.engine.TilePrerenderer.OFFSETX;
 import static isogame.engine.TilePrerenderer.OFFSETY;
-import static isogame.GlobalConstants.TILEH;
 
 /**
  * Represents a single tile in a stage.
  * */
-public class Tile implements HasJSONRepresentation {
+public class Tile extends VisibleObject implements HasJSONRepresentation {
 	public final int elevation;
 	public final TerrainTexture tex;
 	public final CliffTexture cliffTexture;
@@ -204,6 +210,45 @@ public class Tile implements HasJSONRepresentation {
 
 	private final double[] xs = new double[6];
 	private final double[] ys = new double[6];
+
+	private final List<Node> subGraph = new ArrayList<>();
+
+	public void rebuildSceneGraph(
+		final ObservableList<Node> graph,
+		final double x,
+		final double y,
+		final CameraAngle angle
+	) {
+		subGraph.clear();
+		final SlopeType slope = adjustSlopeForCameraAngle(angle);
+
+		final ImageView base = new ImageView(tex.getTexture(even, slope));
+		base.setX(x - OFFSETX);
+		base.setY(y - OFFSETY);
+		graph.add(base);
+		subGraph.add(base);
+
+		if (slope != SlopeType.NONE) {
+			final ImageView cliff = new ImageView(cliffTexture.getPreTexture(slope));
+			cliff.setX(x - OFFSETX);
+			cliff.setY(y - OFFSETY);
+			graph.add(cliff);
+			subGraph.add(cliff);
+		}
+
+		if (elevation != 0) {
+			final Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
+			for (int i = 1; i <= elevation; i++) {
+				final ImageView cliff2 = new ImageView(epaint);
+				cliff2.setX(x - OFFSETX);
+				cliff2.setY(y - OFFSETY + (i * (TILEH / 2)));
+				graph.add(cliff2);
+				subGraph.add(cliff2);
+			}
+		}
+
+		onChange.accept(subGraph);
+	}
 
 	/**
 	 * Render this tile at (0,0).  If you need to draw the tile somewhere else,
