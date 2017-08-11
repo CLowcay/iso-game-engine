@@ -87,10 +87,17 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		this.isManaZone = isManaZone;
 		this.startZone = startZone;
 
-		this.shapeUL = generateShape(CameraAngle.UL);
-		this.shapeUR = generateShape(CameraAngle.UR);
-		this.shapeLL = generateShape(CameraAngle.LL);
-		this.shapeLR = generateShape(CameraAngle.LR);
+		if (slope == SlopeType.NONE) {
+			this.shapeUL = generateShape(CameraAngle.UL);
+			this.shapeUR = this.shapeUL;
+			this.shapeLL = this.shapeUL;
+			this.shapeLR = this.shapeUL;
+		} else {
+			this.shapeUL = generateShape(CameraAngle.UL);
+			this.shapeUR = generateShape(CameraAngle.UR);
+			this.shapeLL = generateShape(CameraAngle.LL);
+			this.shapeLR = generateShape(CameraAngle.LR);
+		}
 	}
 
 	public static Tile fromJSON(final JSONObject json, final Library lib)
