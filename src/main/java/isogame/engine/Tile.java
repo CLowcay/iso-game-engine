@@ -21,7 +21,7 @@ package isogame.engine;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.collections.ObservableList;
-import javafx.scene.Group;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -29,6 +29,7 @@ import javafx.scene.image.ImageView;
 import org.json.JSONException;
 import org.json.JSONObject;
 import static isogame.GlobalConstants.TILEH;
+import static isogame.GlobalConstants.TILEW;
 import static isogame.engine.TilePrerenderer.OFFSETX;
 import static isogame.engine.TilePrerenderer.OFFSETY;
 
@@ -43,6 +44,11 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	public final boolean isManaZone;
 	public final StartZoneType startZone;
 	public final MapPoint pos;
+
+	public final List<Point2D> shapeUL;
+	public final List<Point2D> shapeUR;
+	public final List<Point2D> shapeLL;
+	public final List<Point2D> shapeLR;
 
 	private final boolean even;
 
@@ -80,6 +86,11 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		this.slope = slope;
 		this.isManaZone = isManaZone;
 		this.startZone = startZone;
+
+		this.shapeUL = generateShape(CameraAngle.UL);
+		this.shapeUR = generateShape(CameraAngle.UR);
+		this.shapeLL = generateShape(CameraAngle.LL);
+		this.shapeLR = generateShape(CameraAngle.LR);
 	}
 
 	public static Tile fromJSON(final JSONObject json, final Library lib)
@@ -208,9 +219,6 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		}
 	}
 
-	private final double[] xs = new double[6];
-	private final double[] ys = new double[6];
-
 	private final List<Node> subGraph = new ArrayList<>();
 
 	public void rebuildSceneGraph(
@@ -278,8 +286,71 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		}
 	}
 
-	@Override
-	public String toString() {
+	/**
+	 * Get the shape of this tile.
+	 * @return A list of points representing the outline of this tile
+	 * */
+	private List<Point2D> generateShape(final CameraAngle a) {
+		final double extension = (TILEH * ((double) elevation)) / 2;
+		final List<Point2D> r = new ArrayList<>();
+		switch (adjustSlopeForCameraAngle(a)) {
+			case NONE:
+				if (elevation == 0) {
+					r.add(new Point2D(TILEW / 2, -2       ));
+					r.add(new Point2D(TILEW + 4, TILEH / 2));
+					r.add(new Point2D(TILEW / 2, TILEH + 2));
+					r.add(new Point2D(-4       , TILEH / 2));
+				} else if (elevation > 0) {
+					r.add(new Point2D(TILEW / 2, -2                         ));
+					r.add(new Point2D(TILEW + 4,  TILEH / 2                 ));
+					r.add(new Point2D(TILEW + 4, (TILEH / 2) + extension + 2));
+					r.add(new Point2D(TILEW / 2,       TILEH + extension + 2));
+					r.add(new Point2D(-4       , (TILEH / 2) + extension + 2));
+					r.add(new Point2D(-4       ,  TILEH / 2                 ));
+				} else {
+					throw new RuntimeException("Negative elevation not supported");
+				}
+				break;
+			case N:
+				r.add(new Point2D(-4       ,     (TILEH / 2) + 2        ));
+				r.add(new Point2D(TILEW / 2, 0 - (TILEH / 2) - 2        ));
+				r.add(new Point2D(TILEW + 4, 0                          ));
+				r.add(new Point2D(TILEW + 4, (TILEH / 2) + extension + 2));
+				r.add(new Point2D(TILEW / 2,       TILEH + extension + 4));
+				r.add(new Point2D(-4       , (TILEH / 2) + extension + 2));
+				break;
+			case E:
+				r.add(new Point2D(-4       , (TILEH / 2) + 2            ));
+				r.add(new Point2D(TILEW / 2, -2                         ));
+				r.add(new Point2D(TILEW + 4, -2                         ));
+				r.add(new Point2D(TILEW + 4, (TILEH / 2) + extension + 2));
+				r.add(new Point2D(TILEW / 2,       TILEH + extension + 2));
+				r.add(new Point2D(-4       , (TILEH / 2) + extension + 2));
+				break;
+			case S:
+				r.add(new Point2D(-4       , -2                         ));
+				r.add(new Point2D(TILEW / 2, -2                         ));
+				r.add(new Point2D(TILEW + 4, (TILEH / 2) + 2            ));
+				r.add(new Point2D(TILEW + 4, (TILEH / 2) + extension + 2));
+				r.add(new Point2D(TILEW / 2,       TILEH + extension + 2));
+				r.add(new Point2D(-4       , (TILEH / 2) + extension + 2));
+				break;
+			case W:
+				r.add(new Point2D(-4       , 0                          ));
+				r.add(new Point2D(TILEW / 2, 0 - (TILEH / 2) - 2        ));
+				r.add(new Point2D(TILEW + 4,     (TILEH / 2) + 2        ));
+				r.add(new Point2D(TILEW + 4, (TILEH / 2) + extension + 2));
+				r.add(new Point2D(TILEW / 2,       TILEH + extension + 4));
+				r.add(new Point2D(-4       , (TILEH / 2) + extension + 2));
+				break;
+			default: throw new RuntimeException(
+				"Invalid slope type. This cannot happen");
+		}
+
+		return r;
+	}
+
+	@Override public String toString() {
 		return pos.toString();
 	}
 }

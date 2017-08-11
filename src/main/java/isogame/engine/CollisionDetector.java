@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javafx.geometry.Point2D;
-import static isogame.GlobalConstants.TILEH;
-import static isogame.GlobalConstants.TILEW;
 
 public class CollisionDetector {
 	private final Stage stage;
@@ -46,77 +44,21 @@ public class CollisionDetector {
 		Tile tile;
 		while (it.hasNext()) {
 			tile = it.next();
+			final Point2D cp = stage.correctedIsoCoord(tile.pos, a);
+			final List<Point2D> shape;
 
-			// compute a polygon representing the position and shape of the tile.
-			// Then we will do a test to see if the mouse point is inside the
-			// polygon.
-			final double[] xs = new double[6];
-			final double[] ys = new double[6];
-			int pts;
-
-			final double extension = (TILEH * ((double) tile.elevation)) / 2;
-			switch (tile.adjustSlopeForCameraAngle(a)) {
-				case NONE:
-					if (tile.elevation == 0) {
-						xs[0] = TILEW / 2; ys[0] = -2;
-						xs[1] = TILEW + 4; ys[1] = TILEH / 2;
-						xs[2] = TILEW / 2; ys[2] = TILEH + 2;
-						xs[3] = -4;        ys[3] = TILEH / 2;
-						pts = 4;
-					} else if (tile.elevation > 0) {
-						xs[0] = TILEW / 2; ys[0] = -2;
-						xs[1] = TILEW + 4; ys[1] = TILEH / 2;
-						xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + extension + 2;
-						xs[3] = TILEW / 2; ys[3] = TILEH + extension + 2;
-						xs[4] = -4;        ys[4] = (TILEH / 2) + extension + 2;
-						xs[5] = -4;        ys[5] = TILEH / 2;
-						pts = 6;
-					} else {
-						throw new RuntimeException("Negative elevation not supported");
-					}
-					break;
-				case N:
-					xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
-					xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
-					xs[2] = TILEW + 4; ys[2] = 0;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 4;
-					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
-					pts = 6;
-					break;
-				case E:
-					xs[0] = -4;        ys[0] = (TILEH / 2) + 2;
-					xs[1] = TILEW / 2; ys[1] = -2;
-					xs[2] = TILEW + 4; ys[2] = -2;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 2;
-					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
-					pts = 6;
-					break;
-				case S:
-					xs[0] = -4;        ys[0] = -2;
-					xs[1] = TILEW / 2; ys[1] = -2;
-					xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 2;
-					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
-					pts = 6;
-					break;
-				case W:
-					xs[0] = -4;        ys[0] = 0;
-					xs[1] = TILEW / 2; ys[1] = 0 - (TILEH / 2) - 2;
-					xs[2] = TILEW + 4; ys[2] = (TILEH / 2) + 2;
-					xs[3] = TILEW + 4; ys[3] = (TILEH / 2) + extension + 2;
-					xs[4] = TILEW / 2; ys[4] = TILEH + extension + 4;
-					xs[5] = -4;        ys[5] = (TILEH / 2) + extension + 2;
-					pts = 6;
-					break;
-				default: throw new RuntimeException(
-					"Invalid slope type. This cannot happen");
+			switch (a) {
+				case UL: shape = tile.shapeUL; break;
+				case UR: shape = tile.shapeUR; break;
+				case LL: shape = tile.shapeLL; break;
+				case LR: shape = tile.shapeLR; break;
+				default:
+					throw new RuntimeException("Invalid camera angle, this cannot happen");
 			}
 
-			final Point2D cp = stage.correctedIsoCoord(tile.pos, a);
-			if (isPointInPolygon(xs, ys, pts, in.getX() - cp.getX(), in.getY() - cp.getY())) {
+			if (isPointInPolygon(
+				shape, in.getX() - cp.getX(), in.getY() - cp.getY())
+			) {
 				return tile.pos;
 			}
 		}
@@ -157,9 +99,7 @@ public class CollisionDetector {
 	 * Determine if a point lies inside a convex polygon.
 	 * */
 	private boolean isPointInPolygon(
-		final double[] xs,
-		final double[] ys,
-		final int pts,
+		final List<Point2D> shape,
 		final double x,
 		final double y
 	) {
@@ -168,11 +108,12 @@ public class CollisionDetector {
 		// for a convex polygon, we can determine if a point lies inside the
 		// polygon by checking it lies on the same side of each line on the
 		// perimeter of the polygon.
+		final int pts = shape.size();
 		for (int i = 0; i < pts; i++) {
-			final double lx0 = xs[i];
-			final double ly0 = ys[i];
-			final double lx1 = xs[(i + 1) % pts];
-			final double ly1 = ys[(i + 1) % pts];
+			final double lx0 = shape.get(i).getX();
+			final double ly0 = shape.get(i).getY();
+			final double lx1 = shape.get((i + 1) % pts).getX();
+			final double ly1 = shape.get((i + 1) % pts).getY();
 
 			// the sign of this cross product determines which side the point is on.
 			final double det = ((lx1 - lx0) * (y - ly0)) - ((ly1 - ly0) * (x - lx0));
