@@ -38,7 +38,6 @@ import javafx.stage.Window;
 import org.json.JSONException;
 
 import isogame.engine.CorruptDataException;
-import isogame.engine.Highlighter;
 import isogame.engine.Library;
 import isogame.engine.MapPoint;
 import isogame.engine.MapView;

@@ -241,16 +241,13 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	 * */
 	public void render(
 		final GraphicsContext cx,
-		final Highlighter highlighter,
 		final CameraAngle angle
 	) {
 		final SlopeType slope = adjustSlopeForCameraAngle(angle);
 
 		cx.drawImage(tex.getTexture(even, slope), -OFFSETX, -OFFSETY);
-		if (highlighter != null) highlighter.renderTop(cx, slope);
 		if (slope != SlopeType.NONE) {
 			cx.drawImage(cliffTexture.getPreTexture(slope), -OFFSETX, -OFFSETY);
-			if (highlighter != null) highlighter.renderCliff(cx, slope);
 		}
 
 		if (elevation != 0) {
@@ -258,7 +255,6 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 			for (int i = 0; i < elevation; i++) {
 				cx.translate(0, TILEH / 2);
 				cx.drawImage(epaint, -OFFSETX, -OFFSETY);
-				if (highlighter != null) highlighter.renderElevation(cx);
 			}
 		}
 	}

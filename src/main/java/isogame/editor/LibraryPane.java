@@ -502,7 +502,7 @@ public class LibraryPane extends VBox {
 		gc.scale(1.0d/4.0d, 1.0d/4.0d);
 		try {
 			(new Tile(elevation, slope, global.getTerrain("blank"), tex))
-				.render(gc, null, CameraAngle.UL);
+				.render(gc, CameraAngle.UL);
 		} catch (CorruptDataException e) {
 			throw new RuntimeException("Missing blank texture");
 		}
