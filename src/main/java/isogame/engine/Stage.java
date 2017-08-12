@@ -40,6 +40,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
@@ -384,14 +385,17 @@ public class Stage implements HasJSONRepresentation {
 		return toIsoCoord(p, a).add(0, ELEVATION_H * terrain.getTile(p).elevation);
 	}
 
-	private Map<MapPoint, LinkedList<Integer>> highlighting = new HashMap<>();
-	private Highlighter[] highlightColors = {};
+	private final List<HighlightLayer> highlighting = new ArrayList<>();
+	private final Set<MapPoint> highlightChanged = new HashSet<>();
 
 	/**
 	 * Set the highlighting colour scheme.
 	 * */
-	public void setHighlightColors(final Highlighter[] highlightColors) {
-		this.highlightColors = highlightColors;
+	public void setHighlightColors(final Paint[] highlightColors) {
+		clearAllHighlighting();
+		for (int i = 0; i < highlightColors.length; i++) {
+			highlighting.add(new HighlightLayer(highlightColors[i]));
+		}
 	}
 
 	/**
@@ -399,55 +403,43 @@ public class Stage implements HasJSONRepresentation {
 	 * @param p The tile to highlight
 	 * @param priority The highlighter to use.  A tile map be under several
 	 * highlights at once, but only the highest priority highlight is actually
-	 * rendered.  Lower number == lower priority
+	 * rendered.  Lower number == higher priority
 	 * */
 	public void setHighlight(final MapPoint p, final int priority) {
-		if (priority < 0 || priority >= highlightColors.length) {
+		if (priority < 0 || priority >= highlighting.size()) {
 			throw new RuntimeException("Invalid highlight priority " + priority);
 		}
 
-		LinkedList<Integer> highlights = highlighting.get(p);
-
-		// insert new highlight value into the list, keeping the list sorted.  Ugly
-		// but it works
-		if (highlights == null) {
-			highlights = new LinkedList<>();
-			highlights.add(priority);
-			highlighting.put(p, highlights);
-		} else if (highlights.isEmpty()) {
-			highlights.add(priority);
-		} else {
-			int i = 0;
-			for (int h : highlights) {
-				if (priority > h) {
-					highlights.add(i, priority);
-					break;
-				} else {
-					i++;
-				}
-			}
-		}
+		highlightChanged.add(p);
+		highlighting.get(priority).points.add(p);
 	}
 
 	/**
 	 * Clear a highlighting level.
+	 * @param priority The level to clear
 	 * */
-	public void clearHighlighting(final Integer priority) {
-		highlighting.values().forEach(h -> h.remove(priority));
+	public void clearHighlighting(final int priority) {
+		highlightChanged.addAll(highlighting.get(priority).points);
+		highlighting.get(priority).points.clear();
 	}
 
 	/**
 	 * Clear all highlighting.
 	 * */
 	public void clearAllHighlighting() {
-		highlighting.clear();
+		for (HighlightLayer layer : highlighting) {
+			highlightChanged.addAll(layer.points);
+			layer.points.clear();
+		}
 	}
 
 	/**
-	 * Is that tile highlighted.
+	 * Is that tile highlighted?
+	 * @param p The tile to test
+	 * @return true if the tile is highlighted
 	 * */
 	public boolean isHighlighted(final MapPoint p) {
-		return highlighting.containsKey(p) && highlighting.get(p).size() > 0;
+		return highlighting.stream().anyMatch(layer -> layer.points.contains(p));
 	}
 
 	private CameraAngle currentAngle = null;
@@ -465,6 +457,27 @@ public class Stage implements HasJSONRepresentation {
 			currentAngle = a;
 			rebuildSceneGraph(t, graph);
 		}
+
+		// update highlighting
+		for (HighlightLayer layer : highlighting) {
+			final Optional<Paint> color = Optional.of(layer.color);
+
+			for (MapPoint p : layer.points) {
+				if (highlightChanged.contains(p)) {
+					final Tile tile = terrain.getTile(p);
+					final Point2D l = correctedIsoCoord(tile.pos, currentAngle);
+					tile.setHighlight(graph, currentAngle, l.getX(), l.getY(), color);
+					highlightChanged.remove(p);
+				}
+			}
+		}
+
+		// clear highlighting on unhighlighted nodes.
+		for (MapPoint p : highlightChanged) {
+			final Tile tile = terrain.getTile(p);
+			tile.setHighlight(graph, currentAngle, 0, 0, Optional.empty());
+		}
+		highlightChanged.clear();
 	}
 
 	/**
@@ -476,9 +489,7 @@ public class Stage implements HasJSONRepresentation {
 		graph.clear();
 		terrain.iterateTiles(currentAngle).forEachRemaining(tile -> {
 			final Point2D p = correctedIsoCoord(tile.pos, currentAngle);
-			final double x = p.getX();
-			final double y = p.getY();
-			tile.rebuildSceneGraph(graph, x, y, currentAngle);
+			tile.rebuildSceneGraph(graph, p.getX(), p.getY(), currentAngle);
 		});
 	}
 
@@ -489,7 +500,7 @@ public class Stage implements HasJSONRepresentation {
 	 * @param visible Bounding box for the visible part of the map
 	 * @param renderDebug Render debugging information
 	 * */
-	public void render(
+	/*public void render(
 		final GraphicsContext cx,
 		final CameraAngle angle,
 		final long t,
@@ -541,7 +552,7 @@ public class Stage implements HasJSONRepresentation {
 				cx.restore();
 			}
 		});
-	}
+	}*/
 
 	private void doSprite(
 		final GraphicsContext cx,

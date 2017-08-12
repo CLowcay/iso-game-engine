@@ -20,12 +20,16 @@ package isogame.engine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Shape;
 import org.json.JSONException;
 import org.json.JSONObject;
 import static isogame.GlobalConstants.TILEH;
@@ -161,7 +165,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	 * Make a new tile with a different texture
 	 * */
 	public Tile newTexture(final TerrainTexture tex) {
-		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
+		return new Tile(pos, elevation, slope,
+			isManaZone, startZone, tex, cliffTexture);
 	}
 
 	/**
@@ -172,25 +177,29 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		final SlopeType slope,
 		final CliffTexture cliffTexture
 	) {
-		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
+		return new Tile(pos, elevation, slope,
+			isManaZone, startZone, tex, cliffTexture);
 	}
 
 	/**
 	 * Make a new tile with a different mana zone property
 	 * */
 	public Tile newManaZone(final boolean isManaZone) {
-		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
+		return new Tile(pos, elevation, slope,
+			isManaZone, startZone, tex, cliffTexture);
 	}
 
 	/**
 	 * Make a new tile with a different start zone type
 	 * */
 	public Tile newStartZone(final StartZoneType startZone) {
-		return new Tile(pos, elevation, slope, isManaZone, startZone, tex, cliffTexture);
+		return new Tile(pos, elevation, slope,
+			isManaZone, startZone, tex, cliffTexture);
 	}
 
 	public Tile clearSpecialProperties() {
-		return new Tile(pos, elevation, slope, false, StartZoneType.NONE, tex, cliffTexture);
+		return new Tile(pos, elevation, slope,
+			false, StartZoneType.NONE, tex, cliffTexture);
 	}
 
 	public SlopeType adjustSlopeForCameraAngle(final CameraAngle angle) {
@@ -226,7 +235,37 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		}
 	}
 
+	/**
+	 * Render this tile at (0,0).  If you need to draw the tile somewhere else,
+	 * do a translation before calling this method.
+	 * */
+	public void render(
+		final GraphicsContext cx,
+		final Highlighter highlighter,
+		final CameraAngle angle
+	) {
+		final SlopeType slope = adjustSlopeForCameraAngle(angle);
+
+		cx.drawImage(tex.getTexture(even, slope), -OFFSETX, -OFFSETY);
+		if (highlighter != null) highlighter.renderTop(cx, slope);
+		if (slope != SlopeType.NONE) {
+			cx.drawImage(cliffTexture.getPreTexture(slope), -OFFSETX, -OFFSETY);
+			if (highlighter != null) highlighter.renderCliff(cx, slope);
+		}
+
+		if (elevation != 0) {
+			final Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
+			for (int i = 0; i < elevation; i++) {
+				cx.translate(0, TILEH / 2);
+				cx.drawImage(epaint, -OFFSETX, -OFFSETY);
+				if (highlighter != null) highlighter.renderElevation(cx);
+			}
+		}
+	}
+
 	private final List<Node> subGraph = new ArrayList<>();
+	private Optional<Shape> highlightNode = Optional.empty();
+	private Optional<Paint> highlightColor = Optional.empty();
 
 	public void rebuildSceneGraph(
 		final ObservableList<Node> graph,
@@ -262,34 +301,74 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 			}
 		}
 
+		setHighlight0(graph, angle, x, y);
 		onChange.accept(subGraph);
 	}
 
-	/**
-	 * Render this tile at (0,0).  If you need to draw the tile somewhere else,
-	 * do a translation before calling this method.
-	 * */
-	public void render(
-		final GraphicsContext cx,
-		final Highlighter highlighter,
-		final CameraAngle angle
-	) {
-		final SlopeType slope = adjustSlopeForCameraAngle(angle);
-
-		cx.drawImage(tex.getTexture(even, slope), -OFFSETX, -OFFSETY);
-		if (highlighter != null) highlighter.renderTop(cx, slope);
-		if (slope != SlopeType.NONE) {
-			cx.drawImage(cliffTexture.getPreTexture(slope), -OFFSETX, -OFFSETY);
-			if (highlighter != null) highlighter.renderCliff(cx, slope);
+	private Polygon getHighlightShape(final CameraAngle angle) {
+		final List<Point2D> shape;
+		switch (angle) {
+			case UL: shape = shapeUL; break;
+			case UR: shape = shapeUR; break;
+			case LL: shape = shapeLL; break;
+			case LR: shape = shapeLR; break;
+			default:
+				throw new RuntimeException("Invalid angle, this cannot happen");
 		}
 
-		if (elevation != 0) {
-			final Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
-			for (int i = 0; i < elevation; i++) {
-				cx.translate(0, TILEH / 2);
-				cx.drawImage(epaint, -OFFSETX, -OFFSETY);
-				if (highlighter != null) highlighter.renderElevation(cx);
-			}
+		final double[] pts = new double[shape.size() * 2];
+		for (int i = 0; i < shape.size(); i++) {
+			pts[i * 2] = shape.get(i).getX();
+			pts[(i * 2) + 1] = shape.get(i).getY();
+		}
+
+		return new Polygon(pts);
+	}
+
+	/**
+	 * Update the highlight color for this tile
+	 * @param highlight The highlight color
+	 * */
+	public void setHighlight(
+		final ObservableList<Node> sceneGraph,
+		final CameraAngle angle,
+		final double x, final double y,
+		final Optional<Paint> highlight
+	) {
+		if (highlightColor.equals(highlight)) return;
+		this.highlightColor = highlight;
+		setHighlight0(sceneGraph, angle, x, y);
+	}
+
+	
+	/**
+	 * Create or destroy the highlight node as necessary.
+	 * */
+	private void setHighlight0(
+		final ObservableList<Node> sceneGraph,
+		final CameraAngle angle,
+		final double x, final double y
+	) {
+		if (highlightColor.isPresent()) {
+			final Shape n = highlightNode.orElseGet(() -> {
+				final Shape r = getHighlightShape(angle);
+				r.setCache(true);
+				r.setTranslateX(x);
+				r.setTranslateY(y);
+				sceneGraph.add(
+					sceneGraph.indexOf(subGraph.get(subGraph.size() - 1)) + 1, r);
+				subGraph.add(r);
+				highlightNode = Optional.of(r);
+				return r;
+			});
+
+			n.setFill(highlightColor.get());
+		} else {
+			highlightNode.ifPresent(n -> {
+				sceneGraph.remove(n);
+				subGraph.remove(n);
+				highlightNode = Optional.empty();
+			});
 		}
 	}
 

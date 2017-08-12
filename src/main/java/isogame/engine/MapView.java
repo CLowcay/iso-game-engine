@@ -36,6 +36,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Paint;
 import static isogame.GlobalConstants.SCROLL_SPEED;
 import static isogame.GlobalConstants.TILEH;
 
@@ -60,7 +61,7 @@ public class MapView extends View {
 	private final Set<Sprite> selectableSprites = new HashSet<>();
 	private final Set<Sprite> mouseOverSprites = new HashSet<>();
 
-	private final Highlighter[] highlightColors;
+	private final Paint[] highlightColors;
 
 	private final boolean debugMode;
 
@@ -71,7 +72,7 @@ public class MapView extends View {
 		final Stage stage,
 		final boolean enableAnimations,
 		final boolean debugMode,
-		final Highlighter[] highlightColors
+		final Paint[] highlightColors
 	) {
 		super(960, 400);
 

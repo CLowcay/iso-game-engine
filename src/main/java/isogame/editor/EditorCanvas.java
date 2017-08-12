@@ -30,6 +30,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
@@ -213,7 +214,7 @@ public class EditorCanvas extends MapView {
 		final Node root, final Window window
 	) throws CorruptDataException {
 		super(root, null, true, true,
-			new Highlighter[] {new Highlighter(Color.rgb(0x00, 0x00, 0xFF, 0.2))});
+			new Paint[] {Color.rgb(0x00, 0x00, 0xFF, 0.2)});
 
 		this.setFocusTraversable(true);
 

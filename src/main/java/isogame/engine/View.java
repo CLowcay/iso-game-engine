@@ -176,6 +176,8 @@ public class View extends Pane {
 
 		scrollTransform.setX(-x);
 		scrollTransform.setY(-y);
+		totalScreenTransform = screenTransform.clone();
+		totalScreenTransform.appendTranslation(-x, -y);
 	}
 
 	public Point2D getScrollPos() {
@@ -189,7 +191,7 @@ public class View extends Pane {
 	public MapPoint tileAtMouse(final Point2D mouse, final Stage stage) {
 		try {
 			return stage.collisions.mouseTileCollision(
-				screenTransform.inverseTransform(mouse), angle);
+				totalScreenTransform.inverseTransform(mouse), angle);
 		} catch (NonInvertibleTransformException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
@@ -202,7 +204,7 @@ public class View extends Pane {
 	public MapPoint spriteAtMouse(final Point2D mouse, final Stage stage) {
 		try {
 			return stage.collisions.mouseSpriteCollision(
-				screenTransform.inverseTransform(mouse), angle);
+				totalScreenTransform.inverseTransform(mouse), angle);
 		} catch (NonInvertibleTransformException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
@@ -210,12 +212,16 @@ public class View extends Pane {
 
 	private final Translate scrollTransform = new Translate();
 	private Affine screenTransform = null;
+	private Affine totalScreenTransform = null;
 
 	private void updateScreenTransform() {
 		screenTransform = new Affine();
 		screenTransform.appendTranslation(lx, ly);
 		screenTransform.appendScale(
 			viewportW / ISO_VIEWPORTW, viewportH / ISO_VIEWPORTH);
+		
+		totalScreenTransform = screenTransform.clone();
+		totalScreenTransform.appendTranslation(-x, -y);
 
 		innerPane.getTransforms().clear();
 		innerPane.getTransforms().addAll(screenTransform, scrollTransform);
@@ -225,42 +231,6 @@ public class View extends Pane {
 
 	public void update(final long t, final Stage stage) {
 		stage.update(innerPane.getChildren(), t, angle);
-	}
-
-	/**
-	 * Render a single complete frame.
-	 * @param cx The graphics context
-	 * @param stage The stage to render
-	 * @param renderDebug Render debug information
-	 * */
-	public void renderFrame(
-		final GraphicsContext cx,
-		final long t,
-		final Stage stage,
-		final boolean renderDebug
-	) {
-		cx.setFill(Color.WHITE);
-		cx.fillRect(lx, ly, viewportW, viewportH);
-
-		cx.save();
-		cx.setTransform(screenTransform);
-
-		stage.render(cx, angle, t, new BoundingBox(x, y - TILEH,
-			ISO_VIEWPORTW, ISO_VIEWPORTH + (2 * TILEH)), renderDebug);
-
-		cx.restore();
-
-		// draw black bars if we need them.
-		// Performance note: clipping may be more efficient
-		if (ly > 0) {
-			cx.setFill(Color.BLACK);
-			cx.fillRect(0, 0, viewportW, ly);
-			cx.fillRect(0, ly + viewportH, viewportW, ly);
-		} else if (lx > 0) {
-			cx.setFill(Color.BLACK);
-			cx.fillRect(0, 0, lx, viewportH);
-			cx.fillRect(lx + viewportW, 0, lx, viewportH);
-		}
 	}
 }
 
