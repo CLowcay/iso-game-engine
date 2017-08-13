@@ -18,6 +18,8 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -53,6 +55,8 @@ public class View extends Pane {
 	private double viewportH;
 
 	final private Pane innerPane = new Pane();
+
+	final public BooleanProperty isDebug = new SimpleBooleanProperty(false);
 
 	/**
 	 * Create a view with an initial viewport.
@@ -230,7 +234,7 @@ public class View extends Pane {
 	}
 
 	public void update(final long t, final Stage stage) {
-		stage.update(innerPane.getChildren(), t, angle);
+		stage.update(innerPane.getChildren(), isDebug, t, angle);
 	}
 }
 

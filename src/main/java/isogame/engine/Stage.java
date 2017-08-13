@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
@@ -451,11 +452,14 @@ public class Stage implements HasJSONRepresentation {
 	 * @param a The new camera angle
 	 * */
 	public void update(
-		final ObservableList<Node> graph, final long t, final CameraAngle a
+		final ObservableList<Node> graph,
+		final ObservableBooleanValue isDebug,
+		final long t,
+		final CameraAngle a
 	) {
 		if (a != currentAngle) {
 			currentAngle = a;
-			rebuildSceneGraph(t, graph);
+			rebuildSceneGraph(t, isDebug, graph);
 		}
 
 		// update highlighting
@@ -484,12 +488,14 @@ public class Stage implements HasJSONRepresentation {
 	 * Reconstruct the scene graph
 	 * */
 	private void rebuildSceneGraph(
-		final long t, final ObservableList<Node> graph
+		final long t,
+		final ObservableBooleanValue isDebug,
+		final ObservableList<Node> graph
 	) {
 		graph.clear();
 		terrain.iterateTiles(currentAngle).forEachRemaining(tile -> {
 			final Point2D p = correctedIsoCoord(tile.pos, currentAngle);
-			tile.rebuildSceneGraph(graph, p.getX(), p.getY(), currentAngle);
+			tile.rebuildSceneGraph(graph, isDebug, p.getX(), p.getY(), currentAngle);
 		});
 	}
 

@@ -222,6 +222,8 @@ public class EditorCanvas extends MapView {
 		final Collection<MapPoint> emptyList = new ArrayList<>();
 		final Collection<MapPoint> oneList = new ArrayList<>();
 
+		this.isDebug.setValue(true);
+
 		this.doOnMouseOut(() -> super.setHighlight(emptyList, 0));
 		this.doOnMouseOver(p -> {
 			oneList.clear(); oneList.add(p);

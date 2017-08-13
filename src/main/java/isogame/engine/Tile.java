@@ -21,15 +21,20 @@ package isogame.engine;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import org.json.JSONException;
 import org.json.JSONObject;
 import static isogame.GlobalConstants.TILEH;
@@ -55,6 +60,9 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	public final List<Point2D> shapeLR;
 
 	private final boolean even;
+
+	private final Text debugText = new Text();
+	private final static Font debugFont = new Font(TILEH / 2);
 
 	public Tile(final MapPoint p, final TerrainTexture texture) {
 		this(p, 0, SlopeType.NONE, false, StartZoneType.NONE, texture, null);
@@ -90,6 +98,18 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		this.slope = slope;
 		this.isManaZone = isManaZone;
 		this.startZone = startZone;
+
+		final StringBuilder debug = new StringBuilder();
+		if (isManaZone) debug.append("M");
+		if (isManaZone && startZone != StartZoneType.NONE) debug.append(", ");
+		if (startZone != StartZoneType.NONE)
+			debug.append(startZone == StartZoneType.PLAYER? "S1" : "S2");
+		debugText.setText(debug.toString());
+
+		debugText.setWrappingWidth(TILEW);
+		debugText.setFont(debugFont);
+		debugText.setTextAlignment(TextAlignment.CENTER);
+		debugText.setFill(Color.RED);
 
 		if (slope == SlopeType.NONE) {
 			this.shapeUL = generateShape(CameraAngle.UL);
@@ -265,6 +285,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 
 	public void rebuildSceneGraph(
 		final ObservableList<Node> graph,
+		final ObservableBooleanValue isDebug,
 		final double x,
 		final double y,
 		final CameraAngle angle
@@ -298,6 +319,14 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		}
 
 		setHighlight0(graph, angle, x, y);
+
+		debugText.setX(x);
+		debugText.setY(y + (TILEH / 2));
+		debugText.visibleProperty().bind(isDebug);
+
+		graph.add(debugText);
+		subGraph.add(debugText);
+
 		onChange.accept(subGraph);
 	}
 
@@ -351,9 +380,12 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 				r.setCache(true);
 				r.setTranslateX(x);
 				r.setTranslateY(y);
+
+				// the highlighter goes in the second to last position, so that it
+				// always appears behind the debug text
 				sceneGraph.add(
-					sceneGraph.indexOf(subGraph.get(subGraph.size() - 1)) + 1, r);
-				subGraph.add(r);
+					sceneGraph.indexOf(subGraph.get(subGraph.size() - 2)) + 1, r);
+				subGraph.add(subGraph.size() - 1, r);
 				highlightNode = Optional.of(r);
 				return r;
 			});
