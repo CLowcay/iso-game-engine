@@ -35,7 +35,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	public final SpriteInfo info;
 
 	// position of the sprite on the map.
-	private Optional<MapPoint> pos0 = Optional.empty();
+	private Optional<MapPoint> pos0 = Optional.of(new MapPoint(0, 0));
 	private MapPoint pos = new MapPoint(0, 0);
 	public MapPoint getPos() { return pos; }
 

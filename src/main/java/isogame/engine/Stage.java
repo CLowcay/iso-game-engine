@@ -495,6 +495,8 @@ public class Stage implements HasJSONRepresentation {
 		for (Sprite s : allSprites) {
 			final Tile tile = terrain.getTile(s.getPos());
 			final Point2D l = correctedIsoCoord(s.getPos(), currentAngle);
+			s.sceneGraph.setTranslateX(l.getX());
+			s.sceneGraph.setTranslateY(l.getY());
 			s.update(
 				graph, tile.getSceneGraphIndex(graph) + 1,
 				currentAngle, t);
@@ -518,13 +520,7 @@ public class Stage implements HasJSONRepresentation {
 			graph.add(tile.subGraph);
 		});
 
-		for (Sprite s : allSprites) {
-			final Tile tile = terrain.getTile(s.getPos());
-			final Point2D l = correctedIsoCoord(tile.pos, currentAngle);
-			s.sceneGraph.setTranslateX(l.getX());
-			s.sceneGraph.setTranslateY(l.getY());
-			s.invalidate();
-		}
+		for (Sprite s : allSprites) s.invalidate();
 	}
 
 	/**
