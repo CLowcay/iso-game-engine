@@ -18,15 +18,13 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Optional;
 
 import javafx.collections.ObservableList;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +50,8 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	private SpriteAnimation animation;
 
 	// The current scenegraph node
-	private Rectangle sceneGraphNode = null;
+	public final Group sceneGraph = new Group();
+	private final Rectangle sceneGraphNode = new Rectangle();
 
 	// animate the frames
 	private FrameAnimator frameAnimator;
@@ -62,6 +61,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 
 	public Sprite(final SpriteInfo info) {
 		this.info = info;
+		sceneGraph.getChildren().add(sceneGraphNode);
 		setAnimation(info.defaultAnimation.id);
 	}
 
@@ -88,6 +88,9 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 		this.frame = 0;
 		this.frameAnimator = new FrameAnimator(
 			this.animation.frames, this.animation.framerate);
+
+		sceneGraphNode.setTranslateY(GlobalConstants.TILEH - this.animation.h);
+		onChange.accept(sceneGraph);
 	}
 
 	/**
@@ -111,35 +114,20 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 
 	/**
 	 * Update this sprite.
-	 * @param sceneGraph the scenegraph
-	 * @param i the index into the scenegraph at which to insert this sprite
+	 * @param parent the scenegraph
+	 * @param i the index at which to insert the sprite
 	 * */
 	public void update(
-		final ObservableList<Node> sceneGraph,
-		final int i,
-		final CameraAngle angle,
-		final long t,
-		final double x,
-		final double y
+		final ObservableList<Node> parent, final int i,
+		final CameraAngle angle, final long t
 	) {
-		if (sceneGraphNode == null) {
-			sceneGraphNode = new Rectangle();
-			sceneGraphNode.setTranslateX(x);
-			sceneGraphNode.setTranslateY(y + GlobalConstants.TILEH - animation.h);
-			sceneGraph.add(i, sceneGraphNode);
-
-			final Collection<Node> changed = new LinkedList<>();
-			changed.add(sceneGraphNode);
-			onChange.accept(changed);
-
-		} else if (pos0.isPresent()) {
+		if (pos0.isPresent()) {
 			// the sprite has been moved
-			sceneGraph.remove(sceneGraphNode);
-			sceneGraph.add(i, sceneGraphNode);
+			parent.remove(sceneGraph);
+			parent.add(i, sceneGraph);
+			pos0 = Optional.empty();
 
-			final Collection<Node> changed = new LinkedList<>();
-			changed.add(sceneGraphNode);
-			onChange.accept(changed);
+			onChange.accept(sceneGraph);
 		}
 
 		final int frame = frameAnimator.frameAt(t);
@@ -151,7 +139,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	 * This will force the sprite to be reconstructed on the next update.
 	 * */
 	public void invalidate() {
-		sceneGraphNode = null;
+		pos0 = Optional.of(pos);
 	}
 
 	/**

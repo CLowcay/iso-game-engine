@@ -462,6 +462,14 @@ public class Stage implements HasJSONRepresentation {
 			rebuildSceneGraph(t, isDebug, graph);
 		}
 
+		// update any tiles that have changed
+		for (Tile tile : terrain.getUpdatedTiles()) {
+			final Point2D l = correctedIsoCoord(tile.pos, currentAngle);
+			tile.rebuildSceneGraph(isDebug, currentAngle);
+			tile.subGraph.setTranslateX(l.getX());
+			tile.subGraph.setTranslateY(l.getY());
+		}
+
 		// update highlighting
 		for (HighlightLayer layer : highlighting) {
 			final Optional<Paint> color = Optional.of(layer.color);
@@ -470,7 +478,7 @@ public class Stage implements HasJSONRepresentation {
 				if (highlightChanged.contains(p)) {
 					final Tile tile = terrain.getTile(p);
 					final Point2D l = correctedIsoCoord(tile.pos, currentAngle);
-					tile.setHighlight(graph, currentAngle, l.getX(), l.getY(), color);
+					tile.setHighlight(currentAngle, color);
 					highlightChanged.remove(p);
 				}
 			}
@@ -479,7 +487,7 @@ public class Stage implements HasJSONRepresentation {
 		// clear highlighting on unhighlighted nodes.
 		for (MapPoint p : highlightChanged) {
 			final Tile tile = terrain.getTile(p);
-			tile.setHighlight(graph, currentAngle, 0, 0, Optional.empty());
+			tile.setHighlight(currentAngle, Optional.empty());
 		}
 		highlightChanged.clear();
 
@@ -488,8 +496,8 @@ public class Stage implements HasJSONRepresentation {
 			final Tile tile = terrain.getTile(s.getPos());
 			final Point2D l = correctedIsoCoord(s.getPos(), currentAngle);
 			s.update(
-				graph, tile.getSceneGraphIndex(graph),
-				currentAngle, t, l.getX(), l.getY());
+				graph, tile.getSceneGraphIndex(graph) + 1,
+				currentAngle, t);
 		}
 	}
 
@@ -503,11 +511,20 @@ public class Stage implements HasJSONRepresentation {
 	) {
 		graph.clear();
 		terrain.iterateTiles(currentAngle).forEachRemaining(tile -> {
-			final Point2D p = correctedIsoCoord(tile.pos, currentAngle);
-			tile.rebuildSceneGraph(graph, isDebug, p.getX(), p.getY(), currentAngle);
+			final Point2D l = correctedIsoCoord(tile.pos, currentAngle);
+			tile.rebuildSceneGraph(isDebug, currentAngle);
+			tile.subGraph.setTranslateX(l.getX());
+			tile.subGraph.setTranslateY(l.getY());
+			graph.add(tile.subGraph);
 		});
 
-		for (Sprite s : allSprites) s.invalidate();
+		for (Sprite s : allSprites) {
+			final Tile tile = terrain.getTile(s.getPos());
+			final Point2D l = correctedIsoCoord(tile.pos, currentAngle);
+			s.sceneGraph.setTranslateX(l.getX());
+			s.sceneGraph.setTranslateY(l.getY());
+			s.invalidate();
+		}
 	}
 
 	/**

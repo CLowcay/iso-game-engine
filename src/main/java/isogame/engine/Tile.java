@@ -24,6 +24,7 @@ import java.util.Optional;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -64,8 +65,13 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	private final Text debugText = new Text();
 	private final static Font debugFont = new Font(TILEH / 2);
 
+	public final Group subGraph;
+	private Optional<Shape> highlightNode = Optional.empty();
+	private Optional<Paint> highlightColor = Optional.empty();
+
 	public Tile(final MapPoint p, final TerrainTexture texture) {
-		this(p, 0, SlopeType.NONE, false, StartZoneType.NONE, texture, null);
+		this(p, 0, SlopeType.NONE, false, StartZoneType.NONE,
+			texture, null, new Group());
 	}
 
 	public Tile(
@@ -75,7 +81,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		final CliffTexture cliffTexture
 	) {
 		this(new MapPoint(0, 0), elevation, slope,
-			false, StartZoneType.NONE, texture, cliffTexture);
+			false, StartZoneType.NONE, texture, cliffTexture, new Group());
 	}
 
 	public Tile(
@@ -85,7 +91,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		final boolean isManaZone,
 		final StartZoneType startZone,
 		final TerrainTexture texture,
-		final CliffTexture cliffTexture
+		final CliffTexture cliffTexture,
+		final Group subGraph
 	) {
 		this.elevation = elevation;
 		this.pos = pos;
@@ -99,6 +106,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		this.isManaZone = isManaZone;
 		this.startZone = startZone;
 
+		this.subGraph = subGraph;
+
 		final StringBuilder debug = new StringBuilder();
 		if (isManaZone) debug.append("M");
 		if (isManaZone && startZone != StartZoneType.NONE) debug.append(", ");
@@ -106,6 +115,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 			debug.append(startZone == StartZoneType.PLAYER? "S1" : "S2");
 		debugText.setText(debug.toString());
 
+		debugText.setX(0);
+		debugText.setY(TILEH / 2);
 		debugText.setWrappingWidth(TILEW);
 		debugText.setFont(debugFont);
 		debugText.setTextAlignment(TextAlignment.CENTER);
@@ -141,7 +152,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 				SlopeType.valueOf(slope), isManaZone,
 				StartZoneType.valueOf(startZone),
 				lib.getTerrain(texture),
-				cliffTexture == null? null : lib.getCliffTexture(cliffTexture));
+				cliffTexture == null? null : lib.getCliffTexture(cliffTexture),
+				new Group());
 		} catch (JSONException e) {
 			throw new CorruptDataException("Error parsing tile, " + e.getMessage(), e);
 		} catch (IllegalArgumentException e) {
@@ -186,7 +198,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	 * */
 	public Tile newTexture(final TerrainTexture tex) {
 		return new Tile(pos, elevation, slope,
-			isManaZone, startZone, tex, cliffTexture);
+			isManaZone, startZone, tex, cliffTexture, subGraph);
 	}
 
 	/**
@@ -198,7 +210,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		final CliffTexture cliffTexture
 	) {
 		return new Tile(pos, elevation, slope,
-			isManaZone, startZone, tex, cliffTexture);
+			isManaZone, startZone, tex, cliffTexture, subGraph);
 	}
 
 	/**
@@ -206,7 +218,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	 * */
 	public Tile newManaZone(final boolean isManaZone) {
 		return new Tile(pos, elevation, slope,
-			isManaZone, startZone, tex, cliffTexture);
+			isManaZone, startZone, tex, cliffTexture, subGraph);
 	}
 
 	/**
@@ -214,12 +226,12 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	 * */
 	public Tile newStartZone(final StartZoneType startZone) {
 		return new Tile(pos, elevation, slope,
-			isManaZone, startZone, tex, cliffTexture);
+			isManaZone, startZone, tex, cliffTexture, subGraph);
 	}
 
 	public Tile clearSpecialProperties() {
 		return new Tile(pos, elevation, slope,
-			false, StartZoneType.NONE, tex, cliffTexture);
+			false, StartZoneType.NONE, tex, cliffTexture, subGraph);
 	}
 
 	public SlopeType adjustSlopeForCameraAngle(final CameraAngle angle) {
@@ -279,58 +291,48 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		}
 	}
 
-	private final List<Node> subGraph = new ArrayList<>();
-	private Optional<Shape> highlightNode = Optional.empty();
-	private Optional<Paint> highlightColor = Optional.empty();
-
 	public int getSceneGraphIndex(final ObservableList<Node> graph) {
-		// get the index of the last element
-		return graph.indexOf(subGraph.get(subGraph.size() - 1));
+		return graph.indexOf(subGraph);
 	}
 
+	/**
+	 * Rebuild this part of the scenegraph
+	 * */
 	public void rebuildSceneGraph(
-		final ObservableList<Node> graph,
 		final ObservableBooleanValue isDebug,
-		final double x,
-		final double y,
 		final CameraAngle angle
 	) {
-		subGraph.clear();
+		final ObservableList<Node> graph = subGraph.getChildren();
+		graph.clear();
+
 		final SlopeType slope = adjustSlopeForCameraAngle(angle);
 
 		final ImageView base = new ImageView(tex.getTexture(even, slope));
-		base.setX(x - OFFSETX);
-		base.setY(y - OFFSETY);
+		base.setX(-OFFSETX);
+		base.setY(-OFFSETY);
 		graph.add(base);
-		subGraph.add(base);
 
 		if (slope != SlopeType.NONE) {
 			final ImageView cliff = new ImageView(cliffTexture.getPreTexture(slope));
-			cliff.setX(x - OFFSETX);
-			cliff.setY(y - OFFSETY);
+			cliff.setX(-OFFSETX);
+			cliff.setY(-OFFSETY);
 			graph.add(cliff);
-			subGraph.add(cliff);
 		}
 
 		if (elevation != 0) {
 			final Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
 			for (int i = 1; i <= elevation; i++) {
 				final ImageView cliff2 = new ImageView(epaint);
-				cliff2.setX(x - OFFSETX);
-				cliff2.setY(y - OFFSETY + (i * (TILEH / 2)));
+				cliff2.setX(-OFFSETX);
+				cliff2.setY(-OFFSETY + (i * (TILEH / 2)));
 				graph.add(cliff2);
-				subGraph.add(cliff2);
 			}
 		}
 
-		setHighlight0(graph, angle, x, y);
-
-		debugText.setX(x);
-		debugText.setY(y + (TILEH / 2));
 		debugText.visibleProperty().bind(isDebug);
-
 		graph.add(debugText);
-		subGraph.add(debugText);
+
+		setHighlight0(angle);
 
 		onChange.accept(subGraph);
 	}
@@ -360,37 +362,28 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	 * @param highlight The highlight color
 	 * */
 	public void setHighlight(
-		final ObservableList<Node> sceneGraph,
 		final CameraAngle angle,
-		final double x, final double y,
 		final Optional<Paint> highlight
 	) {
 		if (highlightColor.equals(highlight)) return;
 		this.highlightColor = highlight;
-		setHighlight0(sceneGraph, angle, x, y);
+		setHighlight0(angle);
 	}
 
-	
 	/**
 	 * Create or destroy the highlight node as necessary.
 	 * */
-	private void setHighlight0(
-		final ObservableList<Node> sceneGraph,
-		final CameraAngle angle,
-		final double x, final double y
-	) {
+	private void setHighlight0(final CameraAngle angle) {
+		final ObservableList<Node> graph = subGraph.getChildren();
+
 		if (highlightColor.isPresent()) {
 			final Shape n = highlightNode.orElseGet(() -> {
 				final Shape r = getHighlightShape(angle);
 				r.setCache(true);
-				r.setTranslateX(x);
-				r.setTranslateY(y);
 
 				// the highlighter goes in the second to last position, so that it
 				// always appears behind the debug text
-				sceneGraph.add(
-					sceneGraph.indexOf(subGraph.get(subGraph.size() - 2)) + 1, r);
-				subGraph.add(subGraph.size() - 1, r);
+				graph.add(graph.size() - 1, r);
 				highlightNode = Optional.of(r);
 				return r;
 			});
@@ -398,8 +391,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 			n.setFill(highlightColor.get());
 		} else {
 			highlightNode.ifPresent(n -> {
-				sceneGraph.remove(n);
-				subGraph.remove(n);
+				graph.remove(n);
 				highlightNode = Optional.empty();
 			});
 		}

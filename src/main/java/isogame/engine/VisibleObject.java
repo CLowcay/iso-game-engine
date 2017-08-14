@@ -18,14 +18,14 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import javafx.scene.Node;
-import java.util.Collection;
 import java.util.function.Consumer;
 
-public abstract class VisibleObject {
-	protected Consumer<Collection<Node>> onChange = x -> {};
+import javafx.scene.Group;
 
-	public final void setOnChange(final Consumer<Collection<Node>> handler) {
+public abstract class VisibleObject {
+	protected Consumer<Group> onChange = x -> {};
+
+	public final void setOnChange(final Consumer<Group> handler) {
 		onChange = handler;
 	}
 }

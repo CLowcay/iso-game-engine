@@ -20,8 +20,11 @@ package isogame.engine;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.json.JSONArray;
@@ -113,11 +116,24 @@ public class StageInfo implements HasJSONRepresentation {
 		return data[(pos.y * w) + pos.x];
 	}
 
+	private final Set<MapPoint> updated = new HashSet<>();
+
+	/**
+	 * Get all the tiles updated since the last call to getUpdatedTiles
+	 * */
+	public List<Tile> getUpdatedTiles() {
+		final List<Tile> r = updated.stream()
+			.map(p -> data[(p.y * w) + p.x]).collect(Collectors.toList());
+		updated.clear();
+		return r;
+	}
+
 	public void setTile(final Tile tile)
 		throws IndexOutOfBoundsException
 	{
 		if (tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= w || tile.pos.y >= h)
 			throw new IndexOutOfBoundsException();
+		updated.add(tile.pos);
 		data[(tile.pos.y * w) + tile.pos.x] = tile;
 	}
 
