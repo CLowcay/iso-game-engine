@@ -65,6 +65,8 @@ public class Stage implements HasJSONRepresentation {
 	// sprites that are moving into new squares.
 	private final Map<MapPoint, List<Sprite>> slicedSprites;
 
+	private final Set<Sprite> removedSprites = new HashSet<>();
+
 	private final Collection<AnimationChain> animationChains = new LinkedList<>();
 
 	/**
@@ -201,7 +203,7 @@ public class Stage implements HasJSONRepresentation {
 	 * Get all the sprites on a tile.
 	 * */
 	public List<Sprite> getSpritesByTile(final MapPoint p) {
-		List<Sprite> l = sprites.get(p);
+		final List<Sprite> l = sprites.get(p);
 		return l == null? new LinkedList<>() : new ArrayList<>(l);
 	}
 
@@ -209,8 +211,11 @@ public class Stage implements HasJSONRepresentation {
 	 * Remove all the sprites on a given tile.
 	 * */
 	public void clearTileOfSprites(final MapPoint p) {
-		List<Sprite> l = sprites.get(p);
-		if (l != null) allSprites.removeAll(l);
+		final List<Sprite> l = sprites.get(p);
+		if (l != null) {
+			allSprites.removeAll(l);
+			removedSprites.addAll(l);
+		}
 		sprites.remove(p);
 	}
 
@@ -501,6 +506,8 @@ public class Stage implements HasJSONRepresentation {
 				graph, tile.getSceneGraphIndex(graph) + 1,
 				currentAngle, t);
 		}
+
+		for (Sprite s : removedSprites) graph.remove(s.sceneGraph);
 	}
 
 	/**
