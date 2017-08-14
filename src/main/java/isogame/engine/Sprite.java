@@ -124,8 +124,8 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	) {
 		if (sceneGraphNode == null) {
 			sceneGraphNode = new Rectangle();
-			sceneGraphNode.setX(x);
-			sceneGraphNode.setY(y + GlobalConstants.TILEH - animation.h);
+			sceneGraphNode.setTranslateX(x);
+			sceneGraphNode.setTranslateY(y + GlobalConstants.TILEH - animation.h);
 			sceneGraph.add(i, sceneGraphNode);
 
 			final Collection<Node> changed = new LinkedList<>();
