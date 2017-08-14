@@ -34,7 +34,7 @@ public class AnimationChain {
 
 	public AnimationChain(final Sprite sprite) {
 		this.sprite = sprite;
-		sprite.setAnimationChain(this);
+		sprite.setAnimationChain(Optional.of(this));
 	}
 
 	private boolean chainRunning = false;

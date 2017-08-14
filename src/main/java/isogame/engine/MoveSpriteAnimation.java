@@ -126,9 +126,9 @@ public class MoveSpriteAnimation extends Animation {
 
 	@Override public void start(final Sprite s) {
 		s.setAnimation(spriteAnimation);
-		s.direction = direction;
+		s.setDirection(direction);
 		animator.start();
-		crossBoundary.accept(s.pos, s.pos.add(directionVector));
+		crossBoundary.accept(s.getPos(), s.getPos().add(directionVector));
 	}
 
 	/**

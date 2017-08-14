@@ -145,7 +145,7 @@ public class MapView extends View {
 
 			if (stage != null && (target - now) < targetDuration) {
 				setScrollPos(scrolling.valueAt(target));
-				update(enableAnimations? now : 0, stage);
+				update(enableAnimations? target : 0, stage);
 				while (target <= now) target = target + targetDuration;
 			}
 		}
@@ -193,7 +193,7 @@ public class MapView extends View {
 						if (sprite == null) {
 							onMouseOutSprite.run();
 						} else {
-							if (mouseOverSprites.stream().anyMatch(s -> s.pos.equals(sprite))) {
+							if (mouseOverSprites.stream().anyMatch(s -> s.getPos().equals(sprite))) {
 								onMouseOverSprite.accept(sprite);
 							}
 							if (event.isPrimaryButtonDown() && selectableSprites.contains(sprite)) {
@@ -210,10 +210,10 @@ public class MapView extends View {
 						new Point2D(event.getX(), event.getY()), stage);
 
 					final boolean hasPoint = p != null && (selectable.contains(p) ||
-						selectableSprites.stream().anyMatch(s -> s.pos.equals(p)));
+						selectableSprites.stream().anyMatch(s -> s.getPos().equals(p)));
 
 					final boolean hasSprite = ps != null &&
-						selectableSprites.stream().anyMatch(s -> s.pos.equals(ps));
+						selectableSprites.stream().anyMatch(s -> s.getPos().equals(ps));
 
 					onSelection.accept(new SelectionInfo(
 						Optional.ofNullable(hasPoint? p : null),

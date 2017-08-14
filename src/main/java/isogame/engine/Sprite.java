@@ -18,54 +18,140 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import isogame.GlobalConstants;
-import javafx.scene.canvas.GraphicsContext;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Optional;
+
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Sprite implements HasJSONRepresentation {
+import isogame.GlobalConstants;
+
+public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	public final SpriteInfo info;
 
 	// position of the sprite on the map.
-	public MapPoint pos = new MapPoint(0, 0);
+	private Optional<MapPoint> pos0 = Optional.empty();
+	private MapPoint pos = new MapPoint(0, 0);
+	public MapPoint getPos() { return pos; }
 
 	// The direction the sprite is facing
-	public FacingDirection direction = FacingDirection.UP;
+	private FacingDirection direction = FacingDirection.UP;
+	public FacingDirection getDirection() { return direction; }
 
 	// Extra data that can be used to identify this sprite
 	public Object userData;
 
-	private Optional<SpriteDecalRenderer> renderDecal = Optional.empty();
-
+	// The current animation
 	private SpriteAnimation animation;
+
+	// The current scenegraph node
+	private Rectangle sceneGraphNode = null;
 
 	// animate the frames
 	private FrameAnimator frameAnimator;
 	private int frame = 0;
 
-	private AnimationChain animationChain = null;
+	private Optional<AnimationChain> animationChain = Optional.empty();
 
-	public Sprite(SpriteInfo info) {
+	public Sprite(final SpriteInfo info) {
 		this.info = info;
 		setAnimation(info.defaultAnimation.id);
 	}
 
-	public void setAnimationChain(AnimationChain chain) {
+	public void setAnimationChain(final Optional<AnimationChain> chain) {
 		this.animationChain = chain;
 	}
 
-	public AnimationChain getAnimationChain() {
+	public Optional<AnimationChain> getAnimationChain() {
 		return animationChain;
 	}
 
 	/**
-	 * Register a function that can draw extra decals over the sprite.
-	 * @param r The decal renderer function, null to deregister the current decal
-	 * renderer.
+	 * Rotate the sprite anticlockwise.
 	 * */
-	public void setDecalRenderer(final SpriteDecalRenderer r) {
-		renderDecal = Optional.ofNullable(r);
+	public void rotate() {
+		direction = direction.rotateAntiClockwise();
+	}
+
+	/**
+	 * Set the animation for rendering this sprite.
+	 * */
+	public void setAnimation(final String animation) {
+		this.animation = info.animations.get(animation);
+		this.frame = 0;
+		this.frameAnimator = new FrameAnimator(
+			this.animation.frames, this.animation.framerate);
+	}
+
+	/**
+	 * Set the position of this sprite
+	 * @param pos The new position for the sprite
+	 * */
+	public void setPos(final MapPoint pos) {
+		if (!pos0.isPresent()) {
+			pos0 = Optional.of(this.pos);
+		}
+		this.pos = pos;
+	}
+
+	/**
+	 * Set the direction that this sprite should face.
+	 * @param direction The new direction for this sprite to face
+	 * */
+	public void setDirection(final FacingDirection direction) {
+		this.direction = direction;
+	}
+
+	/**
+	 * Update this sprite.
+	 * @param sceneGraph the scenegraph
+	 * @param i the index into the scenegraph at which to insert this sprite
+	 * */
+	public void update(
+		final ObservableList<Node> sceneGraph,
+		final int i,
+		final CameraAngle angle,
+		final long t,
+		final double x,
+		final double y
+	) {
+		if (sceneGraphNode == null) {
+			sceneGraphNode = new Rectangle();
+			sceneGraphNode.setX(x);
+			sceneGraphNode.setY(y + GlobalConstants.TILEH - animation.h);
+			sceneGraph.add(i, sceneGraphNode);
+
+			final Collection<Node> changed = new LinkedList<>();
+			changed.add(sceneGraphNode);
+			onChange.accept(changed);
+
+		} else if (pos0.isPresent()) {
+			// the sprite has been moved
+			sceneGraph.remove(sceneGraphNode);
+			sceneGraph.add(i, sceneGraphNode);
+
+			final Collection<Node> changed = new LinkedList<>();
+			changed.add(sceneGraphNode);
+			onChange.accept(changed);
+		}
+
+		final int frame = frameAnimator.frameAt(t);
+		animation.updateFrame(sceneGraphNode, frame, angle, direction);
+	}
+
+	/**
+	 * Mark the scene graph information in the sprite as invalid.
+	 * This will force the sprite to be reconstructed on the next update.
+	 * */
+	public void invalidate() {
+		sceneGraphNode = null;
 	}
 
 	/**
@@ -95,24 +181,7 @@ public class Sprite implements HasJSONRepresentation {
 
 		cx.translate(0, GlobalConstants.TILEH - animation.h);
 		animation.renderFrame(cx, xoff, w, frame, angle, direction);
-		renderDecal.ifPresent(r -> r.render(cx, this, t, angle));
-	}
-
-	/**
-	 * Rotate the sprite anticlockwise.
-	 * */
-	public void rotate() {
-		direction = direction.rotateAntiClockwise();
-	}
-
-	/**
-	 * Set the animation for rendering this sprite.
-	 * */
-	public void setAnimation(final String animation) {
-		this.animation = info.animations.get(animation);
-		this.frame = 0;
-		this.frameAnimator = new FrameAnimator(
-			this.animation.frames, this.animation.framerate);
+		//renderDecal.ifPresent(r -> r.render(cx, this, t, angle));
 	}
 
 	public static Sprite fromJSON(final JSONObject json, final Library lib)

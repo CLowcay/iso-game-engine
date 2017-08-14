@@ -38,8 +38,8 @@ public class SpriteTool extends Tool {
 	public void apply(final MapPoint p, final Stage stage, final View view) {
 		if (stage.terrain.hasTile(p)) {
 			final Sprite s = new Sprite(sprite);
-			s.pos = stage.terrain.getTile(p).pos;
-			s.direction = direction.inverseTransform(view.getCameraAngle());
+			s.setPos(stage.terrain.getTile(p).pos);
+			s.setDirection(direction.inverseTransform(view.getCameraAngle()));
 			stage.replaceSprite(s);
 		}
 	}

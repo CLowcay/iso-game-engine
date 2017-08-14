@@ -177,7 +177,7 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public void addSprite(final Sprite sprite) {
 		allSprites.add(sprite);
-		addSpriteToList(sprite, sprite.pos, sprites);
+		addSpriteToList(sprite, sprite.getPos(), sprites);
 	}
 
 	/**
@@ -185,7 +185,7 @@ public class Stage implements HasJSONRepresentation {
 	 * location.
 	 * */
 	public void replaceSprite(final Sprite sprite) {
-		clearTileOfSprites(sprite.pos);
+		clearTileOfSprites(sprite.getPos());
 		addSprite(sprite);
 	}
 
@@ -194,7 +194,7 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public void removeSprite(final Sprite sprite) {
 		allSprites.remove(sprite);
-		removeSpriteFromList(sprite, sprite.pos, sprites);
+		removeSpriteFromList(sprite, sprite.getPos(), sprites);
 	}
 
 	/**
@@ -265,22 +265,22 @@ public class Stage implements HasJSONRepresentation {
 		final String animation,
 		final double speed
 	) {
-		AnimationChain chain = s.getAnimationChain();
-		if (chain == null) {
-			chain = new AnimationChain(s);
+		Optional<AnimationChain> chain = s.getAnimationChain();
+		if (!chain.isPresent()) {
+			chain = Optional.of(new AnimationChain(s));
 			s.setAnimationChain(chain);
-			registerAnimationChain(chain);
+			registerAnimationChain(chain.get());
 		}
 		
-		chain.queueAnimation(new MoveSpriteAnimation(
+		chain.get().queueAnimation(new MoveSpriteAnimation(
 			start, target, animation, speed, terrain,
 				(current, next) -> {
-					removeSpriteFromList(s, s.pos, sprites);
+					removeSpriteFromList(s, s.getPos(), sprites);
 
-					if (!s.pos.equals(current)) removeSpriteFromList(s, current, slicedSprites);
+					if (!s.getPos().equals(current)) removeSpriteFromList(s, current, slicedSprites);
 
-					s.pos = current;
-					addSpriteToList(s, s.pos, sprites);
+					s.setPos(current);
+					addSpriteToList(s, s.getPos(), sprites);
 
 					if (!current.equals(next)) addSpriteToList(s, next, slicedSprites);
 				}));
@@ -291,18 +291,18 @@ public class Stage implements HasJSONRepresentation {
 	 * one location to another.
 	 * */
 	public void queueTeleportSprite(final Sprite s, final MapPoint target) {
-		AnimationChain chain = s.getAnimationChain();
-		if (chain == null) {
-			chain = new AnimationChain(s);
+		Optional<AnimationChain> chain = s.getAnimationChain();
+		if (!chain.isPresent()) {
+			chain = Optional.of(new AnimationChain(s));
 			s.setAnimationChain(chain);
-			registerAnimationChain(chain);
+			registerAnimationChain(chain.get());
 		}
 
-		chain.queueAnimation(new TeleportAnimation(
-			s.pos, target, (from, to) -> {
-				removeSpriteFromList(s, s.pos, sprites);
-				s.pos = to;
-				addSpriteToList(s, s.pos, sprites);
+		chain.get().queueAnimation(new TeleportAnimation(
+			s.getPos(), target, (from, to) -> {
+				removeSpriteFromList(s, s.getPos(), sprites);
+				s.setPos(to);
+				addSpriteToList(s, s.getPos(), sprites);
 			}));
 	}
 
@@ -482,6 +482,15 @@ public class Stage implements HasJSONRepresentation {
 			tile.setHighlight(graph, currentAngle, 0, 0, Optional.empty());
 		}
 		highlightChanged.clear();
+
+		// update the sprites
+		for (Sprite s : allSprites) {
+			final Tile tile = terrain.getTile(s.getPos());
+			final Point2D l = correctedIsoCoord(s.getPos(), currentAngle);
+			s.update(
+				graph, tile.getSceneGraphIndex(graph),
+				currentAngle, t, l.getX(), l.getY());
+		}
 	}
 
 	/**
@@ -497,6 +506,8 @@ public class Stage implements HasJSONRepresentation {
 			final Point2D p = correctedIsoCoord(tile.pos, currentAngle);
 			tile.rebuildSceneGraph(graph, isDebug, p.getX(), p.getY(), currentAngle);
 		});
+
+		for (Sprite s : allSprites) s.invalidate();
 	}
 
 	/**
@@ -560,14 +571,14 @@ public class Stage implements HasJSONRepresentation {
 		});
 	}*/
 
-	private void doSprite(
+	/*private void doSprite(
 		final GraphicsContext cx,
 		final CameraAngle angle,
 		final long t,
 		final Sprite s,
 		final boolean sliced
 	) {
-		final AnimationChain chain = s.getAnimationChain();
+		final Optional<AnimationChain> chain = s.getAnimationChain();
 		if (chain != null) {
 			chain.renderSprite(cx, angle, s, t, sliced);
 		} else {
@@ -575,6 +586,6 @@ public class Stage implements HasJSONRepresentation {
 			s.renderFrame(cx, 0, (int) TILEW, t, angle);
 			cx.restore();
 		}
-	}
+	}*/
 }
 

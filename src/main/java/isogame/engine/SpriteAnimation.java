@@ -18,9 +18,6 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import isogame.GlobalConstants;
-import isogame.resource.ResourceLocator;
-
 import java.io.IOException;
 
 import javafx.scene.canvas.GraphicsContext;
@@ -28,9 +25,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import isogame.GlobalConstants;
+import isogame.resource.ResourceLocator;
 
 
 /**
@@ -150,6 +151,22 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		final int rotation = direction.transform(angle);
 		cx.setFill(frameTextures[(frame * 4) + rotation]);
 		cx.fillRect(xoff, 0, w1, h);
+	}
+
+	/**
+	 * Update this frame object
+	 * */
+	public void updateFrame(
+		final Rectangle sceneGraphNode,
+		final int frame0,
+		final CameraAngle angle,
+		final FacingDirection direction
+	) {
+		final int frame = frame0 % frames;
+		final int rotation = direction.transform(angle);
+		sceneGraphNode.setWidth(w);
+		sceneGraphNode.setHeight(h);
+		sceneGraphNode.setFill(frameTextures[(frame * 4) + rotation]);
 	}
 
 	@Override

@@ -283,6 +283,11 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	private Optional<Shape> highlightNode = Optional.empty();
 	private Optional<Paint> highlightColor = Optional.empty();
 
+	public int getSceneGraphIndex(final ObservableList<Node> graph) {
+		// get the index of the last element
+		return graph.indexOf(subGraph.get(subGraph.size() - 1));
+	}
+
 	public void rebuildSceneGraph(
 		final ObservableList<Node> graph,
 		final ObservableBooleanValue isDebug,
