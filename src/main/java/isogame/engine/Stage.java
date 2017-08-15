@@ -232,6 +232,7 @@ public class Stage implements HasJSONRepresentation {
 			throw new RuntimeException("Invalid highlight priority " + priority);
 		}
 
+		System.err.println("Adding highlight: " + priority + " " + p);
 		highlightChanged.add(p);
 		highlighting.get(priority).points.add(p);
 	}
@@ -262,6 +263,13 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public boolean isHighlighted(final MapPoint p) {
 		return highlighting.stream().anyMatch(layer -> layer.points.contains(p));
+	}
+
+	/**
+	 * Invalidate this stage (to force a redraw)
+	 * */
+	public void invalidate() {
+		currentAngle = null;
 	}
 
 	private CameraAngle currentAngle = null;

@@ -284,6 +284,7 @@ public class MapView extends View {
 
 		if (stage == null) return;
 
+		stage.invalidate();
 		setSelectable(new ArrayList<>());
 		stage.setHighlightColors(highlightColors);
 		scrolling.setClamp(getScrollBounds(stage));

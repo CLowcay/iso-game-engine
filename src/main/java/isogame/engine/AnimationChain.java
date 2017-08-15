@@ -56,7 +56,7 @@ public class AnimationChain {
 	 * Update the animation
 	 * @return true if the entire animation chain is finished
 	 * */
-	public boolean updateAnimation(
+	private boolean updateAnimation(
 		final StageInfo terrain, final long t
 	) {
 		if (!activeAnimation.isPresent()) {
@@ -88,6 +88,7 @@ public class AnimationChain {
 		final CameraAngle angle,
 		final long t
 	) {
+		updateAnimation(terrain, t);
 		activeAnimation.ifPresent(a ->
 			a.updateSceneGraph(graph, terrain, angle, t));
 	}
