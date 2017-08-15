@@ -79,7 +79,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	/**
 	 * Queue an animation which can move the sprite around the map etc.
 	 * */
-	public void queueExtenernalAnimation(final Animation anim) {
+	public void queueExternalAnimation(final Animation anim) {
 		if (!this.animationChain.isPresent()) {
 			final AnimationChain chain = new AnimationChain(this);
 			chain.doOnFinished(() -> {
