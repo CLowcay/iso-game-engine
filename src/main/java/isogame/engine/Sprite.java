@@ -61,6 +61,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	private int frame = 0;
 
 	private Optional<AnimationChain> animationChain = Optional.empty();
+	private Runnable onExternalAnimationFinished = () -> {};
 
 	/**
 	 * @param info template to make the sprite
@@ -71,13 +72,20 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 		setAnimation(info.defaultAnimation.id);
 	}
 
+	public void doOnExternalAnimationFinished(final Runnable k) {
+		this.onExternalAnimationFinished = k;
+	}
+
 	/**
 	 * Queue an animation which can move the sprite around the map etc.
 	 * */
 	public void queueExtenernalAnimation(final Animation anim) {
 		if (!this.animationChain.isPresent()) {
 			final AnimationChain chain = new AnimationChain(this);
-			chain.doOnFinished(() -> this.animationChain = Optional.empty());
+			chain.doOnFinished(() -> {
+				this.animationChain = Optional.empty();
+				this.onExternalAnimationFinished.run();
+			});
 			this.animationChain = Optional.of(chain);
 		}
 
