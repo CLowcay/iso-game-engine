@@ -19,8 +19,10 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.engine;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
@@ -51,7 +53,8 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 
 	// The current scenegraph node
 	public final Group sceneGraph = new Group();
-	private final Rectangle sceneGraphNode = new Rectangle();
+	public final Rectangle sceneGraphNode = new Rectangle();
+	public final Rectangle slicedGraphNode = new Rectangle();
 
 	// animate the frames
 	private FrameAnimator frameAnimator;
@@ -59,16 +62,31 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 
 	private Optional<AnimationChain> animationChain = Optional.empty();
 
+	/**
+	 * @param info template to make the sprite
+	 * */
 	public Sprite(final SpriteInfo info) {
 		this.info = info;
 		sceneGraph.getChildren().add(sceneGraphNode);
 		setAnimation(info.defaultAnimation.id);
 	}
 
-	public void setAnimationChain(final Optional<AnimationChain> chain) {
-		this.animationChain = chain;
+	/**
+	 * Queue an animation which can move the sprite around the map etc.
+	 * */
+	public void queueExtenernalAnimation(final Animation anim) {
+		if (!this.animationChain.isPresent()) {
+			final AnimationChain chain = new AnimationChain(this);
+			chain.doOnFinished(() -> this.animationChain = Optional.empty());
+			this.animationChain = Optional.of(chain);
+		}
+
+		this.animationChain.ifPresent(chain -> chain.queueAnimation(anim));
 	}
 
+	/**
+	 * Get the current animation chain
+	 * */
 	public Optional<AnimationChain> getAnimationChain() {
 		return animationChain;
 	}
@@ -112,26 +130,71 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 		this.direction = direction;
 	}
 
+	private boolean isSliced = false;
+
 	/**
-	 * Update this sprite.
-	 * @param parent the scenegraph
-	 * @param i the index at which to insert the sprite
+	 * Compute the index at which this node should be inserted into the scene
+	 * graph.
 	 * */
-	public void update(
-		final ObservableList<Node> parent, final int i,
+	public Optional<Integer> findIndex(
+		final ObservableList<Node> parent, final boolean isSlice
+	) {
+		final Node needle = isSlice? slicedGraphNode : sceneGraph;
+		final int i = parent.indexOf(needle);
+		return i == -1? Optional.empty(): Optional.of(i + 1);
+	}
+
+	/**
+	 * Update this sprite manually.
+	 * @param parent the scenegraph
+	 * @param iL the index at which to insert the left slice 
+	 * @param iR the index at which to insert the right slice
+	 *           (if this sprite is sliced)
+	 * */
+	void update(
+		final ObservableList<Node> parent,
+		final Supplier<Integer> piL,
+		final Optional<Supplier<Integer>> piR,
 		final CameraAngle angle, final long t
 	) {
-		if (pos0.isPresent()) {
+		if (pos0.isPresent() || piR.isPresent() != isSliced) {
+			final int iL = piL.get();
+			final Optional<Integer> iR = piR.map(v -> v.get());
+
 			// the sprite has been moved
 			parent.remove(sceneGraph);
-			parent.add(i, sceneGraph);
+			parent.remove(slicedGraphNode);
+
+			parent.add(iL, sceneGraph);
+
+			iR.ifPresent(i -> parent.add(i, slicedGraphNode));
 			pos0 = Optional.empty();
+
+			isSliced = iR.isPresent();
 
 			onChange.accept(sceneGraph);
 		}
 
 		final int frame = frameAnimator.frameAt(t);
 		animation.updateFrame(sceneGraphNode, frame, angle, direction);
+	}
+
+	/**
+	 * Update this sprite in the scene graph using the default method.
+	 * */
+	public void updateSceneGraph(
+		final ObservableList<Node> graph,
+		final StageInfo terrain,
+		final CameraAngle angle,
+		final long t
+	) {
+		final Tile tile = terrain.getTile(pos);
+		final Point2D l = terrain.correctedIsoCoord(pos, angle);
+		sceneGraph.setTranslateX(l.getX());
+		sceneGraph.setTranslateY(l.getY());
+		final Supplier<Integer> iL = () ->
+			findIndex(graph, false).orElse(tile.getSceneGraphIndex(graph) + 1);
+		update(graph, iL, Optional.empty(), angle, t);
 	}
 
 	/**
@@ -158,18 +221,12 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	 * Render a single frame of this sprite.
 	 * WARNING: does not preserve the current translation.
 	 * */
-	public void renderFrame(
-		final GraphicsContext cx,
-		final int xoff,
-		final int w,
-		final long t,
-		final CameraAngle angle
+	public void drawFrame(
+		final GraphicsContext cx, final long t, final CameraAngle angle
 	) {
 		final int frame = frameAnimator.frameAt(t);
-
 		cx.translate(0, GlobalConstants.TILEH - animation.h);
-		animation.renderFrame(cx, xoff, w, frame, angle, direction);
-		//renderDecal.ifPresent(r -> r.render(cx, this, t, angle));
+		animation.drawFrame(cx, frame, angle, direction);
 	}
 
 	public static Sprite fromJSON(final JSONObject json, final Library lib)

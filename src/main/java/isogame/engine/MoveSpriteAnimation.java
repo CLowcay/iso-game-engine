@@ -18,15 +18,17 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import isogame.GlobalConstants;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.canvas.GraphicsContext;
-import java.util.function.BiConsumer;
+import javafx.scene.Node;
+
+import isogame.GlobalConstants;
 
 public class MoveSpriteAnimation extends Animation {
 	private final double walkSpeed;
-	private final StageInfo terrain;
-	private final BiConsumer<MapPoint, MapPoint> crossBoundary;
 	private final ContinuousAnimator animator;
 	private final FacingDirection direction;
 	private final MapPoint directionVector;
@@ -57,7 +59,7 @@ public class MoveSpriteAnimation extends Animation {
 	private final static MapPoint leftPV = new MapPoint(-1, 0);
 	private final static MapPoint rightPV = new MapPoint(1, 0);
 
-	private void updateElevationDelta() {
+	private void updateElevationDelta(final StageInfo terrain) {
 		final Tile tfrom = terrain.getTile(point);
 		final Tile tto = terrain.getTile(point.add(directionVector));
 		if (tfrom.slope == tto.slope && tfrom.elevation == tto.elevation) {
@@ -81,18 +83,20 @@ public class MoveSpriteAnimation extends Animation {
 	}
 
 	public MoveSpriteAnimation(
-		final MapPoint start, final MapPoint target,
-		final String spriteAnimation, final double walkSpeed,
-		final StageInfo terrain,
-		final BiConsumer<MapPoint, MapPoint> crossBoundary
+		final MapPoint start,
+		final MapPoint target,
+		final Sprite sprite,
+		final String spriteAnimation,
+		final double walkSpeed,
+		final StageInfo terrain
 	) {
+		super(sprite);
+
 		if (start.equals(target)) throw new RuntimeException(
 			"Start and end points of movement must be different");
 
 		this.walkSpeed = walkSpeed;
-		this.terrain = terrain;
 		this.spriteAnimation = spriteAnimation;
-		this.crossBoundary = crossBoundary;
 		this.animator = new ContinuousAnimator();
 		animator.setAnimation(new Point2D(1, 0), walkSpeed);
 		this.start = start;
@@ -121,31 +125,34 @@ public class MoveSpriteAnimation extends Animation {
 			throw new RuntimeException("Must travel in straight lines");
 		}
 
-		updateElevationDelta();
+		updateElevationDelta(terrain);
 	}
 
-	@Override public void start(final Sprite s) {
-		s.setAnimation(spriteAnimation);
-		s.setDirection(direction);
+	@Override public void start() {
+		if (!start.equals(sprite.getPos()))
+			throw new RuntimeException("Attempted to start invalid move animation");
+		sprite.setAnimation(spriteAnimation);
+		sprite.setDirection(direction);
 		animator.start();
-		crossBoundary.accept(s.getPos(), s.getPos().add(directionVector));
 	}
 
 	/**
 	 * @return true if the animation is now complete.
 	 * */
-	@Override public boolean updateAnimation(final long t) {
+	@Override public boolean updateAnimation(
+		final StageInfo terrain, final long t
+	) {
 		double v1 = animator.valueAt(t).getX();
 		if (v1 >= targetv) {
 			v = targetv;
-			crossBoundary.accept(target, target);
+			sprite.setPos(target);
 			animator.stop();
 			return true;
 		} else if (Math.floor(v) != Math.floor(v1)){
 			v = v1;
 			point = start.addScale(directionVector, (int) Math.floor(v));
-			updateElevationDelta();
-			crossBoundary.accept(point, point.add(directionVector));
+			updateElevationDelta(terrain);
+			sprite.setPos(point);
 		} else {
 			v = v1;
 		}
@@ -153,57 +160,80 @@ public class MoveSpriteAnimation extends Animation {
 		return false;
 	}
 
-	/**
-	 * Render a sprite taking into account this movement animation.
-	 * @param isTargetSlice true if we are rendering onto the tile the sprite is
-	 * moving into.  False if we are rendering onto the tile where the sprite is
-	 * moving from.
-	 * */
-	public void renderSprite(
-		final GraphicsContext gx,
+	@Override public void updateSceneGraph(
+		final ObservableList<Node> graph,
+		final StageInfo terrain,
 		final CameraAngle angle,
-		final Sprite s,
-		final long t,
-		final boolean isTargetSlice
+		final long t
 	) {
 		final double scale = v - Math.floor(v);
-		Point2D directionVector;
-		boolean isLeftSlice;
+
+		// get the motion direction
+		Point2D offsetVector;
+		boolean movingAway;
 		switch (direction.transform(angle)) {
-			case 0: directionVector = upV; isLeftSlice = !isTargetSlice; break;
-			case 1: directionVector = leftV; isLeftSlice = isTargetSlice; break;
-			case 2: directionVector = downV; isLeftSlice = isTargetSlice; break;
-			case 3: directionVector = rightV; isLeftSlice = !isTargetSlice; break;
+			case 0: offsetVector = upV; movingAway = true; break;
+			case 1: offsetVector = leftV; movingAway = false; break;
+			case 2: offsetVector = downV; movingAway = false; break;
+			case 3: offsetVector = rightV; movingAway = true; break;
 			default: throw new RuntimeException("This cannot happen");
 		}
 
-		Point2D offset = directionVector.multiply(scale);
+		final Point2D offset = offsetVector.multiply(scale);
+
+		// get the elevation correction
 		double elevationOffset;
 		if (Math.abs(elevationDelta) == 1.0d) {
 			elevationOffset = elevationDelta * scale;
 		} else if (jump != 0d) {
 			elevationOffset = scale < 0.5d? 0d : jump;
-		} else if (fromFlatElevation)
-			elevationOffset = scale < 0.5d? 0d : elevationDelta * 2.0d * (scale - 0.5d);
-		else {
-			elevationOffset = scale >= 0.5d? elevationDelta : elevationDelta * 2.0d * scale;
-		}
-
-		if (isTargetSlice) {
-			offset = offset.subtract(directionVector);
-			elevationOffset = elevationOffset - elevationDelta - jump;
-		}
-
-		gx.save();
-		gx.translate(offset.getX(), offset.getY() +
-			(elevationOffset * (GlobalConstants.TILEH / 2)));
-		if (isLeftSlice) {
-			s.renderFrame(gx, 0, (int) (GlobalConstants.TILEW - offset.getX()), t, angle);
+		} else if (fromFlatElevation) {
+			elevationOffset = scale < 0.5d?
+				0d : elevationDelta * 2.0d * (scale - 0.5d);
 		} else {
-			s.renderFrame(gx, (int) (-offset.getX()),
-				(int) (GlobalConstants.TILEW + offset.getX()), t, angle);
+			elevationOffset = scale >= 0.5d?
+				elevationDelta : elevationDelta * 2.0d * scale;
 		}
-		gx.restore();
+
+		// get the left and right tiles and their coordinates
+		final MapPoint leftPos;
+		final MapPoint rightPos;
+		if (movingAway) {
+			leftPos = sprite.getPos();
+			rightPos = leftPos.add(directionVector);
+		} else {
+			rightPos = sprite.getPos();
+			leftPos = rightPos.add(directionVector);
+		}
+
+		final Point2D pl = terrain.correctedIsoCoord(leftPos, angle);
+		final Point2D pr = terrain.correctedIsoCoord(rightPos, angle);
+
+		final Tile leftTile = terrain.getTile(leftPos);
+		final Tile rightTile = terrain.getTile(rightPos);
+
+
+		// update the translations
+		sprite.sceneGraph.setTranslateX(pl.getX() + offset.getX());
+		sprite.sceneGraph.setTranslateY(pl.getY() +
+			offset.getY() + (elevationOffset * (GlobalConstants.TILEH / 2)));
+
+		sprite.slicedGraphNode.setX(offset.getX());
+		sprite.slicedGraphNode.setWidth(GlobalConstants.TILEW - offset.getX());
+		sprite.slicedGraphNode.setTranslateX(-offset.getX());
+		sprite.slicedGraphNode.setTranslateY(offset.getY() +
+			((elevationOffset - elevationDelta - jump) *
+			(GlobalConstants.TILEH / 2)));
+
+		// update the sprite
+		final Supplier<Integer> iL = () ->
+			sprite.findIndex(graph, false)
+				.orElse(leftTile.getSceneGraphIndex(graph) + 1);
+		final Supplier<Integer> iR = () ->
+			sprite.findIndex(graph, true)
+				.orElse(rightTile.getSceneGraphIndex(graph) + 1);
+
+		sprite.update(graph, iL, Optional.of(iR), angle, t);
 	}
 }
 

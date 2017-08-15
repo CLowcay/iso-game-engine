@@ -27,14 +27,31 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javafx.geometry.Point2D;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
+import javafx.scene.transform.Rotate;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static isogame.GlobalConstants.ELEVATION_H;
+import static isogame.GlobalConstants.TILEH;
+import static isogame.GlobalConstants.TILEW;
 
 public class StageInfo implements HasJSONRepresentation {
 	public final int w;
 	public final int h;
 	private final Tile[] data;
+
+	// transformation from map coordinates to iso coordinates
+	private final Affine isoTransform;
+
+	private final Rotate rUL;
+	private final Rotate rLL;
+	private final Rotate rLR;
+	private final Rotate rUR;
 
 	public StageInfo(
 		final int w, final int h, final Tile[] data
@@ -44,6 +61,21 @@ public class StageInfo implements HasJSONRepresentation {
 		this.data = data;
 		if (data.length != w * h)
 			throw new CorruptDataException("Incorrect number of tiles in stage");
+
+		// set the camera angle rotations
+		final double xPivot = ((double) this.w) / 2.0d;
+		final double yPivot = ((double) this.h) / 2.0d;
+		rUL = new Rotate();
+		rLL = new Rotate(90, xPivot, yPivot);
+		rLR = new Rotate(180, xPivot, yPivot);
+		rUR = new Rotate(270, xPivot, yPivot);
+
+		// compute the iso coordinate transformation
+		// note that javafx transformations appear to compose backwards
+		isoTransform = new Affine();
+		isoTransform.appendTranslation((0 - TILEW) / 2, 0);
+		isoTransform.appendScale(TILEW / Math.sqrt(2), TILEH / Math.sqrt(2));
+		isoTransform.appendRotation(45, 0, 0);
 	}
 
 	public static StageInfo fromJSON(final JSONObject json, final Library lib)
@@ -192,6 +224,58 @@ public class StageInfo implements HasJSONRepresentation {
 			default: throw new RuntimeException("Invalid camera angle, this cannot happen");
 		}
 	}
+
+	/**
+	 * Get the upper left hand coordinate of a tile in iso space,
+	 * assuming no elevation.
+	 * */
+	public Point2D toIsoCoord(final MapPoint p, final CameraAngle a) {
+		final Point2D in = new Point2D(p.x, p.y);
+		switch (a) {
+			case UL: return isoTransform.transform(rUL.transform(in));
+			case LL: return isoTransform.transform(rLL.transform(in));
+			case LR: return isoTransform.transform(rLR.transform(in));
+			case UR: return isoTransform.transform(rUR.transform(in));
+			default: throw new RuntimeException(
+				"Invalid camera angle.  This cannot happen");
+		}
+	}
+
+	/**
+	 * Convert an iso coordinate to the (uncorrected) map tile that lives there.
+	 * */
+	public MapPoint fromIsoCoord(final Point2D in, final CameraAngle a) {
+		Point2D t;
+		try {
+			switch (a) {
+				case UL:
+					t = rUL.inverseTransform(isoTransform.inverseTransform(in));
+					return new MapPoint((int) (t.getX() - 0.5), (int) t.getY());
+				case LL:
+					t = rLL.inverseTransform(isoTransform.inverseTransform(in));
+					return new MapPoint((int) (t.getX() + 0.5), (int) (t.getY() + 1.5));
+				case LR:
+					t = rLR.inverseTransform(isoTransform.inverseTransform(in));
+					return new MapPoint((int) (t.getX() + 1.5), (int) t.getY());
+				case UR:
+					t = rUR.inverseTransform(isoTransform.inverseTransform(in));
+					return new MapPoint((int) (t.getX() - 1.5), (int) (t.getY() + 0.5));
+				default: throw new RuntimeException(
+					"Invalid camera angle.  This cannot happen");
+			}
+		} catch (NonInvertibleTransformException e) {
+			throw new RuntimeException("This cannot happen", e);
+		}
+	}
+
+	/**
+	 * Get the upper left hand coordinate of a tile in iso space, accounting for
+	 * its elevation.
+	 * */
+	public Point2D correctedIsoCoord(final MapPoint p, final CameraAngle a) {
+		return toIsoCoord(p, a).add(0, ELEVATION_H * getTile(p).elevation);
+	}
+
 
 	/**
 	 * Iterate over the tiles in this sort of order:

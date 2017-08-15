@@ -25,30 +25,20 @@ import java.util.function.BiConsumer;
  * An animation to teleport a sprite instantly from one square to another.
  * */
 public class TeleportAnimation extends Animation {
-	private final MapPoint start;
 	private final MapPoint target;
-	private final BiConsumer<MapPoint, MapPoint> crossBoundary;
 
-	public TeleportAnimation(
-		final MapPoint start,
-		final MapPoint target,
-		final BiConsumer<MapPoint, MapPoint> crossBoundary
-	) {
-		this.start = start;
+	public TeleportAnimation(final Sprite sprite, final MapPoint target) {
+		super(sprite);
 		this.target = target;
-		this.crossBoundary = crossBoundary;
-	}
-
-
-	@Override public void start(final Sprite s) {
-		return;
 	}
 
 	/**
 	 * @return true if the animation is now complete.
 	 * */
-	@Override public boolean updateAnimation(final long t) {
-		crossBoundary.accept(start, target);
+	@Override public boolean updateAnimation(
+		final StageInfo terrain, final long t
+	) {
+		sprite.setPos(target);
 		return true;
 	}
 }

@@ -18,13 +18,12 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import isogame.GlobalConstants;
-
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
-import javafx.scene.canvas.GraphicsContext;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
 
 public class AnimationChain {
 	private Runnable onFinished = () -> {};
@@ -32,9 +31,8 @@ public class AnimationChain {
 	private final Queue<Animation> queuedAnimations = new LinkedList<>();
 	private final Sprite sprite;
 
-	public AnimationChain(final Sprite sprite) {
+	AnimationChain(final Sprite sprite) {
 		this.sprite = sprite;
-		sprite.setAnimationChain(Optional.of(this));
 	}
 
 	private boolean chainRunning = false;
@@ -50,25 +48,27 @@ public class AnimationChain {
 	 * Shut down the animation chain now.
 	 * */
 	public void terminateChain() {
-		sprite.setAnimationChain(null);
+		chainRunning = false;
+		onFinished.run();
 	}
 
 	/**
 	 * Update the animation
-	 * TODO: extend this so that it also updates the scene graph
 	 * @return true if the entire animation chain is finished
 	 * */
-	public boolean updateAnimation(final long t) {
+	public boolean updateAnimation(
+		final StageInfo terrain, final long t
+	) {
 		if (!activeAnimation.isPresent()) {
 			activeAnimation = Optional.ofNullable(queuedAnimations.poll());
 			activeAnimation.ifPresent(a -> {
-				a.start(sprite);
+				a.start();
 				chainRunning = true;
 			});
 		}
 
 		return activeAnimation.map(a -> {
-			if (a.updateAnimation(t)) activeAnimation = Optional.empty();
+			if (a.updateAnimation(terrain, t)) activeAnimation = Optional.empty();
 			return false;
 		}).orElseGet(() -> {
 			if (chainRunning) {
@@ -80,22 +80,16 @@ public class AnimationChain {
 	}
 
 	/**
-	 * Render a sprite taking into account any animation effects.
+	 * Update the scene graph taking into account all animations
 	 * */
-	public void renderSprite(
-		final GraphicsContext gx,
+	public void updateSceneGraph(
+		final ObservableList<Node> graph,
+		final StageInfo terrain,
 		final CameraAngle angle,
-		final Sprite s,
-		final long t,
-		final boolean isTargetSlice
+		final long t
 	) {
-		if (activeAnimation.isPresent()) {
-			activeAnimation.get().renderSprite(gx, angle, s, t, isTargetSlice);
-		} else {
-			gx.save();
-			s.renderFrame(gx, 0, (int) GlobalConstants.TILEW, t, angle);
-			gx.restore();
-		}
+		activeAnimation.ifPresent(a ->
+			a.updateSceneGraph(graph, terrain, angle, t));
 	}
 
 	public void queueAnimation(final Animation a) {

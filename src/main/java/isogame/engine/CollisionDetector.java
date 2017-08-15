@@ -38,13 +38,13 @@ public class CollisionDetector {
 	public MapPoint mouseTileCollision(
 		final Point2D in, final CameraAngle a
 	) {
-		final MapPoint p = stage.fromIsoCoord(in, a);
+		final MapPoint p = stage.terrain.fromIsoCoord(in, a);
 		final Iterator<Tile> it = stage.terrain.iterateCollisionDetection(p, a);
 
 		Tile tile;
 		while (it.hasNext()) {
 			tile = it.next();
-			final Point2D cp = stage.correctedIsoCoord(tile.pos, a);
+			final Point2D cp = stage.terrain.correctedIsoCoord(tile.pos, a);
 			final List<Point2D> shape;
 
 			switch (a) {
@@ -74,7 +74,7 @@ public class CollisionDetector {
 	public MapPoint mouseSpriteCollision(
 		final Point2D in, final CameraAngle a
 	) {
-		final MapPoint p = stage.fromIsoCoord(in, a);
+		final MapPoint p = stage.terrain.fromIsoCoord(in, a);
 		final Iterator<Tile> it = stage.terrain.iterateCollisionDetection(p, a);
 
 		Tile tile;
@@ -86,7 +86,7 @@ public class CollisionDetector {
 				l = l.subList(0, l.size());
 				Collections.reverse(l);
 				for (Sprite s : l) {
-					final Point2D sp = in.subtract(stage.correctedIsoCoord(tile.pos, a));
+					final Point2D sp = in.subtract(stage.terrain.correctedIsoCoord(tile.pos, a));
 					if (s.hitTest(sp.getX(), sp.getY(), a)) return tile.pos;
 				}
 			}

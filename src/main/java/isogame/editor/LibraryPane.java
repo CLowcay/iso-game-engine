@@ -433,9 +433,7 @@ public class LibraryPane extends VBox {
 		final Canvas c = new Canvas(64, anim.h / 4);
 		final GraphicsContext gc = c.getGraphicsContext2D();
 		gc.scale(1.0d/4.0d, 1.0d/4.0d);
-		anim.renderFrame(gc,
-			0, (int) GlobalConstants.TILEW,
-			0, CameraAngle.UL, direction);
+		anim.drawFrame(gc, 0, CameraAngle.UL, direction);
 		return c;
 	}
 

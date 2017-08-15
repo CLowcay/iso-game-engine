@@ -18,33 +18,51 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import javafx.scene.canvas.GraphicsContext;
+import java.util.Optional;
+import java.util.function.Supplier;
+import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import static isogame.GlobalConstants.TILEW;
 
 public abstract class Animation {
-	public abstract void start(final Sprite s);
+	protected final Sprite sprite;
+
+	protected Animation(final Sprite sprite) {
+		this.sprite = sprite;
+	}
+
+	public void start() { }
 
 	/**
+	 * @param terrain the terrain we're rendering onto
+	 * @param t the current time
 	 * @return true if the animation is now complete.
 	 * */
-	public abstract boolean updateAnimation(final long t);
+	public abstract boolean updateAnimation(
+		final StageInfo terrain, final long t
+	);
 
 	/**
-	 * Render a sprite taking into account this movement animation.
-	 * @param isTargetSlice true if we are rendering onto the tile the sprite is
-	 * moving into.  False if we are rendering onto the tile where the sprite is
-	 * moving from.
+	 * Update the scene graph
+	 * @param graph the scenegraph
+	 * @param terrain the terrain we're rendering onto
+	 * @param angle the current camera angle
+	 * @param t the current time
 	 * */
-	public void renderSprite(
-		final GraphicsContext gx,
+	public void updateSceneGraph(
+		final ObservableList<Node> graph,
+		final StageInfo terrain,
 		final CameraAngle angle,
-		final Sprite s,
-		final long t,
-		final boolean isTargetSlice
+		final long t
 	) {
-		gx.save();
-		s.renderFrame(gx, 0, (int) TILEW, t, angle);
-		gx.restore();
+		final Tile tile = terrain.getTile(sprite.getPos());
+		final Point2D l = terrain.correctedIsoCoord(sprite.getPos(), angle);
+		sprite.sceneGraph.setTranslateX(l.getX());
+		sprite.sceneGraph.setTranslateY(l.getY());
+		final Supplier<Integer> iL = () ->
+			sprite.findIndex(graph, false).orElse(tile.getSceneGraphIndex(graph) + 1);
+		sprite.update(graph, iL, Optional.empty(), angle, t);
 	}
 }
 

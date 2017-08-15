@@ -140,17 +140,18 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		}
 	}
 
-	public void renderFrame(
+	/**
+	 * Draw this frame onto a canvas
+	 * */
+	public void drawFrame(
 		final GraphicsContext cx,
-		final int xoff, int w1,
-		final int frame0,
+		final int frame,
 		final CameraAngle angle,
 		final FacingDirection direction
 	) {
-		final int frame = frame0 % frames;
 		final int rotation = direction.transform(angle);
 		cx.setFill(frameTextures[(frame * 4) + rotation]);
-		cx.fillRect(xoff, 0, w1, h);
+		cx.fillRect(0, 0, GlobalConstants.TILEW, h);
 	}
 
 	/**

@@ -138,7 +138,7 @@ public class View extends Pane {
 	}
 
 	public void centreOnTile(final Stage stage, final MapPoint pos) {
-		final Point2D centre = stage.toIsoCoord(pos, angle);
+		final Point2D centre = stage.terrain.toIsoCoord(pos, angle);
 		x = centre.getX() - ((ISO_VIEWPORTW - TILEW) / 2.0);
 		y = centre.getY() - ((ISO_VIEWPORTH - TILEH) / 2.0);
 		updateScreenTransform();
@@ -159,10 +159,10 @@ public class View extends Pane {
 	private final static int overscroll = 3;
 
 	public Rectangle2D getScrollBounds(final Stage stage) {
-		final Point2D pt = stage.toIsoCoord(stage.terrain.getTop(angle), angle);
-		final Point2D pb = stage.toIsoCoord(stage.terrain.getBottom(angle), angle);
-		final Point2D pl = stage.toIsoCoord(stage.terrain.getLeft(angle), angle);
-		final Point2D pr = stage.toIsoCoord(stage.terrain.getRight(angle), angle);
+		final Point2D pt = stage.terrain.toIsoCoord(stage.terrain.getTop(angle), angle);
+		final Point2D pb = stage.terrain.toIsoCoord(stage.terrain.getBottom(angle), angle);
+		final Point2D pl = stage.terrain.toIsoCoord(stage.terrain.getLeft(angle), angle);
+		final Point2D pr = stage.terrain.toIsoCoord(stage.terrain.getRight(angle), angle);
 		return new Rectangle2D(
 			pl.getX() - (overscroll * TILEW),
 			pt.getY() - (overscroll * TILEH),

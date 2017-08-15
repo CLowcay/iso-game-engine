@@ -18,39 +18,29 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import isogame.resource.ResourceLocator;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ObservableList;
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.transform.Affine;
-import javafx.scene.transform.NonInvertibleTransformException;
-import javafx.scene.transform.Rotate;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import static isogame.GlobalConstants.ELEVATION_H;
-import static isogame.GlobalConstants.TILEH;
-import static isogame.GlobalConstants.TILEW;
+
+import isogame.resource.ResourceLocator;
 
 public class Stage implements HasJSONRepresentation {
 	public String name = null;
@@ -61,26 +51,13 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public final Set<Sprite> allSprites = new HashSet<>();
 
-	private final Map<MapPoint, List<Sprite>> sprites;
-	// sprites that are moving into new squares.
-	private final Map<MapPoint, List<Sprite>> slicedSprites;
-
 	private final Set<Sprite> removedSprites = new HashSet<>();
-
-	private final Collection<AnimationChain> animationChains = new LinkedList<>();
+	private final ArrayList<Set<Sprite>> spritesByPriority = new ArrayList<>();
 
 	/**
 	 * Assets for just this stage.
 	 * */
 	public final Library localLibrary;
-
-	// transformation from map coordinates to iso coordinates
-	private final Affine isoTransform;
-
-	private final Rotate rUL;
-	private final Rotate rLL;
-	private final Rotate rLR;
-	private final Rotate rUR;
 
 	/**
 	 * The collision detector.
@@ -98,23 +75,9 @@ public class Stage implements HasJSONRepresentation {
 		this.localLibrary = localLibrary;
 		this.collisions = new CollisionDetector(this);
 
-		sprites = new HashMap<>();
-		slicedSprites = new HashMap<>();
-
-		// set the camera angle rotations
-		final double xPivot = ((double) terrain.w) / 2.0d;
-		final double yPivot = ((double) terrain.h) / 2.0d;
-		rUL = new Rotate();
-		rLL = new Rotate(90, xPivot, yPivot);
-		rLR = new Rotate(180, xPivot, yPivot);
-		rUR = new Rotate(270, xPivot, yPivot);
-
-		// compute the iso coordinate transformation
-		// note that javafx transformations appear to compose backwards
-		isoTransform = new Affine();
-		isoTransform.appendTranslation((0 - TILEW) / 2, 0);
-		isoTransform.appendScale(TILEW / Math.sqrt(2), TILEH / Math.sqrt(2));
-		isoTransform.appendRotation(45, 0, 0);
+		this.spritesByPriority.addAll(localLibrary.priorities
+			.stream().map(x -> new HashSet<Sprite>())
+			.collect(Collectors.toList()));
 	}
 
 	public static Stage fromFile(
@@ -179,7 +142,7 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public void addSprite(final Sprite sprite) {
 		allSprites.add(sprite);
-		addSpriteToList(sprite, sprite.getPos(), sprites);
+		spritesByPriority.get(sprite.info.priority).add(sprite);
 	}
 
 	/**
@@ -196,127 +159,31 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public void removeSprite(final Sprite sprite) {
 		allSprites.remove(sprite);
-		removeSpriteFromList(sprite, sprite.getPos(), sprites);
+		spritesByPriority.get(sprite.info.priority).remove(sprite);
+		removedSprites.add(sprite);
 	}
 
 	/**
 	 * Get all the sprites on a tile.
 	 * */
 	public List<Sprite> getSpritesByTile(final MapPoint p) {
-		final List<Sprite> l = sprites.get(p);
-		return l == null? new LinkedList<>() : new ArrayList<>(l);
+		return allSprites.stream()
+			.filter(s -> s.getPos().equals(p))
+			.collect(Collectors.toList());
 	}
 
 	/**
 	 * Remove all the sprites on a given tile.
 	 * */
 	public void clearTileOfSprites(final MapPoint p) {
-		final List<Sprite> l = sprites.get(p);
-		if (l != null) {
-			allSprites.removeAll(l);
-			removedSprites.addAll(l);
-		}
-		sprites.remove(p);
-	}
-
-	private void addSpriteToList(
-		final Sprite sprite,
-		final MapPoint p,
-		final Map<MapPoint, List<Sprite>> sprites
-	) {
-		List<Sprite> l = sprites.get(p);
-		if (l == null) {
-			l = new LinkedList<>();
-			sprites.put(p, l);
-		}
-
-		int i;
-		for (i = 0; i < l.size(); i++)
-			if (l.get(i).info.priority > sprite.info.priority) break;
-
-		l.add(i, sprite);
-	}
-
-	private void removeSpriteFromList(
-		final Sprite sprite,
-		final MapPoint p,
-		final Map<MapPoint, List<Sprite>> sprites
-	) {
-		final List<Sprite> l = sprites.get(p);
-		if (l != null) l.remove(sprite);
-	}
-
-	/**
-	 * Register a new animation chain with this stage.  Must be invoked in order
-	 * to activate the animations.
-	 * */
-	public void registerAnimationChain(final AnimationChain chain) {
-		animationChains.add(chain);
-	}
-
-	public void deregisterAnimationChain(final AnimationChain chain) {
-		animationChains.remove(chain);
-		chain.terminateChain();
-	}
-
-	/**
-	 * Queue a move animation on a sprite.
-	 * @param animation The walking animation to use.
-	 * */
-	public void queueMoveSprite(
-		final Sprite s,
-		final MapPoint start,
-		final MapPoint target,
-		final String animation,
-		final double speed
-	) {
-		Optional<AnimationChain> chain = s.getAnimationChain();
-		if (!chain.isPresent()) {
-			chain = Optional.of(new AnimationChain(s));
-			s.setAnimationChain(chain);
-			registerAnimationChain(chain.get());
-		}
-		
-		chain.get().queueAnimation(new MoveSpriteAnimation(
-			start, target, animation, speed, terrain,
-				(current, next) -> {
-					removeSpriteFromList(s, s.getPos(), sprites);
-
-					if (!s.getPos().equals(current)) removeSpriteFromList(s, current, slicedSprites);
-
-					s.setPos(current);
-					addSpriteToList(s, s.getPos(), sprites);
-
-					if (!current.equals(next)) addSpriteToList(s, next, slicedSprites);
-				}));
-	}
-
-	/**
-	 * Queue a teleport "animation".  Instantly moves the character sprite from
-	 * one location to another.
-	 * */
-	public void queueTeleportSprite(final Sprite s, final MapPoint target) {
-		Optional<AnimationChain> chain = s.getAnimationChain();
-		if (!chain.isPresent()) {
-			chain = Optional.of(new AnimationChain(s));
-			s.setAnimationChain(chain);
-			registerAnimationChain(chain.get());
-		}
-
-		chain.get().queueAnimation(new TeleportAnimation(
-			s.getPos(), target, (from, to) -> {
-				removeSpriteFromList(s, s.getPos(), sprites);
-				s.setPos(to);
-				addSpriteToList(s, s.getPos(), sprites);
-			}));
+		getSpritesByTile(p).stream().forEach(this::removeSprite);
 	}
 
 	/**
 	 * Rotate all the sprites on a particular tile.
 	 * */
 	public void rotateSprites(final MapPoint p) {
-		List<Sprite> l = sprites.get(p);
-		if (l != null) for (Sprite s : l) s.rotate();
+		getSpritesByTile(p).forEach(s -> s.rotate());
 	}
 
 	/**
@@ -338,57 +205,6 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public boolean usesCliffTexture(final CliffTexture tex) {
 		return terrain.usesCliffTexture(tex);
-	}
-
-	/**
-	 * Get the upper left hand coordinate of a tile in iso space,
-	 * assuming no elevation.
-	 * */
-	public Point2D toIsoCoord(final MapPoint p, final CameraAngle a) {
-		final Point2D in = new Point2D(p.x, p.y);
-		switch (a) {
-			case UL: return isoTransform.transform(rUL.transform(in));
-			case LL: return isoTransform.transform(rLL.transform(in));
-			case LR: return isoTransform.transform(rLR.transform(in));
-			case UR: return isoTransform.transform(rUR.transform(in));
-			default: throw new RuntimeException(
-				"Invalid camera angle.  This cannot happen");
-		}
-	}
-
-	/**
-	 * Convert an iso coordinate to the (uncorrected) map tile that lives there.
-	 * */
-	public MapPoint fromIsoCoord(final Point2D in, final CameraAngle a) {
-		Point2D t;
-		try {
-			switch (a) {
-				case UL:
-					t = rUL.inverseTransform(isoTransform.inverseTransform(in));
-					return new MapPoint((int) (t.getX() - 0.5), (int) t.getY());
-				case LL:
-					t = rLL.inverseTransform(isoTransform.inverseTransform(in));
-					return new MapPoint((int) (t.getX() + 0.5), (int) (t.getY() + 1.5));
-				case LR:
-					t = rLR.inverseTransform(isoTransform.inverseTransform(in));
-					return new MapPoint((int) (t.getX() + 1.5), (int) t.getY());
-				case UR:
-					t = rUR.inverseTransform(isoTransform.inverseTransform(in));
-					return new MapPoint((int) (t.getX() - 1.5), (int) (t.getY() + 0.5));
-				default: throw new RuntimeException(
-					"Invalid camera angle.  This cannot happen");
-			}
-		} catch (NonInvertibleTransformException e) {
-			throw new RuntimeException("This cannot happen", e);
-		}
-	}
-
-	/**
-	 * Get the upper left hand coordinate of a tile in iso space, accounting for
-	 * its elevation.
-	 * */
-	public Point2D correctedIsoCoord(final MapPoint p, final CameraAngle a) {
-		return toIsoCoord(p, a).add(0, ELEVATION_H * terrain.getTile(p).elevation);
 	}
 
 	private final List<HighlightLayer> highlighting = new ArrayList<>();
@@ -469,20 +285,20 @@ public class Stage implements HasJSONRepresentation {
 
 		// update any tiles that have changed
 		for (Tile tile : terrain.getUpdatedTiles()) {
-			final Point2D l = correctedIsoCoord(tile.pos, currentAngle);
+			final Point2D l = terrain.correctedIsoCoord(tile.pos, currentAngle);
 			tile.rebuildSceneGraph(isDebug, currentAngle);
 			tile.subGraph.setTranslateX(l.getX());
 			tile.subGraph.setTranslateY(l.getY());
 		}
 
 		// update highlighting
-		for (HighlightLayer layer : highlighting) {
+		for (final HighlightLayer layer : highlighting) {
 			final Optional<Paint> color = Optional.of(layer.color);
 
-			for (MapPoint p : layer.points) {
+			for (final MapPoint p : layer.points) {
 				if (highlightChanged.contains(p)) {
 					final Tile tile = terrain.getTile(p);
-					final Point2D l = correctedIsoCoord(tile.pos, currentAngle);
+					final Point2D l = terrain.correctedIsoCoord(tile.pos, currentAngle);
 					tile.setHighlight(currentAngle, color);
 					highlightChanged.remove(p);
 				}
@@ -490,21 +306,16 @@ public class Stage implements HasJSONRepresentation {
 		}
 
 		// clear highlighting on unhighlighted nodes.
-		for (MapPoint p : highlightChanged) {
+		for (final MapPoint p : highlightChanged) {
 			final Tile tile = terrain.getTile(p);
 			tile.setHighlight(currentAngle, Optional.empty());
 		}
 		highlightChanged.clear();
 
 		// update the sprites
-		for (Sprite s : allSprites) {
-			final Tile tile = terrain.getTile(s.getPos());
-			final Point2D l = correctedIsoCoord(s.getPos(), currentAngle);
-			s.sceneGraph.setTranslateX(l.getX());
-			s.sceneGraph.setTranslateY(l.getY());
-			s.update(
-				graph, tile.getSceneGraphIndex(graph) + 1,
-				currentAngle, t);
+		for (final Set<Sprite> layer : spritesByPriority) {
+			for (final Sprite s : layer)
+				s.updateSceneGraph(graph, terrain, currentAngle, t);
 		}
 
 		for (Sprite s : removedSprites) graph.remove(s.sceneGraph);
@@ -520,7 +331,7 @@ public class Stage implements HasJSONRepresentation {
 	) {
 		graph.clear();
 		terrain.iterateTiles(currentAngle).forEachRemaining(tile -> {
-			final Point2D l = correctedIsoCoord(tile.pos, currentAngle);
+			final Point2D l = terrain.correctedIsoCoord(tile.pos, currentAngle);
 			tile.rebuildSceneGraph(isDebug, currentAngle);
 			tile.subGraph.setTranslateX(l.getX());
 			tile.subGraph.setTranslateY(l.getY());
@@ -529,83 +340,5 @@ public class Stage implements HasJSONRepresentation {
 
 		for (Sprite s : allSprites) s.invalidate();
 	}
-
-	/**
-	 * Render the entire stage (skipping the invisible bits for efficiency).
-	 * @param cx The graphics context
-	 * @param angle The camera angle
-	 * @param visible Bounding box for the visible part of the map
-	 * @param renderDebug Render debugging information
-	 * */
-	/*public void render(
-		final GraphicsContext cx,
-		final CameraAngle angle,
-		final long t,
-		final BoundingBox visible,
-		final boolean renderDebug
-	) {
-		for (AnimationChain chain : animationChains) {
-			chain.updateAnimation(t);
-		}
-
-		terrain.iterateTiles(angle).forEachRemaining(tile -> {
-			final Point2D p = correctedIsoCoord(tile.pos, angle);
-			final double x = p.getX();
-			final double y = p.getY();
-
-			if (visible.intersects(x, y, TILEW, TILEH)) {
-				// get the highlight color
-				Highlighter hcolor = null;
-				final LinkedList<Integer> h = highlighting.get(tile.pos);
-				if (h != null) {
-					Integer i = h.peekFirst();
-					if (i != null) hcolor = highlightColors[i];
-				}
-
-				cx.save();
-				cx.translate(x, y);
-
-				cx.save();
-				tile.render(cx, hcolor, angle);
-				cx.restore();
-
-				if (tile.slope != SlopeType.NONE) {
-					cx.translate(0, -(TILEH / 4));
-				}
-
-				List<Sprite> l = sprites.get(tile.pos);
-				if (l != null) for (Sprite s : l) doSprite(cx, angle, t, s, false);
-				l = slicedSprites.get(tile.pos);
-				if (l != null) for (Sprite s : l) doSprite(cx, angle, t, s, true);
-
-				if (renderDebug) {
-					cx.setFill(Color.RED);
-					String status = tile.specialStatusString();
-					if (status != null) {
-						cx.fillText(status, TILEW / 3, TILEH / 2);
-					}
-				}
-
-				cx.restore();
-			}
-		});
-	}*/
-
-	/*private void doSprite(
-		final GraphicsContext cx,
-		final CameraAngle angle,
-		final long t,
-		final Sprite s,
-		final boolean sliced
-	) {
-		final Optional<AnimationChain> chain = s.getAnimationChain();
-		if (chain != null) {
-			chain.renderSprite(cx, angle, s, t, sliced);
-		} else {
-			cx.save();
-			s.renderFrame(cx, 0, (int) TILEW, t, angle);
-			cx.restore();
-		}
-	}*/
 }
 

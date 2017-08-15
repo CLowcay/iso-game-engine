@@ -183,6 +183,7 @@ public class Library {
 	 * */
 	public Library(final Library parent) {
 		this.parent = parent;
+		if (parent != null) this.priorities.addAll(parent.priorities);
 	}
 
 	/**
@@ -237,10 +238,13 @@ public class Library {
 
 			if (opriorities != null) {
 				final JSONArray priorities = (JSONArray) opriorities;
-				for (Object x : priorities) r.priorities.add((String) x);
+				if (priorities.length() > 0) {
+					r.priorities.clear();
+					for (final Object x : priorities) r.priorities.add((String) x);
+				}
 			}
 
-			for (Object x : sprites) {
+			for (final Object x : sprites) {
 				final JSONObject sprite = (JSONObject) x;
 				final String id = (String) sprite.get("id");
 				if (id == null)
@@ -248,7 +252,7 @@ public class Library {
 				r.sprites.put(id, SpriteInfo.fromJSON(sprite, loc));
 			}
 
-			for (Object x : terrains) {
+			for (final Object x : terrains) {
 				final JSONObject terrain = (JSONObject) x;
 				final String id = (String) terrain.get("id");
 				if (id == null)
@@ -256,7 +260,7 @@ public class Library {
 				r.terrains.put(id, TerrainTexture.fromJSON(terrain, loc, nofx));
 			}
 
-			for (Object x : cliffTextures) {
+			for (final Object x : cliffTextures) {
 				final JSONObject cliffTerrain = (JSONObject) x;
 				final String id = (String) cliffTerrain.get("id");
 				if (id == null)
