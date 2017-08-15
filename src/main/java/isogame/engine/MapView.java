@@ -104,7 +104,7 @@ public class MapView extends View {
 					final MapPoint centreP = tileAtMouse(centre, this.stage);
 					if (action == KeyBinding.rotateLeft) rotateLeft();
 						else rotateRight();
-					scrolling.setClamp(getScrollBounds(stage));
+					scrolling.setClamp(getScrollBounds(this.stage));
 					centreOnTile(this.stage, centreP);
 					scrolling.reset(getScrollPos());
 				}
