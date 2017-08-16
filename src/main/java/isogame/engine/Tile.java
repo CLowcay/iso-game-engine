@@ -304,6 +304,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	) {
 		final ObservableList<Node> graph = subGraph.getChildren();
 		graph.clear();
+		highlightNode = Optional.empty();
 
 		final SlopeType slope = adjustSlopeForCameraAngle(angle);
 
@@ -365,7 +366,6 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		final CameraAngle angle,
 		final Optional<Paint> highlight
 	) {
-		if (highlightColor.equals(highlight)) return;
 		this.highlightColor = highlight;
 		setHighlight0(angle);
 	}

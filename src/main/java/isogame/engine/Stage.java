@@ -304,9 +304,7 @@ public class Stage implements HasJSONRepresentation {
 
 			for (final MapPoint p : layer.points) {
 				if (highlightChanged.contains(p)) {
-					final Tile tile = terrain.getTile(p);
-					final Point2D l = terrain.correctedIsoCoord(tile.pos, currentAngle);
-					tile.setHighlight(currentAngle, color);
+					terrain.getTile(p).setHighlight(currentAngle, color);
 					highlightChanged.remove(p);
 				}
 			}
