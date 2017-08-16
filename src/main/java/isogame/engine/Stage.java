@@ -18,6 +18,8 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
+import isogame.resource.ResourceLocator;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -39,8 +42,6 @@ import javafx.scene.paint.Paint;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import isogame.resource.ResourceLocator;
 
 public class Stage implements HasJSONRepresentation {
 	public String name = null;
@@ -78,6 +79,12 @@ public class Stage implements HasJSONRepresentation {
 		this.spritesByPriority.addAll(localLibrary.priorities
 			.stream().map(x -> new HashSet<Sprite>())
 			.collect(Collectors.toList()));
+
+		// manually clear out any old highlighting state from the tiles
+		final Iterator<Tile> it = terrain.iterateTiles(CameraAngle.UL);
+		while (it.hasNext()) {
+			it.next().setHighlight(CameraAngle.UL, Optional.empty());
+		}
 	}
 
 	public static Stage fromFile(
@@ -215,6 +222,7 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public void setHighlightColors(final Paint[] highlightColors) {
 		clearAllHighlighting();
+		highlighting.clear();
 		for (int i = 0; i < highlightColors.length; i++) {
 			highlighting.add(new HighlightLayer(highlightColors[i]));
 		}
