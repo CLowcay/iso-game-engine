@@ -39,12 +39,14 @@ public class MoveSpriteAnimation extends Animation {
 	private final MapPoint target;
 	private MapPoint point;
 
-	private double jump = 0;
-	private double elevationDelta = 0;
+	private double jump = 0d;
+	private boolean doJump = false;
+	private boolean doneJump = false;
+	private double elevationDelta = 0d;
 	private boolean fromFlatElevation = false;
 
 	private final double targetv;
-	private double v = 0;
+	private double v = 0d;
 
 	private final static Point2D upV = new Point2D(TILEW / 2d, -(TILEH / 2d));
 	private final static Point2D downV = new Point2D(-(TILEW / 2d), TILEH / 2d);
@@ -59,22 +61,31 @@ public class MoveSpriteAnimation extends Animation {
 	private void updateElevationDelta(final StageInfo terrain) {
 		final Tile tfrom = terrain.getTile(point);
 		final Tile tto = terrain.getTile(point.add(directionVector));
+
 		if (tfrom.slope == tto.slope && tfrom.elevation == tto.elevation) {
 			elevationDelta = 0;
 		} else if (tfrom.slope == SlopeType.NONE) {
 			fromFlatElevation = true;
 			if (tto.slope == SlopeType.NONE) {
 				elevationDelta = 0;
+				doJump = true;
 				jump = tfrom.elevation - tto.elevation;
 			} else {
-				elevationDelta = tto.slope == direction.upThisWay()? -0.5 : 0.5;
+				elevationDelta = tto.slope == direction.upThisWay()? -0.5d : 0.5d;
 			}
 		} else {
 			fromFlatElevation = false;
 			if (tto.slope == SlopeType.NONE) {
-				elevationDelta = tfrom.slope == direction.upThisWay()? -0.5 : 0.5;
+				elevationDelta = tfrom.slope == direction.upThisWay()? -0.5d : 0.5d;
+				if (
+					tfrom.slope == direction.upThisWay() &&
+					tto.elevation != tfrom.elevation + 1d
+				) {
+					doJump = true;
+					jump = tfrom.elevation - tto.elevation + 0.5d;
+				}
 			} else {
-				elevationDelta = tfrom.slope == direction.upThisWay()? -1 : 1;
+				elevationDelta = tfrom.slope == direction.upThisWay()? -1d : 1d;
 			}
 		}
 	}
@@ -95,7 +106,7 @@ public class MoveSpriteAnimation extends Animation {
 		this.walkSpeed = walkSpeed;
 		this.spriteAnimation = spriteAnimation;
 		this.animator = new ContinuousAnimator();
-		animator.setAnimation(new Point2D(1, 0), walkSpeed);
+		animator.setAnimation(new Point2D(1d, 0d), walkSpeed);
 		this.start = start;
 		this.target = target;
 		this.point = start;
@@ -142,17 +153,16 @@ public class MoveSpriteAnimation extends Animation {
 		double v1 = animator.valueAt(t).getX();
 		if (v1 >= targetv) {
 			v = targetv;
-			System.err.println("Sprite is at " + sprite.getPos());
-			System.err.println("Setting sprite pos to " + target);
+			doneJump = false;
 			sprite.setPos(target);
 			animator.stop();
 			return true;
+
 		} else if (Math.floor(v) != Math.floor(v1)){
 			v = v1;
 			point = start.addScale(directionVector, (int) Math.floor(v));
+			doneJump = false;
 			updateElevationDelta(terrain);
-			System.err.println("2Sprite is at " + sprite.getPos());
-			System.err.println("2Setting sprite pos to " + point);
 			sprite.setPos(point);
 		} else {
 			v = v1;
@@ -183,11 +193,9 @@ public class MoveSpriteAnimation extends Animation {
 		final Point2D offset = offsetVector.multiply(scale);
 
 		// get the elevation correction
-		double elevationOffset;
+		double elevationOffset = 0d;
 		if (Math.abs(elevationDelta) == 1.0d) {
 			elevationOffset = elevationDelta * scale;
-		} else if (jump != 0d) {
-			elevationOffset = scale < 0.5d? 0d : jump;
 		} else if (fromFlatElevation) {
 			elevationOffset = scale < 0.5d?
 				0d : elevationDelta * 2.0d * (scale - 0.5d);
@@ -196,11 +204,18 @@ public class MoveSpriteAnimation extends Animation {
 				elevationDelta : elevationDelta * 2.0d * scale;
 		}
 
+		// handle jumps
+		if (doJump && scale >= 0.5d) {
+			elevationOffset = jump;
+			if (!doneJump) sprite.invalidate();
+			doneJump = true;
+		}
+
 		// get the left and right tiles and their coordinates
 		final MapPoint pos0 = sprite.getPos();
 		final MapPoint pos1 = pos0.add(directionVector);
 
-		final Point2D pl = terrain.correctedIsoCoord(pos0, angle);
+		final Point2D pl = terrain.correctedSpriteIsoCoord(pos0, angle);
 
 		final Tile tile0 = terrain.getTile(pos0);
 		final Tile tile1 = terrain.getTile(pos1);
@@ -213,7 +228,7 @@ public class MoveSpriteAnimation extends Animation {
 		if (movingAway) {
 			sprite.slicedGraphNode.setX((TILEW / 2d) - offset.getX());
 			sprite.slicedGraphNode.setWidth((TILEW / 2d) + offset.getX());
-			sprite.slicedGraph.setTranslateX(pl.getX() + (TILEW / 2) -
+			sprite.slicedGraph.setTranslateX(pl.getX() + (TILEW / 2d) -
 				sprite.slicedGraphNode.getX());
 		} else {
 			sprite.slicedGraphNode.setX(0d);
@@ -224,7 +239,13 @@ public class MoveSpriteAnimation extends Animation {
 		sprite.slicedGraph.setTranslateY(sprite.sceneGraph.getTranslateY());
 
 		// update the sprite
-		final Supplier<Integer> iMain = () -> tile0.getSceneGraphIndex(graph) + 1;
+		final Supplier<Integer> iMain = () -> {
+			if (doJump && scale >= 0.5d) {
+				return tile1.getSceneGraphIndex(graph) + 1;
+			} else {
+				return tile0.getSceneGraphIndex(graph) + 1;
+			}
+		};
 		final Supplier<Integer> iSlice = () -> tile1.getSceneGraphIndex(graph) + 1;
 
 		sprite.update(graph, iMain, Optional.of(iSlice), angle, t);

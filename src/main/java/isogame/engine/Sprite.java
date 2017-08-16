@@ -195,7 +195,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 			animationChain.get().updateSceneGraph(graph, terrain, angle, t);
 		} else {
 			final Tile tile = terrain.getTile(pos);
-			final Point2D l = terrain.correctedIsoCoord(pos, angle);
+			final Point2D l = terrain.correctedSpriteIsoCoord(pos, angle);
 			sceneGraph.setTranslateX(l.getX());
 			sceneGraph.setTranslateY(l.getY());
 			final Supplier<Integer> iL = () -> tile.getSceneGraphIndex(graph) + 1;

@@ -249,7 +249,7 @@ public class Stage implements HasJSONRepresentation {
 	 * Clear all highlighting.
 	 * */
 	public void clearAllHighlighting() {
-		for (HighlightLayer layer : highlighting) {
+		for (final HighlightLayer layer : highlighting) {
 			highlightChanged.addAll(layer.points);
 			layer.points.clear();
 		}
@@ -291,7 +291,7 @@ public class Stage implements HasJSONRepresentation {
 		}
 
 		// update any tiles that have changed
-		for (Tile tile : terrain.getUpdatedTiles()) {
+		for (final Tile tile : terrain.getUpdatedTiles()) {
 			final Point2D l = terrain.correctedIsoCoord(tile.pos, currentAngle);
 			tile.rebuildSceneGraph(isDebug, currentAngle);
 			tile.subGraph.setTranslateX(l.getX());
@@ -325,7 +325,7 @@ public class Stage implements HasJSONRepresentation {
 				s.updateSceneGraph(graph, terrain, currentAngle, t);
 		}
 
-		for (Sprite s : removedSprites) graph.remove(s.sceneGraph);
+		for (final Sprite s : removedSprites) graph.remove(s.sceneGraph);
 	}
 
 	/**
@@ -345,7 +345,7 @@ public class Stage implements HasJSONRepresentation {
 			graph.add(tile.subGraph);
 		});
 
-		for (Sprite s : allSprites) s.invalidate();
+		for (final Sprite s : allSprites) s.invalidate();
 	}
 }
 

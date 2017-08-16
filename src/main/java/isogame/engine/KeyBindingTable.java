@@ -13,7 +13,7 @@ public class KeyBindingTable {
 	public final Map<KeyCodeCombination, KeyBinding> keys = new HashMap<>();
 
 	public Optional<KeyBinding> getKeyAction(final KeyEvent e) {
-		for (KeyCodeCombination k : keys.keySet()) {
+		for (final KeyCodeCombination k : keys.keySet()) {
 			if (k.match(e)) return Optional.of(keys.get(k));
 		}
 		return Optional.empty();

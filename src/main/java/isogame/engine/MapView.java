@@ -301,7 +301,7 @@ public class MapView extends View {
 		if (stage == null) return;
 
 		stage.clearHighlighting(priority);
-		for (MapPoint p : pts) stage.setHighlight(p, priority);
+		for (final MapPoint p : pts) stage.setHighlight(p, priority);
 	}
 
 	public void setAllSelectable() {

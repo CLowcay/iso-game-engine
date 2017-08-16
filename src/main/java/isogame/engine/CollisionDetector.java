@@ -77,18 +77,14 @@ public class CollisionDetector {
 		final MapPoint p = stage.terrain.fromIsoCoord(in, a);
 		final Iterator<Tile> it = stage.terrain.iterateCollisionDetection(p, a);
 
-		Tile tile;
 		while (it.hasNext()) {
-			tile = it.next();
-			List<Sprite> l = stage.getSpritesByTile(tile.pos);
+			final Tile tile = it.next();
+			final List<Sprite> l = stage.getSpritesByTile(tile.pos);
 
-			if (l != null) {
-				l = l.subList(0, l.size());
-				Collections.reverse(l);
-				for (Sprite s : l) {
-					final Point2D sp = in.subtract(stage.terrain.correctedIsoCoord(tile.pos, a));
-					if (s.hitTest(sp.getX(), sp.getY(), a)) return tile.pos;
-				}
+			for (final Sprite s : l) {
+				final Point2D sp = in.subtract(
+					stage.terrain.correctedSpriteIsoCoord(tile.pos, a));
+				if (s.hitTest(sp.getX(), sp.getY(), a)) return tile.pos;
 			}
 		}
 

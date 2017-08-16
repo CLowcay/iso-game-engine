@@ -88,7 +88,7 @@ public class StageInfo implements HasJSONRepresentation {
 
 			final Tile[] data = new Tile[w * h];
 			int i = 0;
-			for (Object t : jsonData) {
+			for (final Object t : jsonData) {
 				data[i] = Tile.fromJSON((JSONObject) t, lib);
 				i += 1;
 			}
@@ -273,9 +273,15 @@ public class StageInfo implements HasJSONRepresentation {
 	 * its elevation.
 	 * */
 	public Point2D correctedIsoCoord(final MapPoint p, final CameraAngle a) {
-		return toIsoCoord(p, a).add(0, ELEVATION_H * getTile(p).elevation);
+		final Tile tile = getTile(p);
+		return toIsoCoord(p, a).add(0d, ELEVATION_H * tile.elevation);
 	}
 
+	public Point2D correctedSpriteIsoCoord(final MapPoint p, final CameraAngle a) {
+		final Tile tile = getTile(p);
+		return toIsoCoord(p, a).add(0d, ELEVATION_H * tile.elevation +
+			(tile.slope != SlopeType.NONE? 0.5d * ELEVATION_H : 0d));
+	}
 
 	/**
 	 * Iterate over the tiles in this sort of order:
