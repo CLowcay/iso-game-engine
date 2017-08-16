@@ -56,13 +56,7 @@ public abstract class Animation {
 		final CameraAngle angle,
 		final long t
 	) {
-		final Tile tile = terrain.getTile(sprite.getPos());
-		final Point2D l = terrain.correctedIsoCoord(sprite.getPos(), angle);
-		sprite.sceneGraph.setTranslateX(l.getX());
-		sprite.sceneGraph.setTranslateY(l.getY());
-		final Supplier<Integer> iL = () ->
-			sprite.findIndex(graph, false).orElse(tile.getSceneGraphIndex(graph) + 1);
-		sprite.update(graph, iL, Optional.empty(), angle, t);
+		sprite.updateSceneGraph(graph, terrain, angle, t);
 	}
 }
 

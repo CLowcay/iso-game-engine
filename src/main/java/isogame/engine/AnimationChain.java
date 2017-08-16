@@ -88,9 +88,12 @@ public class AnimationChain {
 		final CameraAngle angle,
 		final long t
 	) {
-		updateAnimation(terrain, t);
-		activeAnimation.ifPresent(a ->
-			a.updateSceneGraph(graph, terrain, angle, t));
+		if (updateAnimation(terrain, t)) {
+			sprite.updateSceneGraph(graph, terrain, angle, t);
+		} else {
+			activeAnimation.ifPresent(a ->
+				a.updateSceneGraph(graph, terrain, angle, t));
+		}
 	}
 
 	public void queueAnimation(final Animation a) {

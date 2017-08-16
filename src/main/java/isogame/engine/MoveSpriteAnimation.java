@@ -25,7 +25,8 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 
-import isogame.GlobalConstants;
+import static isogame.GlobalConstants.TILEW;
+import static isogame.GlobalConstants.TILEH;
 
 public class MoveSpriteAnimation extends Animation {
 	private final double walkSpeed;
@@ -45,14 +46,10 @@ public class MoveSpriteAnimation extends Animation {
 	private final double targetv;
 	private double v = 0;
 
-	private final static Point2D upV =
-		new Point2D(GlobalConstants.TILEW / 2, -(GlobalConstants.TILEH / 2));
-	private final static Point2D downV =
-		new Point2D(-(GlobalConstants.TILEW / 2), GlobalConstants.TILEH / 2);
-	private final static Point2D leftV =
-		new Point2D(-(GlobalConstants.TILEW / 2), -(GlobalConstants.TILEH / 2));
-	private final static Point2D rightV =
-		new Point2D(GlobalConstants.TILEW / 2, GlobalConstants.TILEH / 2);
+	private final static Point2D upV = new Point2D(TILEW / 2d, -(TILEH / 2d));
+	private final static Point2D downV = new Point2D(-(TILEW / 2d), TILEH / 2d);
+	private final static Point2D leftV = new Point2D(-(TILEW / 2d), -(TILEH / 2d));
+	private final static Point2D rightV = new Point2D(TILEW / 2d, TILEH / 2d);
 	
 	private final static MapPoint upPV = new MapPoint(0, -1);
 	private final static MapPoint downPV = new MapPoint(0, 1);
@@ -145,6 +142,8 @@ public class MoveSpriteAnimation extends Animation {
 		double v1 = animator.valueAt(t).getX();
 		if (v1 >= targetv) {
 			v = targetv;
+			System.err.println("Sprite is at " + sprite.getPos());
+			System.err.println("Setting sprite pos to " + target);
 			sprite.setPos(target);
 			animator.stop();
 			return true;
@@ -152,6 +151,8 @@ public class MoveSpriteAnimation extends Animation {
 			v = v1;
 			point = start.addScale(directionVector, (int) Math.floor(v));
 			updateElevationDelta(terrain);
+			System.err.println("2Sprite is at " + sprite.getPos());
+			System.err.println("2Setting sprite pos to " + point);
 			sprite.setPos(point);
 		} else {
 			v = v1;
@@ -196,44 +197,37 @@ public class MoveSpriteAnimation extends Animation {
 		}
 
 		// get the left and right tiles and their coordinates
-		final MapPoint leftPos;
-		final MapPoint rightPos;
-		if (movingAway) {
-			leftPos = sprite.getPos();
-			rightPos = leftPos.add(directionVector);
-		} else {
-			rightPos = sprite.getPos();
-			leftPos = rightPos.add(directionVector);
-		}
+		final MapPoint pos0 = sprite.getPos();
+		final MapPoint pos1 = pos0.add(directionVector);
 
-		final Point2D pl = terrain.correctedIsoCoord(leftPos, angle);
-		final Point2D pr = terrain.correctedIsoCoord(rightPos, angle);
+		final Point2D pl = terrain.correctedIsoCoord(pos0, angle);
 
-		final Tile leftTile = terrain.getTile(leftPos);
-		final Tile rightTile = terrain.getTile(rightPos);
-
+		final Tile tile0 = terrain.getTile(pos0);
+		final Tile tile1 = terrain.getTile(pos1);
 
 		// update the translations
 		sprite.sceneGraph.setTranslateX(pl.getX() + offset.getX());
 		sprite.sceneGraph.setTranslateY(pl.getY() +
-			offset.getY() + (elevationOffset * (GlobalConstants.TILEH / 2)));
+			offset.getY() + (elevationOffset * (TILEH / 2d)));
 
-		sprite.slicedGraphNode.setX(offset.getX());
-		sprite.slicedGraphNode.setWidth(GlobalConstants.TILEW - offset.getX());
-		sprite.slicedGraphNode.setTranslateX(-offset.getX());
-		sprite.slicedGraphNode.setTranslateY(offset.getY() +
-			((elevationOffset - elevationDelta - jump) *
-			(GlobalConstants.TILEH / 2)));
+		if (movingAway) {
+			sprite.slicedGraphNode.setX((TILEW / 2d) - offset.getX());
+			sprite.slicedGraphNode.setWidth((TILEW / 2d) + offset.getX());
+			sprite.slicedGraph.setTranslateX(pl.getX() + (TILEW / 2) -
+				sprite.slicedGraphNode.getX());
+		} else {
+			sprite.slicedGraphNode.setX(0d);
+			sprite.slicedGraphNode.setWidth((TILEW / 2d) - offset.getX());
+			sprite.slicedGraph.setTranslateX(sprite.sceneGraph.getTranslateX());
+		}
+
+		sprite.slicedGraph.setTranslateY(sprite.sceneGraph.getTranslateY());
 
 		// update the sprite
-		final Supplier<Integer> iL = () ->
-			sprite.findIndex(graph, false)
-				.orElse(leftTile.getSceneGraphIndex(graph) + 1);
-		final Supplier<Integer> iR = () ->
-			sprite.findIndex(graph, true)
-				.orElse(rightTile.getSceneGraphIndex(graph) + 1);
+		final Supplier<Integer> iMain = () -> tile0.getSceneGraphIndex(graph) + 1;
+		final Supplier<Integer> iSlice = () -> tile1.getSceneGraphIndex(graph) + 1;
 
-		sprite.update(graph, iL, Optional.of(iR), angle, t);
+		sprite.update(graph, iMain, Optional.of(iSlice), angle, t);
 	}
 }
 

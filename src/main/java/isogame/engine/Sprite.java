@@ -18,6 +18,8 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
+import isogame.GlobalConstants;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -26,12 +28,11 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import isogame.GlobalConstants;
 
 public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	public final SpriteInfo info;
@@ -53,6 +54,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 
 	// The current scenegraph node
 	public final Group sceneGraph = new Group();
+	public final Group slicedGraph = new Group();
 	public final Rectangle sceneGraphNode = new Rectangle();
 	public final Rectangle slicedGraphNode = new Rectangle();
 
@@ -69,6 +71,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	public Sprite(final SpriteInfo info) {
 		this.info = info;
 		sceneGraph.getChildren().add(sceneGraphNode);
+		slicedGraph.getChildren().add(slicedGraphNode);
 		setAnimation(info.defaultAnimation.id);
 	}
 
@@ -115,7 +118,12 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 		this.frameAnimator = new FrameAnimator(
 			this.animation.frames, this.animation.framerate);
 
+		sceneGraphNode.setWidth(this.animation.w);
+		sceneGraphNode.setHeight(this.animation.h);
+		slicedGraphNode.setWidth(this.animation.w);
+		slicedGraphNode.setHeight(this.animation.h);
 		sceneGraphNode.setTranslateY(GlobalConstants.TILEH - this.animation.h);
+		slicedGraphNode.setTranslateY(GlobalConstants.TILEH - this.animation.h);
 		onChange.accept(sceneGraph);
 	}
 
@@ -141,50 +149,37 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	private boolean isSliced = false;
 
 	/**
-	 * Compute the index at which this node should be inserted into the scene
-	 * graph.
-	 * */
-	public Optional<Integer> findIndex(
-		final ObservableList<Node> parent, final boolean isSlice
-	) {
-		final Node needle = isSlice? slicedGraphNode : sceneGraph;
-		final int i = parent.indexOf(needle);
-		return i == -1? Optional.empty(): Optional.of(i + 1);
-	}
-
-	/**
 	 * Update this sprite manually.
 	 * @param parent the scenegraph
-	 * @param iL the index at which to insert the left slice 
-	 * @param iR the index at which to insert the right slice
+	 * @param iMain the index at which to insert the main slice
+	 * @param iSlice the index at which to insert the partial
 	 *           (if this sprite is sliced)
 	 * */
 	void update(
 		final ObservableList<Node> parent,
-		final Supplier<Integer> piL,
-		final Optional<Supplier<Integer>> piR,
+		final Supplier<Integer> iMain,
+		final Optional<Supplier<Integer>> iSlice,
 		final CameraAngle angle, final long t
 	) {
-		if (pos0.isPresent() || piR.isPresent() != isSliced) {
-			final int iL = piL.get();
-			final Optional<Integer> iR = piR.map(v -> v.get());
+		final int frame = frameAnimator.frameAt(t);
+		animation.updateFrame(sceneGraphNode, frame, angle, direction);
+		if (isSliced || iSlice.isPresent()) animation.updateFrame(
+			slicedGraphNode, frame, angle, direction);
 
+		if (pos0.isPresent() || iSlice.isPresent() != isSliced) {
 			// the sprite has been moved
 			parent.remove(sceneGraph);
-			parent.remove(slicedGraphNode);
+			parent.remove(slicedGraph);
 
-			parent.add(iL, sceneGraph);
+			parent.add(iMain.get(), sceneGraph);
 
-			iR.ifPresent(i -> parent.add(i, slicedGraphNode));
+			iSlice.ifPresent(i -> parent.add(i.get(), slicedGraph));
 			pos0 = Optional.empty();
 
-			isSliced = iR.isPresent();
+			isSliced = iSlice.isPresent();
 
 			onChange.accept(sceneGraph);
 		}
-
-		final int frame = frameAnimator.frameAt(t);
-		animation.updateFrame(sceneGraphNode, frame, angle, direction);
 	}
 
 	/**
@@ -203,8 +198,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 			final Point2D l = terrain.correctedIsoCoord(pos, angle);
 			sceneGraph.setTranslateX(l.getX());
 			sceneGraph.setTranslateY(l.getY());
-			final Supplier<Integer> iL = () ->
-				findIndex(graph, false).orElse(tile.getSceneGraphIndex(graph) + 1);
+			final Supplier<Integer> iL = () -> tile.getSceneGraphIndex(graph) + 1;
 			update(graph, iL, Optional.empty(), angle, t);
 		}
 	}

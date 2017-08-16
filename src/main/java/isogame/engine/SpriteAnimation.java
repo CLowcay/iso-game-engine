@@ -165,8 +165,6 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	) {
 		final int frame = frame0 % frames;
 		final int rotation = direction.transform(angle);
-		sceneGraphNode.setWidth(w);
-		sceneGraphNode.setHeight(h);
 		sceneGraphNode.setFill(frameTextures[(frame * 4) + rotation]);
 	}
 
