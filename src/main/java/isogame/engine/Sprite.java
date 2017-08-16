@@ -124,7 +124,6 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 		slicedGraphNode.setHeight(this.animation.h);
 		sceneGraphNode.setTranslateY(GlobalConstants.TILEH - this.animation.h);
 		slicedGraphNode.setTranslateY(GlobalConstants.TILEH - this.animation.h);
-		onChange.accept(sceneGraph);
 	}
 
 	/**
