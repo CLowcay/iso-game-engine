@@ -69,6 +69,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	private Optional<Shape> highlightNode = Optional.empty();
 	private Optional<Paint> highlightColor = Optional.empty();
 
+	public Object userData = null;
+
 	public Tile(final MapPoint p, final TerrainTexture texture) {
 		this(p, 0, SlopeType.NONE, false, StartZoneType.NONE,
 			texture, null, new Group());
@@ -107,6 +109,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		this.startZone = startZone;
 
 		this.subGraph = subGraph;
+		this.subGraph.setCache(true);
 
 		final StringBuilder debug = new StringBuilder();
 		if (isManaZone) debug.append("M");
@@ -309,6 +312,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		final SlopeType slope = adjustSlopeForCameraAngle(angle);
 
 		final ImageView base = new ImageView(tex.getTexture(even, slope));
+		base.setClip(getHighlightShape(angle));
 		base.setX(-OFFSETX);
 		base.setY(-OFFSETY);
 		graph.add(base);
@@ -317,6 +321,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 			final ImageView cliff = new ImageView(cliffTexture.getPreTexture(slope));
 			cliff.setX(-OFFSETX);
 			cliff.setY(-OFFSETY);
+			base.setClip(getHighlightShape(angle));
 			graph.add(cliff);
 		}
 
@@ -326,6 +331,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 				final ImageView cliff2 = new ImageView(epaint);
 				cliff2.setX(-OFFSETX);
 				cliff2.setY(-OFFSETY + (i * (TILEH / 2)));
+				base.setClip(getHighlightShape(angle));
 				graph.add(cliff2);
 			}
 		}
