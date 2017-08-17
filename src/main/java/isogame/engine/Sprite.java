@@ -73,6 +73,9 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 		sceneGraph.getChildren().add(sceneGraphNode);
 		slicedGraph.getChildren().add(slicedGraphNode);
 		setAnimation(info.defaultAnimation.id);
+
+		sceneGraphNode.setCache(true);
+		slicedGraphNode.setCache(true);
 	}
 
 	public void doOnExternalAnimationFinished(final Runnable k) {
@@ -147,6 +150,8 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 
 	private boolean isSliced = false;
 
+	private int frame0 = -1;
+
 	/**
 	 * Update this sprite manually.
 	 * @param parent the scenegraph
@@ -160,12 +165,19 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 		final Optional<Supplier<Integer>> iSlice,
 		final CameraAngle angle, final long t
 	) {
+		final boolean moveSprite =
+			pos0.isPresent() || iSlice.isPresent() != isSliced;
 		final int frame = frameAnimator.frameAt(t);
-		animation.updateFrame(sceneGraphNode, frame, angle, direction);
+
+		if (frame != frame0 || moveSprite) {
+			animation.updateFrame(sceneGraphNode, frame, angle, direction);
+			frame0 = frame;
+		}
+
 		if (isSliced || iSlice.isPresent()) animation.updateFrame(
 			slicedGraphNode, frame, angle, direction);
 
-		if (pos0.isPresent() || iSlice.isPresent() != isSliced) {
+		if (moveSprite) {
 			// the sprite has been moved
 			parent.remove(sceneGraph);
 			parent.remove(slicedGraph);

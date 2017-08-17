@@ -18,10 +18,15 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
+import isogame.GlobalConstants;
+import isogame.resource.ResourceLocator;
+
 import java.io.IOException;
 
+import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
@@ -29,9 +34,6 @@ import javafx.scene.shape.Rectangle;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import isogame.GlobalConstants;
-import isogame.resource.ResourceLocator;
 
 
 /**
@@ -53,7 +55,9 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	public final int w;
 	public final int h; 
 
+	private final Image buffer;
 	private final Paint[] frameTextures;
+	private final Rectangle2D[] frameClips;
 	private final PixelReader hitTester;
 	private final int hitW;
 	private final int hitH;
@@ -73,7 +77,7 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		this.url = url;
 
 		try {
-			final Image buffer = new Image(loc.gfx(url));
+			buffer = new Image(loc.gfx(url));
 			hitTester = buffer.getPixelReader();
 			hitW = (int) buffer.getWidth();
 			hitH = (int) buffer.getHeight();
@@ -85,10 +89,13 @@ public class SpriteAnimation implements HasJSONRepresentation {
 			h = (int) ((GlobalConstants.TILEW / iw) * ih);
 
 			frameTextures = new Paint[frames * 4];
+			frameClips = new Rectangle2D[frames * 4];
 			for (int d = 0; d < 4; d++) {
 				for (int f = 0; f < frames; f++) {
-					frameTextures[(f * 4) + d] =
+					final int i = (f * 4) + d;
+					frameTextures[i] =
 						new ImagePattern(buffer, -f * w, -d * h, frames * w, 4 * h, false);
+					frameClips[i] = new Rectangle2D(f * iw, d * ih, iw, ih);
 				}
 			}
 
@@ -165,7 +172,13 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	) {
 		final int frame = frame0 % frames;
 		final int rotation = direction.transform(angle);
-		sceneGraphNode.setFill(frameTextures[(frame * 4) + rotation]);
+		final int i = (frame * 4) + rotation;
+		sceneGraphNode.setFill(frameTextures[i]);
+		final ImageView clip = new ImageView(buffer);
+		clip.setPreserveRatio(true);
+		clip.setFitWidth(GlobalConstants.TILEW);
+		clip.setViewport(frameClips[i]);
+		sceneGraphNode.setClip(clip);
 	}
 
 	@Override
