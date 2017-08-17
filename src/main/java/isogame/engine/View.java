@@ -65,7 +65,7 @@ public class View extends Pane {
 		this.getChildren().add(innerPane);
 
 		innerPane.setFocusTraversable(false);
-		innerPane.setMouseTransparent(true);
+		//innerPane.setMouseTransparent(true);
 
 		viewportW = w;
 		viewportH = h;
