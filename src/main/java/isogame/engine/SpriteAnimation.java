@@ -122,6 +122,9 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		final FacingDirection direction
 	) {
 		final int y = y0 + h - ((int) GlobalConstants.TILEH);
+
+		if (x < 0 || x >= w || y < 0 || y >= h) return false;
+
 		final int rotation = direction.transform(angle);
 		final int xt = (int) ((double) (x + (frame * GlobalConstants.TILEW)) / sf);
 		final int yt = (int) ((double) (y + (rotation * h)) / sf);

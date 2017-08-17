@@ -41,9 +41,8 @@ public class CollisionDetector {
 		final MapPoint p = stage.terrain.fromIsoCoord(in, a);
 		final Iterator<Tile> it = stage.terrain.iterateCollisionDetection(p, a);
 
-		Tile tile;
 		while (it.hasNext()) {
-			tile = it.next();
+			final Tile tile = it.next();
 			final Point2D cp = stage.terrain.correctedIsoCoord(tile.pos, a);
 			final List<Point2D> shape;
 
