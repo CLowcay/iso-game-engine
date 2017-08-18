@@ -300,7 +300,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		final int base = graph.indexOf(subGraph);
 		if (priority == PrioritizedGroup.TILE) return base;
 		int i = base + 1;
-		while (graph.get(i) instanceof PrioritizedGroup) {
+		while (i < graph.size() && graph.get(i) instanceof PrioritizedGroup) {
 			final PrioritizedGroup n = (PrioritizedGroup) graph.get(i);
 			if (n.priority == PrioritizedGroup.TILE || priority < n.priority) {
 				break;
