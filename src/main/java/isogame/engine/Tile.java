@@ -24,7 +24,6 @@ import java.util.Optional;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -65,7 +64,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	private final Text debugText = new Text();
 	private final static Font debugFont = new Font(TILEH / 2);
 
-	public final Group subGraph;
+	public final PrioritizedGroup subGraph;
 	private Optional<Shape> highlightNode = Optional.empty();
 	private Optional<Paint> highlightColor = Optional.empty();
 
@@ -73,7 +72,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 
 	public Tile(final MapPoint p, final TerrainTexture texture) {
 		this(p, 0, SlopeType.NONE, false, StartZoneType.NONE,
-			texture, null, new Group());
+			texture, null, new PrioritizedGroup(PrioritizedGroup.TILE));
 	}
 
 	public Tile(
@@ -83,7 +82,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		final CliffTexture cliffTexture
 	) {
 		this(new MapPoint(0, 0), elevation, slope,
-			false, StartZoneType.NONE, texture, cliffTexture, new Group());
+			false, StartZoneType.NONE, texture, cliffTexture,
+			new PrioritizedGroup(PrioritizedGroup.TILE));
 	}
 
 	public Tile(
@@ -94,7 +94,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		final StartZoneType startZone,
 		final TerrainTexture texture,
 		final CliffTexture cliffTexture,
-		final Group subGraph
+		final PrioritizedGroup subGraph
 	) {
 		this.elevation = elevation;
 		this.pos = pos;
@@ -156,7 +156,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 				StartZoneType.valueOf(startZone),
 				lib.getTerrain(texture),
 				cliffTexture == null? null : lib.getCliffTexture(cliffTexture),
-				new Group());
+				new PrioritizedGroup(PrioritizedGroup.TILE));
 		} catch (JSONException e) {
 			throw new CorruptDataException("Error parsing tile, " + e.getMessage(), e);
 		} catch (IllegalArgumentException e) {
@@ -294,8 +294,21 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		}
 	}
 
-	public int getSceneGraphIndex(final ObservableList<Node> graph) {
-		return graph.indexOf(subGraph);
+	public int getSceneGraphIndex(
+		final ObservableList<Node> graph, final int priority
+	) {
+		final int base = graph.indexOf(subGraph);
+		if (priority == PrioritizedGroup.TILE) return base;
+		int i = base + 1;
+		while (graph.get(i) instanceof PrioritizedGroup) {
+			final PrioritizedGroup n = (PrioritizedGroup) graph.get(i);
+			if (n.priority == PrioritizedGroup.TILE || priority < n.priority) {
+				break;
+			}
+
+			i += 1;
+		}
+		return i - 1;
 	}
 
 	/**

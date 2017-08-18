@@ -26,9 +26,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -145,11 +148,50 @@ public class Stage implements HasJSONRepresentation {
 	}
 
 	/**
+	 * Control the order in which sprites are rendered.
+	 * */
+	private int mapPriority(final int priority) {
+		return spritesByPriority.size() - 1 - priority;
+	}
+
+	private final Map<MapPoint, List<Sprite>> spritesByTile = new HashMap<>();
+
+	/**
 	 * Add a sprite to the map.  z-order is determined by sprite priority.
 	 * */
 	public void addSprite(final Sprite sprite) {
+		sprite.doOnMove(this::moveSprite);
 		allSprites.add(sprite);
-		spritesByPriority.get(sprite.info.priority).add(sprite);
+		spritesByPriority.get(mapPriority(sprite.info.priority)).add(sprite);
+		moveSprite(sprite, sprite.getPos());
+	}
+
+	/**
+	 * Callback to handle when sprites move
+	 * */
+	private void moveSprite(final Sprite sprite, final MapPoint from) {
+		final List<Sprite> old = spritesByTile.get(from);
+		if (old != null) old.remove(sprite);
+
+		spritesByTile.putIfAbsent(sprite.getPos(), new LinkedList<>());
+		final List<Sprite> byTile = spritesByTile.get(sprite.getPos());
+
+		final Iterator<Sprite> it = byTile.iterator();
+		int i = 0;
+		boolean inserted = false;
+		while (it.hasNext()) {
+			final Sprite c = it.next();
+			if (sprite.info.priority >= c.info.priority) {
+				byTile.add(i, sprite);
+				inserted = true;
+				break;
+			}
+
+			i += 1;
+		}
+		if (!inserted) byTile.add(sprite);
+
+		for (final Sprite s : byTile) s.invalidate();
 	}
 
 	/**
@@ -166,7 +208,7 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public void removeSprite(final Sprite sprite) {
 		allSprites.remove(sprite);
-		spritesByPriority.get(sprite.info.priority).remove(sprite);
+		spritesByPriority.get(mapPriority(sprite.info.priority)).remove(sprite);
 		removedSprites.add(sprite);
 	}
 
@@ -174,9 +216,7 @@ public class Stage implements HasJSONRepresentation {
 	 * Get all the sprites on a tile.
 	 * */
 	public List<Sprite> getSpritesByTile(final MapPoint p) {
-		return allSprites.stream()
-			.filter(s -> s.getPos().equals(p))
-			.collect(Collectors.toList());
+		return new ArrayList<>(spritesByTile.getOrDefault(p, new LinkedList<>()));
 	}
 
 	/**

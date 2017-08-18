@@ -241,12 +241,13 @@ public class MoveSpriteAnimation extends Animation {
 		// update the sprite
 		final Supplier<Integer> iMain = () -> {
 			if (doJump && scale >= 0.5d) {
-				return tile1.getSceneGraphIndex(graph) + 1;
+				return tile1.getSceneGraphIndex(graph, sprite.info.priority) + 1;
 			} else {
-				return tile0.getSceneGraphIndex(graph) + 1;
+				return tile0.getSceneGraphIndex(graph, sprite.info.priority) + 1;
 			}
 		};
-		final Supplier<Integer> iSlice = () -> tile1.getSceneGraphIndex(graph) + 1;
+		final Supplier<Integer> iSlice = () ->
+			tile1.getSceneGraphIndex(graph, sprite.info.priority) + 1;
 
 		sprite.update(graph, iMain, Optional.of(iSlice), angle, t);
 	}

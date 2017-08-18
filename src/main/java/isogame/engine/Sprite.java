@@ -21,14 +21,13 @@ package isogame.engine;
 import isogame.GlobalConstants;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import org.json.JSONException;
@@ -53,8 +52,8 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	private SpriteAnimation animation;
 
 	// The current scenegraph node
-	public final Group sceneGraph = new Group();
-	public final Group slicedGraph = new Group();
+	public final PrioritizedGroup sceneGraph;
+	public final PrioritizedGroup slicedGraph;
 	public final Rectangle sceneGraphNode = new Rectangle();
 	public final Rectangle slicedGraphNode = new Rectangle();
 
@@ -65,11 +64,21 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	private Optional<AnimationChain> animationChain = Optional.empty();
 	private Runnable onExternalAnimationFinished = () -> {};
 
+	private BiConsumer<Sprite, MapPoint> onMove = (x, y) -> {};
+
+	void doOnMove(final BiConsumer<Sprite, MapPoint> onMove) {
+		this.onMove = onMove;
+	}
+
 	/**
 	 * @param info template to make the sprite
 	 * */
 	public Sprite(final SpriteInfo info) {
 		this.info = info;
+
+		sceneGraph = new PrioritizedGroup(info.priority);
+		slicedGraph = new PrioritizedGroup(info.priority);
+
 		sceneGraph.getChildren().add(sceneGraphNode);
 		slicedGraph.getChildren().add(slicedGraphNode);
 		setAnimation(info.defaultAnimation.id);
@@ -134,10 +143,14 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	 * @param pos The new position for the sprite
 	 * */
 	public void setPos(final MapPoint pos) {
+		final MapPoint oldPos = this.pos;
+
 		if (!pos0.isPresent()) {
 			pos0 = Optional.of(this.pos);
 		}
 		this.pos = pos;
+
+		onMove.accept(this, oldPos);
 	}
 
 	/**
@@ -207,7 +220,8 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 			final Point2D l = terrain.correctedSpriteIsoCoord(pos, angle);
 			sceneGraph.setTranslateX(l.getX());
 			sceneGraph.setTranslateY(l.getY());
-			final Supplier<Integer> iL = () -> tile.getSceneGraphIndex(graph) + 1;
+			final Supplier<Integer> iL = () ->
+				tile.getSceneGraphIndex(graph, info.priority) + 1;
 			update(graph, iL, Optional.empty(), angle, t);
 		}
 	}
