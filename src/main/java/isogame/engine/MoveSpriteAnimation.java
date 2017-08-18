@@ -73,6 +73,14 @@ public class MoveSpriteAnimation extends Animation {
 			} else {
 				elevationDelta = tto.slope == direction.upThisWay()? -0.5d : 0.5d;
 			}
+		} else if (
+			tfrom.slope != direction.upThisWay() &&
+			tfrom.slope.opposite() != direction.upThisWay() &&
+			tfrom.elevation >= tto.elevation
+		) {
+			elevationDelta = 0;
+			doJump = true;
+			jump = 0.5d + tfrom.elevation - tto.elevation;
 		} else {
 			fromFlatElevation = false;
 			if (tto.slope == SlopeType.NONE) {
