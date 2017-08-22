@@ -33,20 +33,25 @@ public class KeyBindingTable implements HasJSONRepresentation {
 
 	public void setPrimaryKey(final KeyBinding b, final KeyCodeCombination k) {
 		final KeyBinding last = keys.put(k, b);
-		if (last != null) {
-			primaryKeys.remove(last);
-			secondaryKeys.remove(last);
-		}
+		removeOldBinding(last, b, k);
 		primaryKeys.put(b, k);
 	}
 
 	public void setSecondaryKey(final KeyBinding b, final KeyCodeCombination k) {
 		final KeyBinding last = keys.put(k, b);
-		if (last != null) {
-			primaryKeys.remove(last);
-			secondaryKeys.remove(last);
-		}
+		removeOldBinding(last, b, k);
 		secondaryKeys.put(b, k);
+	}
+
+	private void removeOldBinding(
+		final KeyBinding b0,
+		final KeyBinding b1,
+		final KeyCodeCombination k
+	) {
+		if (b0 != null && b0 != b1) {
+			if (primaryKeys.get(b0) == k) primaryKeys.remove(b0);
+			if (secondaryKeys.get(b0) == k) secondaryKeys.remove(b0);
+		}
 	}
 
 	public KeyBinding getKeyAction(final KeyCodeCombination k) {

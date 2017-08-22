@@ -1,7 +1,7 @@
 package isogame.engine;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A KeyBinding is a token that represents an action that we might want to bind
@@ -9,12 +9,12 @@ import java.util.Set;
  * */
 public class KeyBinding {
 	// Keybindings for moving the view around
-	public final static KeyBinding scrollUp = new KeyBinding("scrollUp");
-	public final static KeyBinding scrollDown = new KeyBinding("scrollDown");
-	public final static KeyBinding scrollLeft = new KeyBinding("scrollLeft");
-	public final static KeyBinding scrollRight = new KeyBinding("scrollRight");
-	public final static KeyBinding rotateLeft = new KeyBinding("rotateLeft");
-	public final static KeyBinding rotateRight = new KeyBinding("rotateRight");
+	public final static KeyBinding scrollUp = new KeyBinding("Scroll up");
+	public final static KeyBinding scrollDown = new KeyBinding("Scroll down");
+	public final static KeyBinding scrollLeft = new KeyBinding("Scroll left");
+	public final static KeyBinding scrollRight = new KeyBinding("Scroll right");
+	public final static KeyBinding rotateLeft = new KeyBinding("Rotate left");
+	public final static KeyBinding rotateRight = new KeyBinding("Rotate right");
 
 	private final String name;
 
@@ -22,14 +22,14 @@ public class KeyBinding {
 		this.name = name;
 	}
 
-	public static Set<KeyBinding> allBindings() {
-		final Set<KeyBinding> r = new HashSet<>();
+	public static List<KeyBinding> allBindings() {
+		final List<KeyBinding> r = new ArrayList<>();
+		r.add(rotateLeft);
+		r.add(rotateRight);
 		r.add(scrollUp);
 		r.add(scrollDown);
 		r.add(scrollLeft);
 		r.add(scrollRight);
-		r.add(rotateLeft);
-		r.add(rotateRight);
 		return r;
 	}
 
@@ -37,12 +37,12 @@ public class KeyBinding {
 
 	public static KeyBinding valueOf(final String s) {
 		switch (s) {
-			case "scrollUp": return scrollUp;
-			case "scrollDown": return scrollDown;
-			case "scrollLeft": return scrollLeft;
-			case "scrollRight": return scrollRight;
-			case "rotateLeft": return scrollLeft;
-			case "rotateRight": return scrollRight;
+			case "Scroll up": return scrollUp;
+			case "Scroll down": return scrollDown;
+			case "Scroll left": return scrollLeft;
+			case "Scroll right": return scrollRight;
+			case "Rotate left": return scrollLeft;
+			case "Rotate right": return scrollRight;
 			default:
 				throw new RuntimeException("Unhandled keybinding " + s);
 		}
