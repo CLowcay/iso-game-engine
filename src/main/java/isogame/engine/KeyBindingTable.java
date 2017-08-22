@@ -17,13 +17,60 @@ import org.json.JSONObject;
  * A table of key bindings
  * */
 public class KeyBindingTable implements HasJSONRepresentation {
-	public final Map<KeyCodeCombination, KeyBinding> keys = new HashMap<>();
+	private final Map<KeyCodeCombination, KeyBinding> keys =
+		new HashMap<>();
+	private final Map<KeyBinding, KeyCodeCombination> primaryKeys =
+		new HashMap<>();
+	private final Map<KeyBinding, KeyCodeCombination> secondaryKeys =
+		new HashMap<>();
 
 	public Optional<KeyBinding> getKeyAction(final KeyEvent e) {
 		for (final KeyCodeCombination k : keys.keySet()) {
 			if (k.match(e)) return Optional.of(keys.get(k));
 		}
 		return Optional.empty();
+	}
+
+	public void setPrimaryKey(final KeyBinding b, final KeyCodeCombination k) {
+		final KeyBinding last = keys.put(k, b);
+		if (last != null) {
+			primaryKeys.remove(last);
+			secondaryKeys.remove(last);
+		}
+		primaryKeys.put(b, k);
+	}
+
+	public void setSecondaryKey(final KeyBinding b, final KeyCodeCombination k) {
+		final KeyBinding last = keys.put(k, b);
+		if (last != null) {
+			primaryKeys.remove(last);
+			secondaryKeys.remove(last);
+		}
+		secondaryKeys.put(b, k);
+	}
+
+	public KeyBinding getKeyAction(final KeyCodeCombination k) {
+		return keys.get(k);
+	}
+
+	public Map<KeyBinding, KeyCodeCombination> getPrimaryKeys() {
+		return new HashMap<>(primaryKeys);
+	}
+
+	public Map<KeyBinding, KeyCodeCombination> getSecondaryKeys() {
+		return new HashMap<>(secondaryKeys);
+	}
+
+	public void loadBindings(final KeyBindingTable table) {
+		this.primaryKeys.clear();
+		this.secondaryKeys.clear();
+		this.keys.clear();
+
+		final Map<KeyBinding, KeyCodeCombination> tp = table.getPrimaryKeys();
+		final Map<KeyBinding, KeyCodeCombination> ts = table.getSecondaryKeys();
+
+		for (final KeyBinding b : tp.keySet()) this.setPrimaryKey(b, tp.get(b));
+		for (final KeyBinding b : ts.keySet()) this.setSecondaryKey(b, ts.get(b));
 	}
 
 	@Override public JSONObject getJSON() {

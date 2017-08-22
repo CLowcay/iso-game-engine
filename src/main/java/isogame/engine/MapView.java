@@ -84,12 +84,12 @@ public class MapView extends View {
 		if (stage != null) stage.setHighlightColors(highlightColors);
 
 		// set the default keys
-		keyBindings.keys.put(new KeyCodeCombination(KeyCode.UP), KeyBinding.scrollUp);
-		keyBindings.keys.put(new KeyCodeCombination(KeyCode.DOWN), KeyBinding.scrollDown);
-		keyBindings.keys.put(new KeyCodeCombination(KeyCode.LEFT), KeyBinding.scrollLeft);
-		keyBindings.keys.put(new KeyCodeCombination(KeyCode.RIGHT), KeyBinding.scrollRight);
-		keyBindings.keys.put(new KeyCodeCombination(KeyCode.Q), KeyBinding.rotateLeft);
-		keyBindings.keys.put(new KeyCodeCombination(KeyCode.E), KeyBinding.rotateRight);
+		keyBindings.setSecondaryKey(KeyBinding.scrollUp,    new KeyCodeCombination(KeyCode.UP));
+		keyBindings.setSecondaryKey(KeyBinding.scrollDown,  new KeyCodeCombination(KeyCode.DOWN));
+		keyBindings.setSecondaryKey(KeyBinding.scrollLeft,  new KeyCodeCombination(KeyCode.LEFT));
+		keyBindings.setSecondaryKey(KeyBinding.scrollRight, new KeyCodeCombination(KeyCode.RIGHT));
+		keyBindings.setSecondaryKey(KeyBinding.rotateLeft,  new KeyCodeCombination(KeyCode.Q));
+		keyBindings.setSecondaryKey(KeyBinding.rotateRight, new KeyCodeCombination(KeyCode.E));
 
 		// Listen for events
 		root.addEventHandler(MouseEvent.ANY, mouseHandler);
