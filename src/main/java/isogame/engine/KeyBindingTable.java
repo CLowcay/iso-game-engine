@@ -11,6 +11,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -89,6 +90,7 @@ public class KeyBindingTable implements HasJSONRepresentation {
 			k.put("shift", key.getShift().toString());
 			k.put("shortcut", key.getShortcut().toString());
 			k.put("action", keys.get(key).toString());
+			k.put("primary", primaryKeys.get(keys.get(key)).equals(key));
 			a.put(k);
 		}
 		o.put("keys", a);
@@ -98,30 +100,42 @@ public class KeyBindingTable implements HasJSONRepresentation {
 	public static KeyBindingTable fromJSON(
 		final JSONObject json,
 		final Function<String, KeyBinding> getBinding
-	) {
-		final KeyBindingTable table = new KeyBindingTable();
+	) throws CorruptDataException {
+		try {
+			final KeyBindingTable table = new KeyBindingTable();
 
-		final JSONArray a = json.optJSONArray("keys");
+			final JSONArray a = json.getJSONArray("keys");
 
-		for (int i = 0; i < a.length(); i++) {
-			final JSONObject ko = a.getJSONObject(i);
-			final KeyCode code = KeyCode.valueOf(ko.getString("code"));
-			final KeyCombination.ModifierValue control =
-				KeyCombination.ModifierValue.valueOf(ko.getString("control"));
-			final KeyCombination.ModifierValue alt =
-				KeyCombination.ModifierValue.valueOf(ko.getString("alt"));
-			final KeyCombination.ModifierValue shift =
-				KeyCombination.ModifierValue.valueOf(ko.getString("shift"));
-			final KeyCombination.ModifierValue shortcut =
-				KeyCombination.ModifierValue.valueOf(ko.getString("shortcut"));
+			for (int i = 0; i < a.length(); i++) {
+				final JSONObject ko = a.getJSONObject(i);
+				final KeyCode code = KeyCode.valueOf(ko.getString("code"));
+				final KeyCombination.ModifierValue control =
+					KeyCombination.ModifierValue.valueOf(ko.getString("control"));
+				final KeyCombination.ModifierValue alt =
+					KeyCombination.ModifierValue.valueOf(ko.getString("alt"));
+				final KeyCombination.ModifierValue shift =
+					KeyCombination.ModifierValue.valueOf(ko.getString("shift"));
+				final KeyCombination.ModifierValue shortcut =
+					KeyCombination.ModifierValue.valueOf(ko.getString("shortcut"));
 
-			table.keys.put(
-				new KeyCodeCombination(code, shift, control, alt,
-					KeyCombination.ModifierValue.UP, shortcut),
-				getBinding.apply(ko.getString("action")));
+				final boolean isPrimary = ko.optBoolean("primary", true);
+				final KeyBinding binding = getBinding.apply(ko.getString("action"));
+				final KeyCodeCombination key =
+					new KeyCodeCombination(code, shift, control, alt,
+						KeyCombination.ModifierValue.UP, shortcut);
+
+				if (isPrimary) {
+					table.setPrimaryKey(binding, key);
+				} else {
+					table.setSecondaryKey(binding, key);
+				}
+			}
+
+			return table;
+
+		} catch (final JSONException e) {
+			throw new CorruptDataException("Invalid key binding table", e);
 		}
-
-		return table;
 	}
 }
 

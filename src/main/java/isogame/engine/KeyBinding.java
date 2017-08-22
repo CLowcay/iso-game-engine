@@ -41,8 +41,8 @@ public class KeyBinding {
 			case "Scroll down": return scrollDown;
 			case "Scroll left": return scrollLeft;
 			case "Scroll right": return scrollRight;
-			case "Rotate left": return scrollLeft;
-			case "Rotate right": return scrollRight;
+			case "Rotate left": return rotateLeft;
+			case "Rotate right": return rotateRight;
 			default:
 				throw new RuntimeException("Unhandled keybinding " + s);
 		}
