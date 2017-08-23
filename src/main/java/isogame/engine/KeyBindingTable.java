@@ -32,16 +32,30 @@ public class KeyBindingTable implements HasJSONRepresentation {
 		return Optional.empty();
 	}
 
-	public void setPrimaryKey(final KeyBinding b, final KeyCodeCombination k) {
+	/**
+	 * Set the primary key for an action
+	 * @return the action that was previously bound to that key, or null
+	 * */
+	public KeyBinding setPrimaryKey(
+		final KeyBinding b, final KeyCodeCombination k
+	) {
 		final KeyBinding last = keys.put(k, b);
 		removeOldBinding(last, b, k);
 		primaryKeys.put(b, k);
+		return last;
 	}
 
-	public void setSecondaryKey(final KeyBinding b, final KeyCodeCombination k) {
+	/**
+	 * Set the secondary key for an action
+	 * @return the action that was previously bound to that key, or null
+	 * */
+	public KeyBinding setSecondaryKey(
+		final KeyBinding b, final KeyCodeCombination k
+	) {
 		final KeyBinding last = keys.put(k, b);
 		removeOldBinding(last, b, k);
 		secondaryKeys.put(b, k);
+		return last;
 	}
 
 	private void removeOldBinding(
@@ -50,8 +64,8 @@ public class KeyBindingTable implements HasJSONRepresentation {
 		final KeyCodeCombination k
 	) {
 		if (b0 != null && b0 != b1) {
-			if (primaryKeys.get(b0) == k) primaryKeys.remove(b0);
-			if (secondaryKeys.get(b0) == k) secondaryKeys.remove(b0);
+			if (k.equals(primaryKeys.get(b0))) primaryKeys.remove(b0);
+			if (k.equals(secondaryKeys.get(b0))) secondaryKeys.remove(b0);
 		}
 	}
 
@@ -87,6 +101,7 @@ public class KeyBindingTable implements HasJSONRepresentation {
 			k.put("code", key.getCode().toString());
 			k.put("control", key.getControl().toString());
 			k.put("alt", key.getAlt().toString());
+			k.put("meta", key.getMeta().toString());
 			k.put("shift", key.getShift().toString());
 			k.put("shortcut", key.getShortcut().toString());
 			k.put("action", keys.get(key).toString());
@@ -113,6 +128,8 @@ public class KeyBindingTable implements HasJSONRepresentation {
 					KeyCombination.ModifierValue.valueOf(ko.getString("control"));
 				final KeyCombination.ModifierValue alt =
 					KeyCombination.ModifierValue.valueOf(ko.getString("alt"));
+				final KeyCombination.ModifierValue meta =
+					KeyCombination.ModifierValue.valueOf(ko.getString("meta"));
 				final KeyCombination.ModifierValue shift =
 					KeyCombination.ModifierValue.valueOf(ko.getString("shift"));
 				final KeyCombination.ModifierValue shortcut =
@@ -121,8 +138,8 @@ public class KeyBindingTable implements HasJSONRepresentation {
 				final boolean isPrimary = ko.optBoolean("primary", true);
 				final KeyBinding binding = getBinding.apply(ko.getString("action"));
 				final KeyCodeCombination key =
-					new KeyCodeCombination(code, shift, control, alt,
-						KeyCombination.ModifierValue.UP, shortcut);
+					new KeyCodeCombination(code, shift, control,
+						alt, meta, shortcut);
 
 				if (isPrimary) {
 					table.setPrimaryKey(binding, key);
