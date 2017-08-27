@@ -105,7 +105,7 @@ public class EditorCanvas extends MapView {
 
 	private void saveThumbnail(final File dataDir) {
 		final File out = new File(dataDir,
-			"/gfx/mapThumbs/" + stageFile.getName() + ".png");
+			"/gfx/mapThumbs/" + getStage().name + ".png");
 
 		pushTranslation();
 		centreView();
