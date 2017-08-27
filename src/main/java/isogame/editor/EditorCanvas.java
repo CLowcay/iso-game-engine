@@ -18,17 +18,30 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.editor;
 
+import isogame.engine.CorruptDataException;
+import isogame.engine.Library;
+import isogame.engine.MapPoint;
+import isogame.engine.MapView;
+import isogame.engine.Stage;
+import isogame.resource.ResourceLocator;
+
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import javax.imageio.ImageIO;
 
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
@@ -37,14 +50,10 @@ import javafx.stage.Window;
 
 import org.json.JSONException;
 
-import isogame.engine.CorruptDataException;
-import isogame.engine.Library;
-import isogame.engine.MapPoint;
-import isogame.engine.MapView;
-import isogame.engine.Stage;
-import isogame.resource.ResourceLocator;
-
 public class EditorCanvas extends MapView {
+	private final double THUMBW = 288d;
+	private final double THUMBH = 162d;
+
 	private Tool tool = null;
 	private final Window window;
 
@@ -79,18 +88,51 @@ public class EditorCanvas extends MapView {
 					localLibrary = stage.localLibrary;
 					saved.setValue(true);
 					tool = null;
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					final Alert d = new Alert(Alert.AlertType.ERROR);
 					d.setHeaderText("Cannot read file " + r.toString());
 					d.setContentText(e.toString());
 					d.show();
-				} catch (CorruptDataException|JSONException|ClassCastException e) {
+				} catch (final CorruptDataException|JSONException|ClassCastException e) {
 					final Alert d = new Alert(Alert.AlertType.ERROR);
 					d.setHeaderText("Error in file " + r.toString());
 					d.setContentText(e.toString());
 					d.show();
 				}
 			}
+		}
+	}
+
+	private void saveThumbnail(final File dataDir) {
+		final File out = new File(dataDir,
+			"/mapThumbs/" + stageFile.getName() + ".png");
+
+		pushTranslation();
+		centreView();
+
+		isDebug.setValue(false);
+		getStage().clearAllHighlighting();
+		update(0, getStage());
+
+		final Image img = this.snapshot(new SnapshotParameters(), null);
+		final ImageView shrink = new ImageView(img);
+		shrink.setFitWidth(THUMBW);
+		shrink.setFitHeight(THUMBH);
+		shrink.setSmooth(true);
+		shrink.setPreserveRatio(true);
+		final Image smallImg = shrink.snapshot(new SnapshotParameters(), null);
+		final BufferedImage simg = SwingFXUtils.fromFXImage(smallImg, null);
+
+		try {
+			ImageIO.write(simg, "png", out);
+		} catch (final IOException e) {
+			final Alert d = new Alert(Alert.AlertType.ERROR);
+			d.setHeaderText("Could not save thumbnail " + out);
+			d.setContentText(e.toString());
+			d.show();
+		} finally {
+			isDebug.setValue(true);
+			popTranslation();
 		}
 	}
 
@@ -105,9 +147,10 @@ public class EditorCanvas extends MapView {
 		} else {
 			try {
 				localLibrary.writeToStream(new FileOutputStream(stageFile), stage);
+				saveThumbnail(dataDir);
 				saved.setValue(true);
-			} catch (IOException e) {
-				Alert d = new Alert(Alert.AlertType.ERROR);
+			} catch (final IOException e) {
+				final Alert d = new Alert(Alert.AlertType.ERROR);
 				d.setHeaderText("Cannot save file as " + stageFile.toString());
 				d.setContentText(e.toString());
 				d.show();
@@ -190,7 +233,7 @@ public class EditorCanvas extends MapView {
 					stageFile = null;
 					saved.setValue(false);
 				});
-		} catch (CorruptDataException e) {
+		} catch (final CorruptDataException e) {
 			final Alert d = new Alert(Alert.AlertType.ERROR);
 			d.setHeaderText("Cannot create map");
 			d.setContentText(
@@ -238,7 +281,7 @@ public class EditorCanvas extends MapView {
 		});
 	}
 
-	public void setTool(Tool tool) {
+	public void setTool(final Tool tool) {
 		this.tool = tool;
 	}
 }

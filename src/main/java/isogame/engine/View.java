@@ -18,15 +18,12 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
+import java.util.EmptyStackException;
+import java.util.Stack;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -142,6 +139,22 @@ public class View extends Pane {
 		x = centre.getX() - ((ISO_VIEWPORTW - TILEW) / 2.0);
 		y = centre.getY() - ((ISO_VIEWPORTH - TILEH) / 2.0);
 		updateScreenTransform();
+	}
+
+	private final Stack<Point2D> stack = new Stack<>();
+
+	public void pushTranslation() {
+		stack.push(new Point2D(x, y));
+	}
+
+	public void popTranslation() {
+		try {
+			final Point2D r = stack.pop();
+			x = r.getX(); y = r.getY();
+			updateScreenTransform();
+		} catch (final EmptyStackException e) {
+			/* do nothing */
+		}
 	}
 
 	public Point2D getViewportCentre() {

@@ -122,7 +122,7 @@ public class MapView extends View {
 		centreView();
 	}
 
-	private void centreView() {
+	protected void centreView() {
 		if (stage == null) return;
 		centreOnTile(new MapPoint(stage.terrain.w/2, stage.terrain.h/2));
 	}
