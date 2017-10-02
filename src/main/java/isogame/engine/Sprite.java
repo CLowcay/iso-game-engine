@@ -119,6 +119,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	 * */
 	public void rotate() {
 		direction = direction.rotateAntiClockwise();
+		invalidate();
 	}
 
 	/**
@@ -159,6 +160,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	 * */
 	public void setDirection(final FacingDirection direction) {
 		this.direction = direction;
+		invalidate();
 	}
 
 	private boolean isSliced = false;
