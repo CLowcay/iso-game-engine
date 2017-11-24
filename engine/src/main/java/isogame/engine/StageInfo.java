@@ -136,8 +136,8 @@ public class StageInfo implements HasJSONRepresentation {
 		for (int i = 0; i < ndata; i++) a.put(data[i].getJSON());
 
 		final JSONObject r = new JSONObject();
-		r.put("w", new Integer(w));
-		r.put("h", new Integer(h));
+		r.put("w", w);
+		r.put("h", h);
 		r.put("data", a);
 		return r;
 	}

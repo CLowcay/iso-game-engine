@@ -1,0 +1,18 @@
+apply plugin : 'java'
+apply plugin : 'java-library'
+
+compileJava {
+	options.encoding = 'UTF-8'
+	options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Werror"
+}
+
+compileTestJava {
+	options.encoding = 'UTF-8'
+	options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Werror"
+}
+
+dependencies {
+	implementation 'com.diffplug.durian:durian:3.4.0'
+	api 'org.json:json:20171018'
+}
+

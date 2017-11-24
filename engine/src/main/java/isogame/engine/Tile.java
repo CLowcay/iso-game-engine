@@ -168,9 +168,9 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	public JSONObject getJSON() {
 		final JSONObject r = new JSONObject();
 		r.put("p", pos.getJSON());
-		r.put("elevation", new Integer(elevation));
+		r.put("elevation", elevation);
 		r.put("slope", slope.name());
-		r.put("isManaZone", new Boolean(isManaZone));
+		r.put("isManaZone", isManaZone);
 		r.put("startZone", startZone.name());
 		r.put("texture", tex.id);
 		if (cliffTexture != null) r.put("cliffTexture", cliffTexture.id);

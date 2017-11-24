@@ -1,0 +1,19 @@
+apply plugin : 'java'
+apply plugin : 'application'
+
+mainClassName = 'isogame.editor.MapEditor'
+
+compileJava {
+	options.encoding = 'UTF-8'
+	options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Werror"
+}
+
+compileTestJava {
+	options.encoding = 'UTF-8'
+	options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Werror"
+}
+
+dependencies {
+	compile project(':engine')
+}
+

@@ -90,8 +90,8 @@ public class MapPoint implements HasJSONRepresentation {
 	@Override
 	public JSONObject getJSON() {
 		final JSONObject r = new JSONObject();
-		r.put("x", new Integer(x));
-		r.put("y", new Integer(y));
+		r.put("x", x);
+		r.put("y", y);
 		return r;
 	}
 

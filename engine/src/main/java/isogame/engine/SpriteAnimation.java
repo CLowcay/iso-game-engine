@@ -188,8 +188,8 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		final JSONObject r = new JSONObject();
 		r.put("id", id);
 		r.put("url", url);
-		r.put("nframes", new Integer(frames));
-		r.put("framerate", new Integer(framerate));
+		r.put("nframes", frames);
+		r.put("framerate", framerate);
 		return r;
 	}
 

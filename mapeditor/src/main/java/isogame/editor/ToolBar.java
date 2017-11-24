@@ -27,23 +27,23 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 
 public class ToolBar extends FlowPane {
-	private ImageView playImage = new ImageView("/editor_assets/play.png");
-	private ImageView stopImage = new ImageView("/editor_assets/stop.png");
+	private ImageView playImage = new ImageView("/play.png");
+	private ImageView stopImage = new ImageView("/stop.png");
 	private final ToggleButton playStop = new ToggleButton("", playImage);
 	private final ToggleButton pointer =
-		new ToggleButton("", new ImageView("/editor_assets/pointer.png"));
+		new ToggleButton("", new ImageView("/pointer.png"));
 	private final ToggleButton delete =
-		new ToggleButton("", new ImageView("/editor_assets/cross.png"));
+		new ToggleButton("", new ImageView("/cross.png"));
 	private final ToggleButton rotate =
-		new ToggleButton("", new ImageView("/editor_assets/rotate.png"));
+		new ToggleButton("", new ImageView("/rotate.png"));
 	private final ToggleButton start1 =
-		new ToggleButton("", new ImageView("/editor_assets/1.png"));
+		new ToggleButton("", new ImageView("/1.png"));
 	private final ToggleButton start2 =
-		new ToggleButton("", new ImageView("/editor_assets/2.png"));
+		new ToggleButton("", new ImageView("/2.png"));
 	private final ToggleButton mana =
-		new ToggleButton("", new ImageView("/editor_assets/M.png"));
+		new ToggleButton("", new ImageView("/M.png"));
 	private final ToggleButton specialDelete =
-		new ToggleButton("", new ImageView("/editor_assets/scross.png"));
+		new ToggleButton("", new ImageView("/scross.png"));
 	
 	public ToolBar(final EditorCanvas canvas, final ToggleGroup group) {
 		super();

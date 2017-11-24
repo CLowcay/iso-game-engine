@@ -38,6 +38,11 @@ public class MappedList<E, F> extends TransformationList<E, F> {
 	}
 
 	@Override
+	public int getViewIndex(final int index) {
+		return index;
+	}
+
+	@Override
 	public int getSourceIndex(final int index) {
 		return index;
 	}
