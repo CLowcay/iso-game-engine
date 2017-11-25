@@ -1,6 +1,12 @@
 apply plugin : 'java'
 apply plugin : 'java-library'
 
+ext.moduleName = 'isogame.engine';
+
+dependencies {
+	implementation project(':json')
+}
+
 compileJava {
 	options.encoding = 'UTF-8'
 	options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Werror"
@@ -9,10 +15,5 @@ compileJava {
 compileTestJava {
 	options.encoding = 'UTF-8'
 	options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Werror"
-}
-
-dependencies {
-	implementation 'com.diffplug.durian:durian:3.4.0'
-	api 'org.json:json:20171018'
 }
 

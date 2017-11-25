@@ -1,7 +1,14 @@
 apply plugin : 'java'
 apply plugin : 'application'
 
-mainClassName = 'isogame.editor.MapEditor'
+ext.moduleName = 'isogame.editor';
+
+mainClassName = "$moduleName/isogame.editor.MapEditor"
+
+dependencies {
+	implementation project(':engine')
+	implementation project(':json')
+}
 
 compileJava {
 	options.encoding = 'UTF-8'
@@ -13,7 +20,35 @@ compileTestJava {
 	options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Werror"
 }
 
-dependencies {
-	compile project(':engine')
+run {
+	inputs.property("moduleName", moduleName)
+	doFirst {
+		jvmArgs = [
+			'--module-path', classpath.asPath,
+			'--module', mainClassName,
+		]
+		classpath = files()
+	}
+}
+
+startScripts {
+	inputs.property("moduleName", moduleName)
+	doFirst {
+		classpath = files()
+		defaultJvmOpts = [
+			'--module-path', 'APP_HOME_LIBS',
+			'--module', mainClassName,
+		]
+	}
+
+	doLast {
+		def bashFile = new File(outputDir, applicationName)
+		String bashContent = bashFile.text
+		bashFile.text = bashContent.replaceFirst('APP_HOME_LIBS', java.util.regex.Matcher.quoteReplacement('$APP_HOME/lib'))
+
+		def batFile = new File(outputDir, applicationName + ".bat")
+		String batContent = batFile.text
+		batFile.text = batContent.replaceFirst('APP_HOME_LIBS', java.util.regex.Matcher.quoteReplacement('%APP_HOME%\\lib'))
+	}
 }
 
