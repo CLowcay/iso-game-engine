@@ -57,7 +57,7 @@ subprojects {
 					'--module-path', classpath.asPath,
 					'--add-modules', 'junit',
 					'--add-reads', "$moduleName=junit",
-					'--path-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
+					'--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
 				]
 			}
 		}
@@ -66,7 +66,7 @@ subprojects {
 			inputs.property("moduleName", moduleName)
 			doFirst {
 				jvmArgs += [
-					'--modulePath', classpath.asPath,
+					'--module-path', classpath.asPath,
 					'--add-modules', 'ALL-MODULE-PATH',
 					'--add-reads', "$moduleName=junit",
 					'--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
