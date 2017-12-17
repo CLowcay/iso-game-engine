@@ -58,6 +58,7 @@ subprojects {
 					'--add-modules', 'junit',
 					'--add-reads', "$moduleName=junit",
 					'--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
+					'--add-exports',  "$moduleName/${moduleName}.test=junit"
 				]
 			}
 		}
@@ -70,6 +71,7 @@ subprojects {
 					'--add-modules', 'ALL-MODULE-PATH',
 					'--add-reads', "$moduleName=junit",
 					'--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
+					'--add-exports',  "$moduleName/${moduleName}.test=junit"
 				]
 			}
 		}
