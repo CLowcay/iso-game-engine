@@ -7,5 +7,6 @@ module isogame.engine {
 	requires javafx.controls;
 
 	requires org.json;
+	requires ssjsjs;
 }
 

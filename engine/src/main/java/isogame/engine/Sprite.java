@@ -32,8 +32,16 @@ import javafx.scene.shape.Rectangle;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import ssjsjs.annotations.As;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.Implicit;
+import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.JSONable;
 
-public class Sprite extends VisibleObject implements HasJSONRepresentation {
+/**
+ * An instance of a sprite.
+ * */
+public class Sprite extends VisibleObject implements JSONable {
 	public final SpriteInfo info;
 
 	// position of the sprite on the map.
@@ -44,6 +52,12 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	// The direction the sprite is facing
 	private FacingDirection direction = FacingDirection.UP;
 	public FacingDirection getDirection() { return direction; }
+
+	// copy of the spriteID for serialization
+	public final String spriteID;
+
+	// copy of the animation ID for serialization
+	private String animationID;
 
 	// Extra data that can be used to identify this sprite
 	public Object userData;
@@ -75,6 +89,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	 * */
 	public Sprite(final SpriteInfo info) {
 		this.info = info;
+		this.spriteID = info.id;
 
 		sceneGraph = new PrioritizedGroup(info.priority);
 		slicedGraph = new PrioritizedGroup(info.priority);
@@ -87,12 +102,31 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 		slicedGraphNode.setCache(true);
 	}
 
-	public void doOnExternalAnimationFinished(final Runnable k) {
+	@JSONConstructor
+	public Sprite(
+		@Implicit("library") final Library lib,
+		@Field("pos") final MapPoint pos,
+		@Field("direction") final FacingDirection direction,
+		@Field("spriteID")@As("sprite") final String spriteID,
+		@Field("animationID")@As("animation") final String animation
+	) throws CorruptDataException {
+		this(lib.getSprite(spriteID));
+		this.direction = direction;
+		this.pos = pos;
+		this.setAnimation(animation);
+	}
+
+	/**
+	 * Set the action to perform when an external animation of this sprite finishes.
+	 * @param k the action to perform
+	 * */
+	public void setOnExternalAnimationFinished(final Runnable k) {
 		this.onExternalAnimationFinished = k;
 	}
 
 	/**
 	 * Queue an animation which can move the sprite around the map etc.
+	 * @param anim the animation to queue
 	 * */
 	public void queueExternalAnimation(final Animation anim) {
 		if (!this.animationChain.isPresent()) {
@@ -108,7 +142,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Get the current animation chain
+	 * Get the current animation chain.
 	 * */
 	public Optional<AnimationChain> getAnimationChain() {
 		return animationChain;
@@ -124,8 +158,10 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 
 	/**
 	 * Set the animation for rendering this sprite.
+	 * @param animation the new animation
 	 * */
 	public void setAnimation(final String animation) {
+		this.animationID = animation;
 		this.animation = info.animations.get(animation);
 		this.frame = -1;
 		this.frameAnimator = new FrameAnimator(
@@ -140,7 +176,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Set the position of this sprite
+	 * Set the position of this sprite.
 	 * @param pos The new position for the sprite
 	 * */
 	public void setPos(final MapPoint pos) {
@@ -171,6 +207,8 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	 * @param iMain the index at which to insert the main slice
 	 * @param iSlice the index at which to insert the partial
 	 *           (if this sprite is sliced)
+	 * @param angle the current camera angle
+	 * @param t the current time value
 	 * */
 	void update(
 		final ObservableList<Node> parent,
@@ -208,6 +246,10 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 
 	/**
 	 * Update this sprite in the scene graph using the default method.
+	 * @param graph the scene graph
+	 * @param terrain the terrain data
+	 * @param angle the current camera angle
+	 * @param t the current time value
 	 * */
 	public void updateSceneGraph(
 		final ObservableList<Node> graph,
@@ -240,6 +282,7 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	 * Check if a point is on this sprite.
 	 * @param x coordinate transformed relative to the origin of this sprite
 	 * @param y coordinate transformed relative to the origin of this sprite
+	 * @param angle the current camera angle
 	 * @return true if the point collides, otherwise false
 	 * */
 	public boolean hitTest(
@@ -251,6 +294,9 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 	/**
 	 * Render a single frame of this sprite.
 	 * WARNING: does not preserve the current translation.
+	 * @param cx the graphics context
+	 * @param t the current time value
+	 * @param angle the current camera angle
 	 * */
 	public void drawFrame(
 		final GraphicsContext cx, final long t, final CameraAngle angle
@@ -258,37 +304,6 @@ public class Sprite extends VisibleObject implements HasJSONRepresentation {
 		final int frame = frameAnimator.frameAt(t);
 		cx.translate(0, GlobalConstants.TILEH - animation.h);
 		animation.drawFrame(cx, frame, angle, direction);
-	}
-
-	public static Sprite fromJSON(final JSONObject json, final Library lib)
-		throws CorruptDataException
-	{
-		try {
-			final JSONObject pos = json.getJSONObject("pos");
-			final String direction = json.getString("direction");
-			final String spriteID = json.getString("sprite");
-			final String animation = json.getString("animation");
-
-			final Sprite sprite = new Sprite(lib.getSprite(spriteID));
-			sprite.direction = FacingDirection.valueOf(direction);
-			sprite.pos = MapPoint.fromJSON(pos);
-			sprite.setAnimation(animation);
-			return sprite;
-		} catch (JSONException e) {
-			throw new CorruptDataException("Error parsing sprite, " + e.getMessage(), e);
-		} catch (IllegalArgumentException e) {
-			throw new CorruptDataException("Type error in sprite", e);
-		}
-	}
-
-	@Override
-	public JSONObject getJSON() {
-		final JSONObject r = new JSONObject();
-		r.put("pos", pos.getJSON());
-		r.put("direction", direction.name());
-		r.put("animation", animation.id);
-		r.put("sprite", info.id);
-		return r;
 	}
 
 	@Override public String toString() {

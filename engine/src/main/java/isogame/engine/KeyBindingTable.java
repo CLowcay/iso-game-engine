@@ -1,23 +1,23 @@
 package isogame.engine;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import ssjsjs.JSONable;
+import ssjsjs.annotations.As;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.Implicit;
+import ssjsjs.annotations.JSONConstructor;
 
 /**
  * A table of key bindings
  * */
-public class KeyBindingTable implements HasJSONRepresentation {
+public class KeyBindingTable implements JSONable {
 	private final Map<KeyCodeCombination, KeyBinding> keys =
 		new HashMap<>();
 	private final Map<KeyBinding, KeyCodeCombination> primaryKeys =
@@ -25,6 +25,28 @@ public class KeyBindingTable implements HasJSONRepresentation {
 	private final Map<KeyBinding, KeyCodeCombination> secondaryKeys =
 		new HashMap<>();
 
+	private List<JSONableKeyCodeCombination> allKeys;
+
+	public KeyBindingTable() {
+	}
+
+	@JSONConstructor
+	public KeyBindingTable(
+		@Implicit("getBinding") final Function<String, KeyBinding> getBinding,
+		@Field("allKeys")@As("keys") final Collection<JSONableKeyCodeCombination> keys
+	) {
+		for (final JSONableKeyCodeCombination key : keys) {
+			final KeyBinding binding = getBinding.apply(key.action);
+			this.setPrimaryKey(binding, key.k);
+			this.setSecondaryKey(binding, key.k);
+		}
+	}
+
+	/**
+	 * Get the action associated with a KeyEvent.
+	 * @param e the KeyEvent to look up
+	 * @return a KeyBinding if one is registered for the event, otherwise nothing
+	 * */
 	public Optional<KeyBinding> getKeyAction(final KeyEvent e) {
 		for (final KeyCodeCombination k : keys.keySet()) {
 			if (k.match(e)) return Optional.of(keys.get(k));
@@ -33,28 +55,33 @@ public class KeyBindingTable implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Set the primary key for an action
+	 * Set the primary key for an action.
+	 * @param b the key binding
+	 * @param k the key to bind
 	 * @return the action that was previously bound to that key, or null
 	 * */
 	public KeyBinding setPrimaryKey(
 		final KeyBinding b, final KeyCodeCombination k
 	) {
-		return setKey(b, k, primaryKeys);
+		return setKey(b, k, true, primaryKeys);
 	}
 
 	/**
 	 * Set the secondary key for an action
+	 * @param b the key binding
+	 * @param k the key to bind
 	 * @return the action that was previously bound to that key, or null
 	 * */
 	public KeyBinding setSecondaryKey(
 		final KeyBinding b, final KeyCodeCombination k
 	) {
-		return setKey(b, k, secondaryKeys);
+		return setKey(b, k, false, secondaryKeys);
 	}
 
 	private KeyBinding setKey(
 		final KeyBinding b,
 		final KeyCodeCombination k,
+		final boolean isPrimary,
 		final Map<KeyBinding, KeyCodeCombination> keysMap
 	) {
 		if (k == null) {
@@ -69,6 +96,7 @@ public class KeyBindingTable implements HasJSONRepresentation {
 		final KeyBinding last = keys.put(k, b);
 		removeOldBinding(last, b, k);
 		keysMap.put(b, k);
+		allKeys.add(new JSONableKeyCodeCombination(k, b.toString(), isPrimary));
 		return last;
 	}
 
@@ -78,23 +106,55 @@ public class KeyBindingTable implements HasJSONRepresentation {
 		final KeyCodeCombination k
 	) {
 		if (b0 != null && b0 != b1) {
-			if (k.equals(primaryKeys.get(b0))) primaryKeys.remove(b0);
-			if (k.equals(secondaryKeys.get(b0))) secondaryKeys.remove(b0);
+			boolean remove = false;
+			if (k.equals(primaryKeys.get(b0))) {
+				primaryKeys.remove(b0);
+				remove = true;
+			}
+			if (k.equals(secondaryKeys.get(b0))) {
+				secondaryKeys.remove(b0);
+				remove = true;
+			}
+			if (remove) {
+				final String action = b0.toString();
+				for (int i = 0; i < allKeys.size(); i++) {
+					if (allKeys.get(i).action.equals(action)) {
+						allKeys.remove(i); break;
+					}
+				}
+			}
 		}
 	}
 
+	/**
+	 * Get the key binding associated with a key
+	 * @param k the key
+	 * @return the key binding
+	 * */
 	public KeyBinding getKeyAction(final KeyCodeCombination k) {
 		return keys.get(k);
 	}
 
+	/**
+	 * Get all the primary keys
+	 * @return all the primary keys
+	 * */
 	public Map<KeyBinding, KeyCodeCombination> getPrimaryKeys() {
 		return new HashMap<>(primaryKeys);
 	}
 
+	/**
+	 * Get all the secondary keys
+	 * @return all the secondary keys
+	 * */
 	public Map<KeyBinding, KeyCodeCombination> getSecondaryKeys() {
 		return new HashMap<>(secondaryKeys);
 	}
 
+	/**
+	 * Copy the key bindings from another table into this table
+	 * @param table the key binding table to copy from
+	 * */
 	public void loadBindings(final KeyBindingTable table) {
 		this.primaryKeys.clear();
 		this.secondaryKeys.clear();
@@ -105,68 +165,6 @@ public class KeyBindingTable implements HasJSONRepresentation {
 
 		for (final KeyBinding b : tp.keySet()) this.setPrimaryKey(b, tp.get(b));
 		for (final KeyBinding b : ts.keySet()) this.setSecondaryKey(b, ts.get(b));
-	}
-
-	@Override public JSONObject getJSON() {
-		final JSONObject o = new JSONObject();
-		final JSONArray a = new JSONArray();
-		for (final KeyCodeCombination key : keys.keySet()) {
-			final JSONObject k = new JSONObject();
-			k.put("code", key.getCode().toString());
-			k.put("control", key.getControl().toString());
-			k.put("alt", key.getAlt().toString());
-			k.put("meta", key.getMeta().toString());
-			k.put("shift", key.getShift().toString());
-			k.put("shortcut", key.getShortcut().toString());
-			k.put("action", keys.get(key).toString());
-			k.put("primary", primaryKeys.get(keys.get(key)).equals(key));
-			a.put(k);
-		}
-		o.put("keys", a);
-		return o;
-	}
-
-	public static KeyBindingTable fromJSON(
-		final JSONObject json,
-		final Function<String, KeyBinding> getBinding
-	) throws CorruptDataException {
-		try {
-			final KeyBindingTable table = new KeyBindingTable();
-
-			final JSONArray a = json.getJSONArray("keys");
-
-			for (int i = 0; i < a.length(); i++) {
-				final JSONObject ko = a.getJSONObject(i);
-				final KeyCode code = KeyCode.valueOf(ko.getString("code"));
-				final KeyCombination.ModifierValue control =
-					KeyCombination.ModifierValue.valueOf(ko.getString("control"));
-				final KeyCombination.ModifierValue alt =
-					KeyCombination.ModifierValue.valueOf(ko.getString("alt"));
-				final KeyCombination.ModifierValue meta =
-					KeyCombination.ModifierValue.valueOf(ko.getString("meta"));
-				final KeyCombination.ModifierValue shift =
-					KeyCombination.ModifierValue.valueOf(ko.getString("shift"));
-				final KeyCombination.ModifierValue shortcut =
-					KeyCombination.ModifierValue.valueOf(ko.getString("shortcut"));
-
-				final boolean isPrimary = ko.optBoolean("primary", true);
-				final KeyBinding binding = getBinding.apply(ko.getString("action"));
-				final KeyCodeCombination key =
-					new KeyCodeCombination(code, shift, control,
-						alt, meta, shortcut);
-
-				if (isPrimary) {
-					table.setPrimaryKey(binding, key);
-				} else {
-					table.setSecondaryKey(binding, key);
-				}
-			}
-
-			return table;
-
-		} catch (final JSONException e) {
-			throw new CorruptDataException("Invalid key binding table", e);
-		}
 	}
 }
 

@@ -19,13 +19,18 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 package isogame.engine;
 
 import isogame.resource.ResourceLocator;
-
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.paint.Paint;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,18 +40,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javafx.beans.value.ObservableBooleanValue;
-import javafx.collections.ObservableList;
-import javafx.geometry.Point2D;
-import javafx.scene.Node;
-import javafx.scene.paint.Paint;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import ssjsjs.annotations.As;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.Implicit;
+import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.JSONable;
+import ssjsjs.JSONDeserializeException;
+import ssjsjs.SSJSJS;
 
-public class Stage implements HasJSONRepresentation {
+/**
+ * The environment in which the sprites move around.
+ * */
+public class Stage implements JSONable {
 	public String name = null;
 	public final StageInfo terrain;
 
@@ -68,12 +75,22 @@ public class Stage implements HasJSONRepresentation {
 	 * */
 	public final CollisionDetector collisions;
 
-	public Stage clone() {
-		final Stage r = new Stage(this.terrain, this.localLibrary);
-		for (Sprite s : allSprites) r.addSprite(s);
-		return r;
+	@JSONConstructor
+	public Stage(
+		@Implicit("library") Library localLibrary,
+		@Field("name") final String name,
+		@Field("terrain") final StageInfo terrain,
+		@Field("allSprites")@As("sprites") final Collection<Sprite> sprites
+	) {
+		this(terrain, localLibrary);
+		this.name = name;
+		for (final Sprite s : sprites) this.addSprite(s);
 	}
 
+	/**
+	 * @param terrain the terrain this stage is built on
+	 * @param localLibrary a library containing private assets for this stage
+	 * */
 	public Stage(final StageInfo terrain, final Library localLibrary) {
 		this.terrain = terrain;
 		this.localLibrary = localLibrary;
@@ -90,9 +107,18 @@ public class Stage implements HasJSONRepresentation {
 		}
 	}
 
+	/**
+	 * Load a Stage from a file
+	 * @param filename the name of the file to load from
+	 * @param loc the resource locator
+	 * @param globl the global library
+	 * @return the loaded stage
+	 * @throws IOException if there is an error reading the file
+	 * @throws CorruptDataException if the data in the file is malformed
+	 * */
 	public static Stage fromFile(
 		final File filename, final ResourceLocator loc, final Library global
-	) throws IOException, CorruptDataException, JSONException
+	) throws IOException, CorruptDataException
 	{
 		try (BufferedReader in =
 			new BufferedReader(
@@ -104,48 +130,45 @@ public class Stage implements HasJSONRepresentation {
 			while ((line = in.readLine()) != null) raw.append(line);
 			final JSONObject json = new JSONObject(raw.toString());
 
-			return Stage.fromJSON(json, loc, global);
+			return Stage.fromJSON(filename.toString(), json, loc, global);
 		}
 	}
 
+	/**
+	 * Load a Stage from a JSON object
+	 * @param url the name of the resource we're loading from
+	 * @param json the JSON object to parse
+	 * @param locator the resource locator
+	 * @param global the global library
+	 * @return the loaded stage
+	 * @throws CorruptDataException if the data in the file is malformed
+	 * */
 	public static Stage fromJSON(
-		final JSONObject json, final ResourceLocator loc, final Library global
-	) throws CorruptDataException
-	{
+		final String url,
+		final JSONObject json,
+		final ResourceLocator locator,
+		final Library global
+	) throws CorruptDataException {
 		try {
-			final JSONObject stageJSON = json.getJSONObject("stage");
-			final String name = stageJSON.getString("name");
+			final Map<String, Object> jsonEnvironment = new HashMap<>();
+			jsonEnvironment.put("library",
+				Library.fromJSON(json, url, locator, global, false));
+			return SSJSJS.deserialize((JSONObject) json.get("stage"), Stage.class, jsonEnvironment);
 
-			final Library lib = Library.fromJSON(json, name, loc, global, false);
-
-			final JSONObject terrain = stageJSON.getJSONObject("terrain");
-			final JSONArray sprites = stageJSON.getJSONArray("sprites");
-
-			final Stage r = new Stage(StageInfo.fromJSON(terrain, lib), lib);
-			r.name = name;
-			for (Object s : sprites) {
-				r.addSprite(Sprite.fromJSON((JSONObject) s, lib));
-			}
-
-			return r;
-		} catch (ClassCastException e) {
-			throw new CorruptDataException("Type error in stage", e);
-		} catch (JSONException e) {
-			throw new CorruptDataException("Error parsing stage, " + e.getMessage(), e);
+		} catch (final JSONException|JSONDeserializeException e) {
+			throw new CorruptDataException("Error parsing stage", e);
 		}
 	}
 
-	@Override
-	public JSONObject getJSON() {
-		final JSONArray s = new JSONArray();
-		for (Sprite sprite : allSprites) s.put(sprite.getJSON());
-
-		final JSONObject r = new JSONObject();
-		r.put("name", name);
-		r.put("terrain", terrain.getJSON());
-		r.put("sprites", s);
+	/**
+	 * Create a copy of this stage.
+	 * */
+	public Stage clone() {
+		final Stage r = new Stage(this.terrain, this.localLibrary);
+		for (final Sprite s : allSprites) r.addSprite(s);
 		return r;
 	}
+
 
 	/**
 	 * Control the order in which sprites are rendered.
@@ -158,6 +181,7 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Add a sprite to the map.  z-order is determined by sprite priority.
+	 * @param sprite the sprite to add to the map
 	 * */
 	public void addSprite(final Sprite sprite) {
 		sprite.doOnMove(this::moveSprite);
@@ -168,6 +192,8 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Callback to handle when sprites move
+	 * @param sprite the sprite to move
+	 * @param from where the sprite is when the movement starts
 	 * */
 	private void moveSprite(final Sprite sprite, final MapPoint from) {
 		final List<Sprite> old = spritesByTile.get(from);
@@ -197,6 +223,7 @@ public class Stage implements HasJSONRepresentation {
 	/**
 	 * Add a sprite to the map, removing any sprites already at the same
 	 * location.
+	 * @param sprite the sprite to add
 	 * */
 	public void replaceSprite(final Sprite sprite) {
 		clearTileOfSprites(sprite.getPos());
@@ -205,6 +232,7 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Remove a single sprite.
+	 * @param sprite the sprite to remove
 	 * */
 	public void removeSprite(final Sprite sprite) {
 		allSprites.remove(sprite);
@@ -214,6 +242,8 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Get all the sprites on a tile.
+	 * @param p the map point to examine
+	 * @return a list of all the sprites at position p
 	 * */
 	public List<Sprite> getSpritesByTile(final MapPoint p) {
 		return new ArrayList<>(spritesByTile.getOrDefault(p, new LinkedList<>()));
@@ -221,6 +251,7 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Remove all the sprites on a given tile.
+	 * @param p the tile to clear of sprites
 	 * */
 	public void clearTileOfSprites(final MapPoint p) {
 		getSpritesByTile(p).stream().forEach(this::removeSprite);
@@ -228,6 +259,7 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Rotate all the sprites on a particular tile.
+	 * @param p the tile containing the sprites to rotate
 	 * */
 	public void rotateSprites(final MapPoint p) {
 		getSpritesByTile(p).forEach(s -> s.rotate());
@@ -235,6 +267,7 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Does this stage use that TerrainTexture.
+	 * @param tex the texture to check for
 	 * */
 	public boolean usesTerrainTexture(final TerrainTexture tex) {
 		return terrain.usesTerrainTexture(tex);
@@ -242,6 +275,7 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Does this stage use that Sprite.
+	 * @param info the sprite to check for
 	 * */
 	public boolean usesSprite(final SpriteInfo info) {
 		return allSprites.stream().anyMatch(s -> s.info == info);
@@ -249,6 +283,7 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Does this stage use that CliffTexture.
+	 * @param tex the cliff texture to check for
 	 * */
 	public boolean usesCliffTexture(final CliffTexture tex) {
 		return terrain.usesCliffTexture(tex);
@@ -259,6 +294,7 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Set the highlighting colour scheme.
+	 * @param highlightColors the colours to use for the highlighters
 	 * */
 	public void setHighlightColors(final Paint[] highlightColors) {
 		clearAllHighlighting();
@@ -323,9 +359,10 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Update the scene graph for a new frame
-	 * @param graph The scene graph
-	 * @param t The current timestamp in nanoseconds
-	 * @param a The new camera angle
+	 * @param graph the scene graph
+	 * @param isDebug true to display debug information
+	 * @param t the current timestamp in nanoseconds
+	 * @param a the new camera angle
 	 * */
 	public void update(
 		final ObservableList<Node> graph,
@@ -376,6 +413,9 @@ public class Stage implements HasJSONRepresentation {
 
 	/**
 	 * Reconstruct the scene graph
+	 * @param t the current time value
+	 * @param isDebug true to show extra debugging information
+	 * @param graph part of the scene graph
 	 * */
 	private void rebuildSceneGraph(
 		final long t,

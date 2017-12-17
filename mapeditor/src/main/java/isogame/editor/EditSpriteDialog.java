@@ -18,19 +18,15 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.editor;
 
+import isogame.engine.CorruptDataException;
 import isogame.engine.SpriteAnimation;
 import isogame.engine.SpriteInfo;
 import isogame.resource.ResourceLocator;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -42,6 +38,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * A dialog for creating and editing sprites
@@ -63,7 +64,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 	public EditSpriteDialog(
 		final File dataRoot, final ResourceLocator loc,
 		final List<String> priorities, final SpriteInfo info
-	) {
+	) throws CorruptDataException {
 		super();
 
 		boolean isNew;
@@ -155,11 +156,20 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 
 				final Iterator<SpriteAnimation> it = animList.iterator();
 				if (!it.hasNext()) return null;
-				final SpriteInfo i = new SpriteInfo(idField.getText(), p, it.next());
-				while (it.hasNext()) {
-					i.addAnimation(it.next());
+
+				try {
+					final SpriteInfo i = new SpriteInfo(idField.getText(), p, it.next());
+					while (it.hasNext()) {
+						i.addAnimation(it.next());
+					}
+					return i;
+
+				} catch (final CorruptDataException e) {
+					final Alert alert = new Alert(AlertType.ERROR, e.getMessage());
+					alert.setHeaderText("Error constructing sprite info");
+					alert.showAndWait();
+					return null;
 				}
-				return i;
 			} else {
 				return null;
 			}

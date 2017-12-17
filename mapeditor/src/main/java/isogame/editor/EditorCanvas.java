@@ -24,7 +24,6 @@ import isogame.engine.MapPoint;
 import isogame.engine.MapView;
 import isogame.engine.Stage;
 import isogame.resource.ResourceLocator;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,8 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-import javax.imageio.ImageIO;
-
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
@@ -47,8 +44,9 @@ import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
-
+import javax.imageio.ImageIO;
 import org.json.JSONException;
+import ssjsjs.JSONSerializeException;
 
 public class EditorCanvas extends MapView {
 	private final double THUMBW = 288d;
@@ -149,7 +147,7 @@ public class EditorCanvas extends MapView {
 				localLibrary.writeToStream(new FileOutputStream(stageFile), stage);
 				saveThumbnail(dataDir);
 				saved.setValue(true);
-			} catch (final IOException e) {
+			} catch (final IOException|JSONSerializeException e) {
 				final Alert d = new Alert(Alert.AlertType.ERROR);
 				d.setHeaderText("Cannot save file as " + stageFile.toString());
 				d.setContentText(e.toString());

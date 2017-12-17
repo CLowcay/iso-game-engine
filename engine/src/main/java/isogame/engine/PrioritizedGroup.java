@@ -30,6 +30,9 @@ public class PrioritizedGroup extends Group {
 
 	public static final int TILE = -1;
 
+	/**
+	 * @param priority the priority level of this group
+	 * */
 	public PrioritizedGroup(final int priority) {
 		this.priority = priority;
 	}

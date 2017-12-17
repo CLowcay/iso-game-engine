@@ -26,12 +26,17 @@ import java.io.IOException;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import ssjsjs.annotations.As;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.Implicit;
+import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.JSONable;
 
 /**
  * A texture for use on terrain.  This could be embellished later to make more
  * sophisticated terrain.
  * */
-public class TerrainTexture implements HasJSONRepresentation {
+public class TerrainTexture implements JSONable {
 	public final String id;
 	private final String url;
 
@@ -40,11 +45,12 @@ public class TerrainTexture implements HasJSONRepresentation {
 	private final Map<SlopeType, Image> evenPrerendered;
 	private final Map<SlopeType, Image> oddPrerendered;
 
+	@JSONConstructor
 	public TerrainTexture(
-		final ResourceLocator loc,
-		final String id,
-		final String url,
-		final boolean nofx
+		@Implicit("locator") final ResourceLocator loc,
+		@Field("id") final String id,
+		@Field("url") final String url,
+		@Implicit("nofx") final boolean nofx
 	) throws CorruptDataException {
 		this.id = id;
 		this.url = url;
@@ -66,7 +72,7 @@ public class TerrainTexture implements HasJSONRepresentation {
 
 				evenPrerendered = TilePrerenderer.prerenderTile(evenPaint);
 				oddPrerendered = TilePrerenderer.prerenderTile(oddPaint);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new CorruptDataException(
 					"Cannot locate resource " + url, e);
 			}
@@ -75,42 +81,13 @@ public class TerrainTexture implements HasJSONRepresentation {
 
 	/**
 	 * Get an appropriate prerendered texture.
+	 * @param even true to get the even texture, false for the odd texture
+	 * @param slope the type of slope to get a texture for
+	 * @return the texture as an Image
 	 * */
 	public Image getTexture(final boolean even, final SlopeType slope) {
 		if (even) return evenPrerendered.get(slope);
 		else return oddPrerendered.get(slope);
 	}
-
-	/**
-	 * @param nofx True if we are running in an environment where we cannot use
-	 * JavaFX
-	 * */
-	public static TerrainTexture fromJSON(
-		final JSONObject json,
-		final ResourceLocator loc,
-		final boolean nofx
-	) throws CorruptDataException
-	{
-		try {
-			final String id = json.getString("id");
-			final String url = json.getString("url");
-
-			return new TerrainTexture(loc, id, url, nofx);
-		} catch (JSONException e) {
-			throw new CorruptDataException("Error parsing terrain texture, " + e.getMessage(), e);
-		} catch (IllegalArgumentException e) {
-			throw new CorruptDataException("Bad filename in texture", e);
-		}
-	}
-
-	@Override
-	public JSONObject getJSON() {
-		final JSONObject r = new JSONObject();
-		r.put("id", id);
-		r.put("url", url);
-
-		return r;
-	}
-
 }
 

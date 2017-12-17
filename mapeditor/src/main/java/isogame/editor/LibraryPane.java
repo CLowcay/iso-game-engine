@@ -18,7 +18,6 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.editor;
 
-import isogame.GlobalConstants;
 import isogame.engine.AssetType;
 import isogame.engine.CameraAngle;
 import isogame.engine.CliffTexture;
@@ -31,20 +30,10 @@ import isogame.engine.SpriteInfo;
 import isogame.engine.TerrainTexture;
 import isogame.engine.Tile;
 import isogame.resource.ResourceLocator;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleButton;
@@ -53,6 +42,16 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.Node;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import ssjsjs.JSONSerializeException;
 
 public class LibraryPane extends VBox {
 	private final GlobalLocalPane sprites;
@@ -142,9 +141,15 @@ public class LibraryPane extends VBox {
 		newButton.setOnAction(event -> {
 			final Node selected = palette.getContent();
 			if (selected == sprites) {
-				(new EditSpriteDialog(gfxRoot, loc, global.priorities, null))
-					.showAndWait()
-					.ifPresent(sprite -> addSpriteToLibrary(sprite, false));
+				try {
+					(new EditSpriteDialog(gfxRoot, loc, global.priorities, null))
+						.showAndWait()
+						.ifPresent(sprite -> addSpriteToLibrary(sprite, false));
+				} catch (final CorruptDataException e) {
+					final Alert alert = new Alert(AlertType.ERROR, e.getMessage());
+					alert.setHeaderText("Error constructing sprite info dialog box");
+					alert.showAndWait();
+				}
 			} else if (selected == textures) {
 				(new NewTextureDialog(gfxRoot, loc))
 					.showAndWait()
@@ -204,7 +209,7 @@ public class LibraryPane extends VBox {
 	private void saveGlobal() {
 		try {
 			global.writeToStream(new FileOutputStream(globalLibraryFile));
-		} catch (IOException e) {
+		} catch (final IOException|JSONSerializeException e) {
 			final Alert d = new Alert(Alert.AlertType.ERROR);
 			d.setHeaderText("Cannot save global library to " +
 				globalLibraryFile.toString());

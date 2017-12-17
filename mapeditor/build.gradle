@@ -7,7 +7,7 @@ mainClassName = "$moduleName/isogame.editor.MapEditor"
 
 dependencies {
 	implementation project(':engine')
-	implementation project(':json')
+	implementation project(':org.json')
 }
 
 compileJava {

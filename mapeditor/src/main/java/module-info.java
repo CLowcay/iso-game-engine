@@ -7,5 +7,6 @@ module isogame.editor {
 
 	requires isogame.engine;
 	requires org.json;
+	requires ssjsjs;
 }
 

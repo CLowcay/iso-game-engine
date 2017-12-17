@@ -29,8 +29,15 @@ import javafx.scene.paint.Paint;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.Implicit;
+import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.JSONable;
 
-public class CliffTexture implements HasJSONRepresentation {
+/**
+ * A texture for drawing cliffs.
+ * */
+public class CliffTexture implements JSONable {
 	// a paint for every direction the slope could be going.
 	private final Paint ul;
 	private final Paint ur;
@@ -42,12 +49,13 @@ public class CliffTexture implements HasJSONRepresentation {
 
 	private final Map<SlopeType, Image> prerendered;
 
+	@JSONConstructor
 	public CliffTexture(
-		final ResourceLocator loc,
-		final String id,
-		final String urlWide,
-		final String urlNarrow,
-		final boolean nofx
+		@Implicit("locator") final ResourceLocator loc,
+		@Field("id") final String id,
+		@Field("urlWide") final String urlWide,
+		@Field("urlNarrow") final String urlNarrow,
+		@Implicit("nofx") final boolean nofx
 	) throws CorruptDataException {
 		this.id = id;
 		this.urlWide = urlWide;
@@ -75,34 +83,11 @@ public class CliffTexture implements HasJSONRepresentation {
 		}
 	}
 
-	public static CliffTexture fromJSON(
-		final JSONObject json,
-		final ResourceLocator loc, final boolean nofx
-	) throws CorruptDataException
-	{
-		try {
-			final String id = json.getString("id");
-			final String urlWide = json.getString("urlWide");
-			final String urlNarrow = json.getString("urlNarrow");
-
-			return new CliffTexture(loc, id, urlWide, urlNarrow, nofx);
-		} catch (IllegalArgumentException e) {
-			throw new CorruptDataException("Bad filename in cliff texture", e);
-		} catch (JSONException e) {
-			throw new CorruptDataException("Error parsing cliff, " + e.getMessage(), e);
-		}
-	}
-
-	@Override
-	public JSONObject getJSON() {
-		final JSONObject r = new JSONObject();
-		r.put("id", id);
-		r.put("urlWide", urlWide);
-		r.put("urlNarrow", urlNarrow);
-
-		return r;
-	}
-
+	/**
+	 * Get the texture for a slope tile.
+	 * @param s the slope type
+	 * @return the texture as a tiling Paint
+	 * */
 	public Paint getTexture(final SlopeType s) {
 		switch (s) {
 			case N: return ur;
@@ -115,12 +100,18 @@ public class CliffTexture implements HasJSONRepresentation {
 		}
 	}
 
+	/**
+	 * Get the texture for a non-slope tile.
+	 * @return the texture as a tiling Paint
+	 * */
 	public Paint getFlatTexture() {
 		return flat;
 	}
 
 	/**
 	 * Get an appropriate prerendered texture.
+	 * @param slope the slope type
+	 * @return the prerendered texture as an image
 	 * */
 	public Image getPreTexture(final SlopeType slope) {
 		return prerendered.get(slope);

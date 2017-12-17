@@ -20,9 +20,6 @@ package isogame.engine;
 
 import isogame.GlobalConstants;
 import isogame.resource.ResourceLocator;
-
-import java.io.IOException;
-
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -31,14 +28,17 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException;
+import ssjsjs.annotations.As;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.Implicit;
+import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.JSONable;
 
 
 /**
- * Every sprite has four rotations, which are layed out vertically.  Each layer
- * may have multiple frames, which are layed out horizontally.
+ * Every sprite has four rotations, which are laid out vertically.  Each layer
+ * may have multiple frames, which are laid out horizontally.
  *
  * The rotations are in this order:
  * facing up and right
@@ -47,7 +47,7 @@ import org.json.JSONObject;
  * facing down and right
  * 
  * */
-public class SpriteAnimation implements HasJSONRepresentation {
+public class SpriteAnimation implements JSONable {
 	public final String id;
 	public final String url;
 	public final int frames;
@@ -63,12 +63,13 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	private final int hitH;
 	private final double sf;
 
+	@JSONConstructor
 	public SpriteAnimation(
-		final ResourceLocator loc,
-		final String id,
-		final String url,
-		final int frames,
-		final int framerate
+		@Implicit("locator") final ResourceLocator loc,
+		@Field("id") final String id,
+		@Field("url") final String url,
+		@Field("frames")@As("nframes") final int frames,
+		@Field("framerate") final int framerate
 	) throws CorruptDataException
 	{
 		this.frames = frames;
@@ -99,7 +100,7 @@ public class SpriteAnimation implements HasJSONRepresentation {
 				}
 			}
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new CorruptDataException(
 				"Cannot locate resource " + url, e);
 		}
@@ -133,24 +134,12 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		return hitTester.getColor(xt, yt).isOpaque();
 	}
 
-	public static SpriteAnimation fromJSON(
-		final JSONObject json, final ResourceLocator loc
-	) throws CorruptDataException
-	{
-		try {
-			final String id = json.getString("id");
-			final String url = json.getString("url");
-			final int frames = json.getInt("nframes");
-			final int framerate = json.getInt("framerate");
-
-			return new SpriteAnimation(loc, id, url, frames, framerate);
-		} catch (JSONException e) {
-			throw new CorruptDataException("Error parsing animation " + e.getMessage(), e);
-		}
-	}
-
 	/**
-	 * Draw this frame onto a canvas
+	 * Draw this frame onto a canvas.
+	 * @param cx the graphics context
+	 * @param frame the frame to draw
+	 * @param angle the current camera angle
+	 * @param the direction the sprite is facing
 	 * */
 	public void drawFrame(
 		final GraphicsContext cx,
@@ -164,7 +153,11 @@ public class SpriteAnimation implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Update this frame object
+	 * Update this frame object.
+	 * @param sceneGraphNode the node to draw the frame onto
+	 * @param frame0 the frame to draw
+	 * @param angle the current camera angle
+	 * @param direction the direction the sprite is facing
 	 * */
 	public void updateFrame(
 		final Rectangle sceneGraphNode,
@@ -183,18 +176,7 @@ public class SpriteAnimation implements HasJSONRepresentation {
 		sceneGraphNode.setClip(clip);
 	}
 
-	@Override
-	public JSONObject getJSON() {
-		final JSONObject r = new JSONObject();
-		r.put("id", id);
-		r.put("url", url);
-		r.put("nframes", frames);
-		r.put("framerate", framerate);
-		return r;
-	}
-
-	@Override
-	public String toString() {
+	@Override public String toString() {
 		return id;
 	}
 }

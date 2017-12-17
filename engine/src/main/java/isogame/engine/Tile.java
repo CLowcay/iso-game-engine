@@ -18,16 +18,13 @@ along with iso-game-engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 package isogame.engine;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
@@ -35,17 +32,25 @@ import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.json.JSONException;
 import org.json.JSONObject;
-import static isogame.GlobalConstants.TILEH;
-import static isogame.GlobalConstants.TILEW;
+import ssjsjs.annotations.As;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.Implicit;
+import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.JSONable;
 import static isogame.engine.TilePrerenderer.OFFSETX;
 import static isogame.engine.TilePrerenderer.OFFSETY;
+import static isogame.GlobalConstants.TILEH;
+import static isogame.GlobalConstants.TILEW;
 
 /**
  * Represents a single tile in a stage.
  * */
-public class Tile extends VisibleObject implements HasJSONRepresentation {
+public class Tile extends VisibleObject implements JSONable {
 	public final int elevation;
 	public final TerrainTexture tex;
 	public final CliffTexture cliffTexture;
@@ -86,6 +91,35 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 			new PrioritizedGroup(PrioritizedGroup.TILE));
 	}
 
+	private final String textureID;
+	private final String cliffTextureID;
+
+	@JSONConstructor
+	public Tile(
+		@Implicit("library") final Library lib,
+		@Field("pos")@As("p") final MapPoint pos,
+		@Field("elevation") final int elevation,
+		@Field("slope") final SlopeType slope,
+		@Field("isManaZone") final boolean isManaZone,
+		@Field("startZone") final StartZoneType startZone,
+		@Field("textureID")@As("texture") final String textureID,
+		@Field("cliffTextureID")@As("cliffTexture") final String cliffTextureID
+	) throws CorruptDataException {
+		this(pos, elevation, slope, isManaZone, startZone, lib.getTerrain(textureID),
+			cliffTextureID == null? null : lib.getCliffTexture(cliffTextureID),
+			new PrioritizedGroup(PrioritizedGroup.TILE));
+	} 
+
+	/**
+	 * @param pos the position
+	 * @param elevation the elevation
+	 * @param slope the slope type
+	 * @param isManaZone true if this is a mana zone, otherwise false
+	 * @param startZone the start zone type
+	 * @param texture the main texture
+	 * @param cliffTexture the cliff texture
+	 * @param subGraph the child nodes of this node in the scene graph
+	 * */
 	public Tile(
 		final MapPoint pos,
 		final int elevation,
@@ -98,6 +132,9 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	) {
 		this.elevation = elevation;
 		this.pos = pos;
+
+		this.textureID = texture.id;
+		this.cliffTextureID = cliffTexture.id;
 
 		tex = texture;
 		even = (pos.x + pos.y) % 2 == 0;
@@ -138,47 +175,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		}
 	}
 
-	public static Tile fromJSON(final JSONObject json, final Library lib)
-		throws CorruptDataException
-	{
-		try {
-			final JSONObject p = json.getJSONObject("p");
-			final int elevation = json.getInt("elevation");
-			final String slope = json.getString("slope");
-			final boolean isManaZone = json.getBoolean("isManaZone");
-			final String startZone = json.getString("startZone");
-			final String texture = json.getString("texture");
-			final String cliffTexture = json.optString("cliffTexture", null);
-
-			return new Tile(
-				MapPoint.fromJSON(p), elevation,
-				SlopeType.valueOf(slope), isManaZone,
-				StartZoneType.valueOf(startZone),
-				lib.getTerrain(texture),
-				cliffTexture == null? null : lib.getCliffTexture(cliffTexture),
-				new PrioritizedGroup(PrioritizedGroup.TILE));
-		} catch (JSONException e) {
-			throw new CorruptDataException("Error parsing tile, " + e.getMessage(), e);
-		} catch (IllegalArgumentException e) {
-			throw new CorruptDataException("Type error in tile", e);
-		}
-	}
-
-	@Override
-	public JSONObject getJSON() {
-		final JSONObject r = new JSONObject();
-		r.put("p", pos.getJSON());
-		r.put("elevation", elevation);
-		r.put("slope", slope.name());
-		r.put("isManaZone", isManaZone);
-		r.put("startZone", startZone.name());
-		r.put("texture", tex.id);
-		if (cliffTexture != null) r.put("cliffTexture", cliffTexture.id);
-		return r;
-	}
-
 	/**
-	 * Get a string describing the special properties of this tile
+	 * Get a string describing the special properties of this tile.
 	 * @return May be null
 	 * */
 	public String specialStatusString() {
@@ -197,7 +195,9 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Make a new tile with a different texture
+	 * Make a new tile with a different texture.
+	 * @param tex the texture for the new tile
+	 * @return a new Tile which is a clone of this one but with a different texture
 	 * */
 	public Tile newTexture(final TerrainTexture tex) {
 		return new Tile(pos, elevation, slope,
@@ -205,7 +205,12 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Make a new tile with different elevation characteristics
+	 * Make a new tile with different elevation characteristics.
+	 * @param elevation the new elevation
+	 * @param slope the new slope type
+	 * @param cliffTexture the new cliff type
+	 * @return a new Tile which is a clone of this one but with different
+	 * elevation characteristics
 	 * */
 	public Tile newElevation(
 		final int elevation,
@@ -217,7 +222,10 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Make a new tile with a different mana zone property
+	 * Make a new tile with a different mana zone property.
+	 * @param isManaZone true if this is a mana zone, otherwise false
+	 * @return a new Tile which is a clone of this one but the mana zone property
+	 * is different
 	 * */
 	public Tile newManaZone(final boolean isManaZone) {
 		return new Tile(pos, elevation, slope,
@@ -225,18 +233,31 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	}
 
 	/**
-	 * Make a new tile with a different start zone type
+	 * Make a new tile with a different start zone type.
+	 * @param startZone the kind of start zone
+	 * @return a new Tile which is a clone of this one but it's a different kind
+	 * of start zone
 	 * */
 	public Tile newStartZone(final StartZoneType startZone) {
 		return new Tile(pos, elevation, slope,
 			isManaZone, startZone, tex, cliffTexture, subGraph);
 	}
 
+	/**
+	 * Make a new tile with the mana zone type and start zone type cleared
+	 * @return a new Tile which is a clone of this one but the mana zone and
+	 * start zone types are cleared.
+	 * */
 	public Tile clearSpecialProperties() {
 		return new Tile(pos, elevation, slope,
 			false, StartZoneType.NONE, tex, cliffTexture, subGraph);
 	}
 
+	/**
+	 * Get the visual slope type for this Tile given a particular camera angle
+	 * @param angle the camera angle
+	 * @return the visual slope type given the camera angle
+	 * */
 	public SlopeType adjustSlopeForCameraAngle(final CameraAngle angle) {
 		int s;
 		int d;
@@ -273,6 +294,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 	/**
 	 * Render this tile at (0,0).  If you need to draw the tile somewhere else,
 	 * do a translation before calling this method.
+	 * @param cx the graphics context
+	 * @param angle the current camera angle
 	 * */
 	public void render(
 		final GraphicsContext cx,
@@ -294,6 +317,12 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		}
 	}
 
+	/**
+	 * Get the index of this Tile in a list of scene graph nodes
+	 * @param graph the scene graph nodes to examine
+	 * @param priority the priority of the element to get the index for
+	 * @return a valid index into the scene graph nodes, or -1 if it is empty
+	 * */
 	public int getSceneGraphIndex(
 		final ObservableList<Node> graph, final int priority
 	) {
@@ -313,6 +342,8 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 
 	/**
 	 * Rebuild this part of the scenegraph
+	 * @param isDebug true to show extra debugging information
+	 * @param angle the current camera angle
 	 * */
 	public void rebuildSceneGraph(
 		final ObservableBooleanValue isDebug,
@@ -357,6 +388,11 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 		onChange.accept(subGraph);
 	}
 
+	/**
+	 * Get the shape of a highlighter for this Tile
+	 * @param angle the current camera angle
+	 * @return the shape of a highlighter for this Tile
+	 * */
 	private Polygon getHighlightShape(final CameraAngle angle) {
 		final List<Point2D> shape;
 		switch (angle) {
@@ -391,6 +427,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 
 	/**
 	 * Create or destroy the highlight node as necessary.
+	 * @param angle the current camera angle
 	 * */
 	private void setHighlight0(final CameraAngle angle) {
 		final ObservableList<Node> graph = subGraph.getChildren();
@@ -418,6 +455,7 @@ public class Tile extends VisibleObject implements HasJSONRepresentation {
 
 	/**
 	 * Get the shape of this tile.
+	 * @param a the current camera angle
 	 * @return A list of points representing the outline of this tile
 	 * */
 	private List<Point2D> generateShape(final CameraAngle a) {

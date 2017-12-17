@@ -30,8 +30,16 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import ssjsjs.annotations.As;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.Implicit;
+import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.JSONable;
 
-public class SpriteInfo implements HasJSONRepresentation {
+/**
+ * Information that is shared between all sprites of the same kind.
+ * */
+public class SpriteInfo implements JSONable {
 	public final Map<String, SpriteAnimation> animations;
 	private final List<SpriteAnimation> animationsOrdered;
 
@@ -41,18 +49,11 @@ public class SpriteInfo implements HasJSONRepresentation {
 	// sprites are rendered in order of priority starting with 0
 	public final int priority;
 
-	@Override
-	public String toString() {
-		return id;
-	}
-
-	public String debugString() {
-		return "Sprite:" + id + ":" + priority;
-	}
-
 	public SpriteInfo(
 		final String id, final int priority, final SpriteAnimation defaultAnimation
-	) {
+	) throws CorruptDataException {
+		if (defaultAnimation == null)
+			throw new CorruptDataException("No animations define for sprite " + id);
 		this.id = id;
 		this.priority = priority;
 		this.defaultAnimation = defaultAnimation;
@@ -61,55 +62,37 @@ public class SpriteInfo implements HasJSONRepresentation {
 		if (defaultAnimation != null) addAnimation(defaultAnimation);
 	}
 
-	public static SpriteInfo fromJSON(
-		final JSONObject json, final ResourceLocator loc
-	) throws CorruptDataException
-	{
-		try {
-			final String id = json.getString("id");
-			final JSONArray animations = json.getJSONArray("animations");
-			final int priority = json.optInt("priority", 0);
-
-			@SuppressWarnings("unchecked")
-			final Iterator<Object> i = animations.iterator();
-			// Hazard: Editor must make sure that every sprite has at least one sprite
-			if (!i.hasNext()) throw new CorruptDataException("No animations defined for sprite");
-
-			final SpriteInfo info = new SpriteInfo(id, priority,
-				SpriteAnimation.fromJSON((JSONObject) i.next(), loc));
-
-			while (i.hasNext()) {
-				info.addAnimation(
-					SpriteAnimation.fromJSON((JSONObject) i.next(), loc));
-			}
-			return info;
-		} catch (ClassCastException e) {
-			throw new CorruptDataException("Type error in sprite", e);
-		} catch (JSONException e) {
-			throw new CorruptDataException("Error parsing sprite info, " + e.getMessage(), e);
-		}
+	@JSONConstructor
+	public SpriteInfo(
+		@Implicit("locator") final ResourceLocator loc,
+		@Field("id") final String id,
+		@Field("priority") final int priority,
+		@Field("animationsOrdered")@As("animations") final List<SpriteAnimation> animations
+	) throws CorruptDataException {
+		this(id, priority, animations.size() < 1 ? null : animations.get(0));
+		animations.remove(0);
+		for (final SpriteAnimation animation : animations) this.addAnimation(animation);
 	}
 
+	/**
+	 * Get all the animations defined for this sprite.
+	 * @return a Collection containing all the animations for this sprite
+	 * */
 	public Collection<SpriteAnimation> getAllAnimations() {
 		return animations.values();
 	}
 
+	/**
+	 * Add an animation to this sprite.
+	 * @param animation the animation to add
+	 * */
 	public void addAnimation(final SpriteAnimation animation) {
 		animations.put(animation.id, animation);
 		animationsOrdered.add(animation);
 	}
 
-	@Override
-	public JSONObject getJSON() {
-		final JSONArray a = new JSONArray();
-		animationsOrdered.forEach(x -> a.put(x.getJSON()));
-
-		final JSONObject r = new JSONObject();
-		r.put("id", id);
-		r.put("priority", priority);
-		r.put("animations", a);
-
-		return r;
+	@Override public String toString() {
+		return "Sprite: " + id + ":" + priority;
 	}
 }
 

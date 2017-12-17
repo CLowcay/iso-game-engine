@@ -26,21 +26,21 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javafx.geometry.Point2D;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import ssjsjs.JSONable;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.JSONConstructor;
 import static isogame.GlobalConstants.ELEVATION_H;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
 
-public class StageInfo implements HasJSONRepresentation {
+/**
+ * The terrain data for a Stage
+ * */
+public class StageInfo implements JSONable {
 	public final int w;
 	public final int h;
 	private final Tile[] data;
@@ -53,8 +53,11 @@ public class StageInfo implements HasJSONRepresentation {
 	private final Rotate rLR;
 	private final Rotate rUR;
 
+	@JSONConstructor
 	public StageInfo(
-		final int w, final int h, final Tile[] data
+		@Field("w") final int w,
+		@Field("h") final int h,
+		@Field("data") final Tile[] data
 	) throws CorruptDataException {
 		this.w = w;
 		this.h = h;
@@ -78,31 +81,9 @@ public class StageInfo implements HasJSONRepresentation {
 		isoTransform.appendRotation(45, 0, 0);
 	}
 
-	public static StageInfo fromJSON(final JSONObject json, final Library lib)
-		throws CorruptDataException
-	{
-		try {
-			final int w = json.getInt("w");
-			final int h =  json.getInt("h");
-			final JSONArray jsonData = json.getJSONArray("data");
-
-			final Tile[] data = new Tile[w * h];
-			int i = 0;
-			for (final Object t : jsonData) {
-				data[i] = Tile.fromJSON((JSONObject) t, lib);
-				i += 1;
-			}
-
-			return new StageInfo(w, h, data);
-		} catch (ClassCastException e) {
-			throw new CorruptDataException("Type error in stage info", e);
-		} catch (JSONException e) {
-			throw new CorruptDataException("Error parsing stage info, " + e.getMessage(), e);
-		}
-	}
-
 	/**
 	 * Get start tiles belonging to the human player (or player 1 in PVP)
+	 * @return all of the start tiles for player 1
 	 * */
 	public Collection<MapPoint> getPlayerStartTiles() {
 		return Arrays.stream(data)
@@ -113,6 +94,7 @@ public class StageInfo implements HasJSONRepresentation {
 
 	/**
 	 * Get start tiles belonging to the ai player (or player 2 in PVP)
+	 * @return all of the start tiles for player 2
 	 * */
 	public Collection<MapPoint> getAIStartTiles() {
 		return Arrays.stream(data)
@@ -121,27 +103,30 @@ public class StageInfo implements HasJSONRepresentation {
 			.collect(Collectors.toList());
 	}
 
+	/**
+	 * Does this terrain use a particular TerrainTexture?
+	 * @param tex the texture to check for
+	 * @return true if it does, otherwise false
+	 * */
 	public boolean usesTerrainTexture(final TerrainTexture tex) {
 		return Arrays.stream(data).anyMatch(t -> t.tex == tex);
 	}
 
+	/**
+	 * Does this terrain use a particular CliffTexture?
+	 * @param tex the texture to check for
+	 * @return true if it does, otherwise false
+	 * */
 	public boolean usesCliffTexture(final CliffTexture tex) {
 		return Arrays.stream(data).anyMatch(t -> t.cliffTexture == tex);
 	}
 
-	@Override
-	public JSONObject getJSON() {
-		final JSONArray a = new JSONArray();
-		int ndata = w * h;
-		for (int i = 0; i < ndata; i++) a.put(data[i].getJSON());
-
-		final JSONObject r = new JSONObject();
-		r.put("w", w);
-		r.put("h", h);
-		r.put("data", a);
-		return r;
-	}
-
+	/**
+	 * Get a terrain tile
+	 * @param pos the position of the tile to get
+	 * @return the Tile as pos
+	 * @throws IndexOutOfBoundsException when pos is not on the map
+	 * */
 	public Tile getTile(final MapPoint pos) throws IndexOutOfBoundsException {
 		if (pos.x < 0 || pos.y < 0 || pos.x >= w || pos.y >= h)
 			throw new IndexOutOfBoundsException();
@@ -152,6 +137,7 @@ public class StageInfo implements HasJSONRepresentation {
 
 	/**
 	 * Get all the tiles updated since the last call to getUpdatedTiles
+	 * @return all the updates tiles in the order they were updated
 	 * */
 	public List<Tile> getUpdatedTiles() {
 		final List<Tile> r = updated.stream()
@@ -160,6 +146,11 @@ public class StageInfo implements HasJSONRepresentation {
 		return r;
 	}
 
+	/**
+	 * Set a tile
+	 * @param tile new tile data
+	 * @throws IndexOutOfBoundsException if tile is located outside of the map
+	 * */
 	public void setTile(final Tile tile)
 		throws IndexOutOfBoundsException
 	{
@@ -169,12 +160,18 @@ public class StageInfo implements HasJSONRepresentation {
 		data[(tile.pos.y * w) + tile.pos.x] = tile;
 	}
 
+	/**
+	 * Determine if this StageInfo has a tile at a particular position
+	 * @param pos the position to check
+	 * @return true if pos is on the map, otherwise false
+	 * */
 	public boolean hasTile(final MapPoint pos) {
 		return pos.x >= 0 && pos.y >= 0 && pos.x < w && pos.y < h;
 	}
 
 	/**
 	 * Get the position of the tile that renders at the top of the map.
+	 * @param a the current camera angle
 	 * */
 	public MapPoint getTop(final CameraAngle a) {
 		switch (a) {
@@ -188,6 +185,7 @@ public class StageInfo implements HasJSONRepresentation {
 
 	/**
 	 * Get the position of the tile that renders at the bottom of the map.
+	 * @param a the current camera angle
 	 * */
 	public MapPoint getBottom(final CameraAngle a) {
 		switch (a) {
@@ -201,6 +199,7 @@ public class StageInfo implements HasJSONRepresentation {
 
 	/**
 	 * Get the position of the tile that renders at the left of the map.
+	 * @param a the current camera angle
 	 * */
 	public MapPoint getLeft(final CameraAngle a) {
 		switch (a) {
@@ -214,6 +213,7 @@ public class StageInfo implements HasJSONRepresentation {
 
 	/**
 	 * Get the position of the tile that renders at the right of the map.
+	 * @param a the current camera angle
 	 * */
 	public MapPoint getRight(final CameraAngle a) {
 		switch (a) {
@@ -228,6 +228,9 @@ public class StageInfo implements HasJSONRepresentation {
 	/**
 	 * Get the upper left hand coordinate of a tile in iso space,
 	 * assuming no elevation.
+	 * @param p the point to check
+	 * @param a the current camera angle
+	 * @return the iso coordinates of the point p
 	 * */
 	public Point2D toIsoCoord(final MapPoint p, final CameraAngle a) {
 		final Point2D in = new Point2D(p.x, p.y);
@@ -243,6 +246,10 @@ public class StageInfo implements HasJSONRepresentation {
 
 	/**
 	 * Convert an iso coordinate to the (uncorrected) map tile that lives there.
+	 * @param in the iso coordinate to check
+	 * @param a the current camera angle
+	 * @return the map tile at point in.  If in is not on the map, then it still
+	 * returns a MapPoint, but the returned MapPoint is also not on the map.
 	 * */
 	public MapPoint fromIsoCoord(final Point2D in, final CameraAngle a) {
 		Point2D t;
@@ -271,12 +278,23 @@ public class StageInfo implements HasJSONRepresentation {
 	/**
 	 * Get the upper left hand coordinate of a tile in iso space, accounting for
 	 * its elevation.
+	 * @param p the map point to check
+	 * @param a the current camera angle
+	 * @return The corrected iso coordinate
 	 * */
 	public Point2D correctedIsoCoord(final MapPoint p, final CameraAngle a) {
 		final Tile tile = getTile(p);
 		return toIsoCoord(p, a).add(0d, ELEVATION_H * tile.elevation);
 	}
 
+	/**
+	 * Gets the upper left hand coordinate of a tile in iso space, accounting for
+	 * its elevation, and corrected so that a sprite based at the returned
+	 * location will appear to be standing at the correct height.
+	 * @param p the map point to check
+	 * @param a the current camera angle
+	 * @return the corrected iso coordinate
+	 * */
 	public Point2D correctedSpriteIsoCoord(final MapPoint p, final CameraAngle a) {
 		final Tile tile = getTile(p);
 		return toIsoCoord(p, a).add(0d, ELEVATION_H * tile.elevation +
@@ -294,6 +312,9 @@ public class StageInfo implements HasJSONRepresentation {
 	 * Iterating over the tiles in this order guarantees that we draw them from
 	 * the back to the front, so objects closer to the camera properly obscure
 	 * objects that are further away.
+	 *
+	 * @param a the current camera angle
+	 * @return an iterator over the tiles of this StageInfo
 	 * */
 	public Iterator<Tile> iterateTiles(final CameraAngle a) {
 		// coordinates of the next tile to return
@@ -344,13 +365,11 @@ public class StageInfo implements HasJSONRepresentation {
 			private boolean done = false;
 			private boolean useAuxVector = false;
 
-			@Override
-			public boolean hasNext() {
+			@Override public boolean hasNext() {
 				return !done;
 			}
 
-			@Override
-			public Tile next() {
+			@Override public Tile next() {
 				if (done) {
 					throw new NoSuchElementException();
 				} else {
@@ -383,6 +402,11 @@ public class StageInfo implements HasJSONRepresentation {
 	/**
 	 * Iterate over the tiles in the correct order to do mouse collision
 	 * detection when the mouse is at point p with elevation 0.
+	 * @param p the map point over which the mouse is hovering
+	 * @param a the current camera angle
+	 * @return an iterator over the tiles of this StageInfo.  Note that this
+	 * iterator does not necessarily iterate over the entire collection, but may
+	 * skip some elements for efficiency
 	 * */
 	public Iterator<Tile> iterateCollisionDetection(
 		final MapPoint p, final CameraAngle a
@@ -478,8 +502,7 @@ public class StageInfo implements HasJSONRepresentation {
 
 			int untilMove = 2;
 
-			@Override
-			public boolean hasNext() {
+			@Override public boolean hasNext() {
 				return
 					(x  >= 0 &&  x < w &&  y >= 0 &&  y < h) ||
 					(xa >= 0 && xa < w && ya >= 0 && ya < h) ||

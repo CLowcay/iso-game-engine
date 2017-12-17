@@ -20,30 +20,24 @@ package isogame.engine;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import ssjsjs.annotations.Field;
+import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.JSONable;
 
 /**
  * A map coordinate.  See coordinates.txt for more information.
  * */
-public class MapPoint implements HasJSONRepresentation {
+public class MapPoint implements JSONable {
 	public final int x;
 	public final int y;
 
-	public MapPoint(final int x, final int y) {
+	@JSONConstructor
+	public MapPoint(
+		@Field("x") final int x,
+		@Field("y") final int y
+	) {
 		this.x = x;
 		this.y = y;
-	}
-
-	public static MapPoint fromJSON(final JSONObject json)
-		throws CorruptDataException
-	{
-		try {
-			final int x = json.getInt("x");
-			final int y = json.getInt("y");
-
-			return new MapPoint(x, y);
-		} catch (JSONException e) {
-			throw new CorruptDataException("Error in map point, " + e.getMessage(), e);
-		}
 	}
 
 	public MapPoint add(final MapPoint p) {
@@ -85,14 +79,6 @@ public class MapPoint implements HasJSONRepresentation {
 	@Override
 	public String toString() {
 		return "MAP:(" + x + ", " + y + ")";
-	}
-
-	@Override
-	public JSONObject getJSON() {
-		final JSONObject r = new JSONObject();
-		r.put("x", x);
-		r.put("y", y);
-		return r;
 	}
 
 	@Override

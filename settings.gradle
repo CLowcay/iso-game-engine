@@ -16,5 +16,5 @@ include 'services:webservice'
 */
 
 rootProject.name = 'iso-game-engine'
-include 'json', 'engine', 'mapeditor'
+include 'org.json', 'ssjsjs', 'engine', 'mapeditor'
 
