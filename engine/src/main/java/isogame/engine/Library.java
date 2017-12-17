@@ -278,9 +278,9 @@ public class Library {
 
 			return r;
 		} catch (final ClassCastException e) {
-			throw new CorruptDataException(url + " is corrupted");
+			throw new CorruptDataException(url + " is corrupted", e);
 		} catch (final JSONException|JSONDeserializeException e) {
-			throw new CorruptDataException("Error parsing data: " + e.getMessage());
+			throw new CorruptDataException("Error parsing data: " + e.getMessage(), e);
 		}
 	}
 

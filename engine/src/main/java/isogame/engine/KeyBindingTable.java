@@ -1,18 +1,19 @@
 package isogame.engine;
 
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyEvent;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyEvent;
-import ssjsjs.JSONable;
 import ssjsjs.annotations.As;
 import ssjsjs.annotations.Field;
 import ssjsjs.annotations.Implicit;
 import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.JSONable;
 
 /**
  * A table of key bindings
@@ -25,7 +26,7 @@ public class KeyBindingTable implements JSONable {
 	private final Map<KeyBinding, KeyCodeCombination> secondaryKeys =
 		new HashMap<>();
 
-	private List<JSONableKeyCodeCombination> allKeys;
+	private List<JSONableKeyCodeCombination> allKeys = new ArrayList<>();
 
 	public KeyBindingTable() {
 	}

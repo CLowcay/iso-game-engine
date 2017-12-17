@@ -67,9 +67,9 @@ public class SpriteInfo implements JSONable {
 		@Implicit("locator") final ResourceLocator loc,
 		@Field("id") final String id,
 		@Field("priority") final int priority,
-		@Field("animationsOrdered")@As("animations") final List<SpriteAnimation> animations
+		@Field("animationsOrdered")@As("animations") final Collection<SpriteAnimation> animations
 	) throws CorruptDataException {
-		this(id, priority, animations.size() < 1 ? null : animations.get(0));
+		this(id, priority, animations.size() < 1 ? null : animations.iterator().next());
 		animations.remove(0);
 		for (final SpriteAnimation animation : animations) this.addAnimation(animation);
 	}
