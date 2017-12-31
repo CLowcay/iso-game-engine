@@ -118,7 +118,7 @@ public class StageInfo implements JSONable {
 	 * @return true if it does, otherwise false
 	 * */
 	public boolean usesCliffTexture(final CliffTexture tex) {
-		return Arrays.stream(data).anyMatch(t -> t.cliffTexture == tex);
+		return Arrays.stream(data).anyMatch(t -> t.cliffTexture.map(i -> i == tex).orElse(false));
 	}
 
 	/**

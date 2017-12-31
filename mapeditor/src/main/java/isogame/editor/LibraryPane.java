@@ -51,6 +51,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import ssjsjs.JSONSerializeException;
 
 public class LibraryPane extends VBox {
@@ -146,6 +147,7 @@ public class LibraryPane extends VBox {
 						.showAndWait()
 						.ifPresent(sprite -> addSpriteToLibrary(sprite, false));
 				} catch (final CorruptDataException e) {
+					e.printStackTrace();
 					final Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 					alert.setHeaderText("Error constructing sprite info dialog box");
 					alert.showAndWait();
@@ -210,6 +212,7 @@ public class LibraryPane extends VBox {
 		try {
 			global.writeToStream(new FileOutputStream(globalLibraryFile));
 		} catch (final IOException|JSONSerializeException e) {
+			e.printStackTrace();
 			final Alert d = new Alert(Alert.AlertType.ERROR);
 			d.setHeaderText("Cannot save global library to " +
 				globalLibraryFile.toString());
@@ -286,11 +289,11 @@ public class LibraryPane extends VBox {
 						else global.updateSprite(sprite);
 						redrawSpriteButtons(sprite);
 						saveGlobal();
-					} catch (CorruptDataException e) {
+					} catch (final CorruptDataException e) {
 						throw new RuntimeException("This cannot happen", e);
 					}
 				});
-		} catch (CorruptDataException e) {
+		} catch (final CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
@@ -305,7 +308,7 @@ public class LibraryPane extends VBox {
 			final TerrainTexture tex = local.getTerrain(id);
 			deleteTexture(id);
 			addTextureToLibrary(tex, true);
-		} catch (CorruptDataException e) {
+		} catch (final CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
@@ -315,7 +318,7 @@ public class LibraryPane extends VBox {
 			final SpriteInfo sprite = local.getSprite(id);
 			deleteSprite(id);
 			addSpriteToLibrary(sprite, true);
-		} catch (CorruptDataException e) {
+		} catch (final CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
@@ -325,7 +328,7 @@ public class LibraryPane extends VBox {
 			final CliffTexture tex = local.getCliffTexture(id);
 			deleteCliffTexture(id);
 			addCliffTextureToLibrary(tex, true);
-		} catch (CorruptDataException e) {
+		} catch (final CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
@@ -335,7 +338,7 @@ public class LibraryPane extends VBox {
 			local.deleteTerrain(id);
 			final ToggleButton b = textureButtonsL.get(id);
 			if (b != null) textures.local.getChildren().removeAll(b);
-		} catch (CorruptDataException e) {
+		} catch (final CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
@@ -345,7 +348,7 @@ public class LibraryPane extends VBox {
 			local.deleteSprite(id);
 			final ToggleButton button = spriteButtonsL.get(id);
 			if (button != null) sprites.local.getChildren().removeAll(button);
-		} catch (CorruptDataException e) {
+		} catch (final CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
@@ -355,7 +358,7 @@ public class LibraryPane extends VBox {
 			local.deleteCliffTexture(id);
 			final List<ToggleButton> bs = cliffButtonsL.get(id);
 			if (bs != null) cliffTextures.local.getChildren().removeAll(bs);
-		} catch (CorruptDataException e) {
+		} catch (final CorruptDataException e) {
 			throw new RuntimeException("This cannot happen", e);
 		}
 	}
@@ -504,9 +507,9 @@ public class LibraryPane extends VBox {
 		gc.translate(0, (1 - elevation) * 16);
 		gc.scale(1.0d/4.0d, 1.0d/4.0d);
 		try {
-			(new Tile(elevation, slope, global.getTerrain("blank"), tex))
+			(new Tile(elevation, slope, global.getTerrain("blank"), Optional.of(tex)))
 				.render(gc, CameraAngle.UL);
-		} catch (CorruptDataException e) {
+		} catch (final CorruptDataException e) {
 			throw new RuntimeException("Missing blank texture");
 		}
 

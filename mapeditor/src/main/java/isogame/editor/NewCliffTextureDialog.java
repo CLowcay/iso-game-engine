@@ -98,6 +98,7 @@ public class NewCliffTextureDialog extends Dialog<CliffTexture> {
 					return new CliffTexture(loc, id.getText(),
 						wide.getText(), narrow.getText(), false);
 				} catch (CorruptDataException e) {
+					e.printStackTrace();
 					Alert err = new Alert(Alert.AlertType.ERROR);
 					err.setTitle("Cannot load texture image");
 					err.setContentText(e.getMessage());

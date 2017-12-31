@@ -53,7 +53,7 @@ import static isogame.GlobalConstants.TILEW;
 public class Tile extends VisibleObject implements JSONable {
 	public final int elevation;
 	public final TerrainTexture tex;
-	public final CliffTexture cliffTexture;
+	public final Optional<CliffTexture> cliffTexture;
 	public final SlopeType slope;
 	public final boolean isManaZone;
 	public final StartZoneType startZone;
@@ -84,7 +84,7 @@ public class Tile extends VisibleObject implements JSONable {
 		final int elevation,
 		final SlopeType slope,
 		final TerrainTexture texture,
-		final CliffTexture cliffTexture
+		final Optional<CliffTexture> cliffTexture
 	) {
 		this(new MapPoint(0, 0), elevation, slope,
 			false, StartZoneType.NONE, texture, cliffTexture,
@@ -92,7 +92,7 @@ public class Tile extends VisibleObject implements JSONable {
 	}
 
 	private final String textureID;
-	private final String cliffTextureID;
+	private final Optional<String> cliffTextureID;
 
 	@JSONConstructor
 	public Tile(
@@ -103,10 +103,11 @@ public class Tile extends VisibleObject implements JSONable {
 		@Field("isManaZone") final boolean isManaZone,
 		@Field("startZone") final StartZoneType startZone,
 		@Field("textureID")@As("texture") final String textureID,
-		@Field("cliffTextureID")@As("cliffTexture") final String cliffTextureID
+		@Field("cliffTextureID")@As("cliffTexture") final Optional<String> cliffTextureID
 	) throws CorruptDataException {
 		this(pos, elevation, slope, isManaZone, startZone, lib.getTerrain(textureID),
-			cliffTextureID == null? null : lib.getCliffTexture(cliffTextureID),
+			cliffTextureID.isPresent()?
+				Optional.of(lib.getCliffTexture(cliffTextureID.get())) : Optional.empty(),
 			new PrioritizedGroup(PrioritizedGroup.TILE));
 	} 
 
@@ -127,14 +128,14 @@ public class Tile extends VisibleObject implements JSONable {
 		final boolean isManaZone,
 		final StartZoneType startZone,
 		final TerrainTexture texture,
-		final CliffTexture cliffTexture,
+		final Optional<CliffTexture> cliffTexture,
 		final PrioritizedGroup subGraph
 	) {
 		this.elevation = elevation;
 		this.pos = pos;
 
 		this.textureID = texture.id;
-		this.cliffTextureID = cliffTexture.id;
+		this.cliffTextureID = cliffTexture.map(x -> x.id);
 
 		tex = texture;
 		even = (pos.x + pos.y) % 2 == 0;
@@ -218,7 +219,7 @@ public class Tile extends VisibleObject implements JSONable {
 		final CliffTexture cliffTexture
 	) {
 		return new Tile(pos, elevation, slope,
-			isManaZone, startZone, tex, cliffTexture, subGraph);
+			isManaZone, startZone, tex, Optional.of(cliffTexture), subGraph);
 	}
 
 	/**
@@ -304,12 +305,12 @@ public class Tile extends VisibleObject implements JSONable {
 		final SlopeType slope = adjustSlopeForCameraAngle(angle);
 
 		cx.drawImage(tex.getTexture(even, slope), -OFFSETX, -OFFSETY);
-		if (slope != SlopeType.NONE) {
-			cx.drawImage(cliffTexture.getPreTexture(slope), -OFFSETX, -OFFSETY);
+		if (slope != SlopeType.NONE && cliffTexture.isPresent()) {
+			cx.drawImage(cliffTexture.get().getPreTexture(slope), -OFFSETX, -OFFSETY);
 		}
 
-		if (elevation != 0) {
-			final Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
+		if (elevation != 0 && cliffTexture.isPresent()) {
+			final Image epaint = cliffTexture.get().getPreTexture(SlopeType.NONE);
 			for (int i = 0; i < elevation; i++) {
 				cx.translate(0, TILEH / 2);
 				cx.drawImage(epaint, -OFFSETX, -OFFSETY);
@@ -361,16 +362,16 @@ public class Tile extends VisibleObject implements JSONable {
 		base.setY(-OFFSETY);
 		graph.add(base);
 
-		if (slope != SlopeType.NONE) {
-			final ImageView cliff = new ImageView(cliffTexture.getPreTexture(slope));
+		if (slope != SlopeType.NONE && cliffTexture.isPresent()) {
+			final ImageView cliff = new ImageView(cliffTexture.get().getPreTexture(slope));
 			cliff.setX(-OFFSETX);
 			cliff.setY(-OFFSETY);
 			base.setClip(getHighlightShape(angle));
 			graph.add(cliff);
 		}
 
-		if (elevation != 0) {
-			final Image epaint = cliffTexture.getPreTexture(SlopeType.NONE);
+		if (elevation != 0 && cliffTexture.isPresent()) {
+			final Image epaint = cliffTexture.get().getPreTexture(SlopeType.NONE);
 			for (int i = 1; i <= elevation; i++) {
 				final ImageView cliff2 = new ImageView(epaint);
 				cliff2.setX(-OFFSETX);

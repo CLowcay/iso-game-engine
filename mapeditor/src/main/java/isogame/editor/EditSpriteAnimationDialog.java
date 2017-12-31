@@ -125,6 +125,7 @@ public class EditSpriteAnimationDialog extends Dialog<SpriteAnimation> {
 					return new SpriteAnimation(loc,
 						id.getText(), spriteFile.getText(), nframes, rframerate);
 				} catch (CorruptDataException e) {
+					e.printStackTrace();
 					final Alert err = new Alert(Alert.AlertType.ERROR);
 					err.setTitle("Cannot load sprite image");
 					err.setContentText(e.getMessage());

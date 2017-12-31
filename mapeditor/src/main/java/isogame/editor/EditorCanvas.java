@@ -87,11 +87,14 @@ public class EditorCanvas extends MapView {
 					saved.setValue(true);
 					tool = null;
 				} catch (final IOException e) {
+					e.printStackTrace();
 					final Alert d = new Alert(Alert.AlertType.ERROR);
 					d.setHeaderText("Cannot read file " + r.toString());
 					d.setContentText(e.toString());
 					d.show();
+
 				} catch (final CorruptDataException|JSONException|ClassCastException e) {
+					e.printStackTrace();
 					final Alert d = new Alert(Alert.AlertType.ERROR);
 					d.setHeaderText("Error in file " + r.toString());
 					d.setContentText(e.toString());
@@ -124,10 +127,12 @@ public class EditorCanvas extends MapView {
 		try {
 			ImageIO.write(simg, "png", out);
 		} catch (final IOException e) {
+			e.printStackTrace();
 			final Alert d = new Alert(Alert.AlertType.ERROR);
 			d.setHeaderText("Could not save thumbnail " + out);
 			d.setContentText(e.toString());
 			d.show();
+
 		} finally {
 			isDebug.setValue(true);
 			popTranslation();
@@ -148,6 +153,8 @@ public class EditorCanvas extends MapView {
 				saveThumbnail(dataDir);
 				saved.setValue(true);
 			} catch (final IOException|JSONSerializeException e) {
+				e.printStackTrace();
+
 				final Alert d = new Alert(Alert.AlertType.ERROR);
 				d.setHeaderText("Cannot save file as " + stageFile.toString());
 				d.setContentText(e.toString());
@@ -232,6 +239,7 @@ public class EditorCanvas extends MapView {
 					saved.setValue(false);
 				});
 		} catch (final CorruptDataException e) {
+			e.printStackTrace();
 			final Alert d = new Alert(Alert.AlertType.ERROR);
 			d.setHeaderText("Cannot create map");
 			d.setContentText(

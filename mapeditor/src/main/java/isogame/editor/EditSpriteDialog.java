@@ -165,6 +165,7 @@ public class EditSpriteDialog extends Dialog<SpriteInfo> {
 					return i;
 
 				} catch (final CorruptDataException e) {
+					e.printStackTrace();
 					final Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 					alert.setHeaderText("Error constructing sprite info");
 					alert.showAndWait();

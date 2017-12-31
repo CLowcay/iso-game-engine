@@ -91,6 +91,7 @@ public class NewTextureDialog extends Dialog<TerrainTexture> {
 				try {
 					return new TerrainTexture(loc, id.getText(), texture.getText(), false);
 				} catch (CorruptDataException e) {
+					e.printStackTrace();
 					final Alert err = new Alert(Alert.AlertType.ERROR);
 					err.setTitle("Cannot load texture image");
 					err.setContentText(e.getMessage());
