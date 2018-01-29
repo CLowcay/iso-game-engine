@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ssjsjs.JSONDeserializeException;
-import ssjsjs.JSONSerializeException;
+import ssjsjs.JSONdecodeException;
+import ssjsjs.JSONencodeException;
 import ssjsjs.SSJSJS;
 
 import org.json.JSONArray;
@@ -254,7 +254,7 @@ public class Library {
 
 			for (final Object x : sprites) {
 				final SpriteInfo sprite =
-					SSJSJS.deserialize((JSONObject) x, SpriteInfo.class, jsonEnvironment);
+					SSJSJS.decode((JSONObject) x, SpriteInfo.class, jsonEnvironment);
 				if (sprite.id == null)
 					throw new CorruptDataException("Missing id for sprite in " + url);
 				r.sprites.put(sprite.id, sprite);
@@ -262,7 +262,7 @@ public class Library {
 
 			for (final Object x : terrains) {
 				final TerrainTexture texture =
-					SSJSJS.deserialize((JSONObject) x, TerrainTexture.class, jsonEnvironment);
+					SSJSJS.decode((JSONObject) x, TerrainTexture.class, jsonEnvironment);
 				if (texture.id == null)
 					throw new CorruptDataException("Missing id for texture in " + url);
 				r.terrains.put(texture.id, texture);
@@ -270,7 +270,7 @@ public class Library {
 
 			for (final Object x : cliffTextures) {
 				final CliffTexture texture =
-					SSJSJS.deserialize((JSONObject) x, CliffTexture.class, jsonEnvironment);
+					SSJSJS.decode((JSONObject) x, CliffTexture.class, jsonEnvironment);
 				if (texture.id == null)
 					throw new CorruptDataException("Missing id for clidff texture in " + url);
 				r.cliffTextures.put(texture.id, texture);
@@ -279,7 +279,7 @@ public class Library {
 			return r;
 		} catch (final ClassCastException e) {
 			throw new CorruptDataException(url + " is corrupted", e);
-		} catch (final JSONException|JSONDeserializeException e) {
+		} catch (final JSONException|JSONdecodeException e) {
 			throw new CorruptDataException("Error parsing data: " + e.getMessage(), e);
 		}
 	}
@@ -288,7 +288,7 @@ public class Library {
 	 * Write this library to an output stream.
 	 * */
 	public void writeToStream(final OutputStream outStream)
-		throws IOException, JSONSerializeException
+		throws IOException, JSONencodeException
 	{
 		writeToStream(outStream, null);
 	}
@@ -300,7 +300,7 @@ public class Library {
 	@SuppressWarnings("unchecked")
 	public void writeToStream(
 		final OutputStream outStream, final Stage stage
-	) throws IOException, JSONSerializeException {
+	) throws IOException, JSONencodeException {
 		try (PrintWriter out =
 			new PrintWriter(new OutputStreamWriter(outStream, "UTF-8"));
 		) {
@@ -309,17 +309,17 @@ public class Library {
 			final JSONArray prioritiesArray = new JSONArray();
 			for (final String x : priorities) prioritiesArray.put(x);
 			final JSONArray spriteArray = new JSONArray();
-			for (final SpriteInfo x : sprites.values()) spriteArray.put(SSJSJS.serialize(x));
+			for (final SpriteInfo x : sprites.values()) spriteArray.put(SSJSJS.encode(x));
 			final JSONArray terrainArray = new JSONArray();
-			for (final TerrainTexture x : terrains.values()) terrainArray.put(SSJSJS.serialize(x));
+			for (final TerrainTexture x : terrains.values()) terrainArray.put(SSJSJS.encode(x));
 			final JSONArray cliffArray = new JSONArray();
-			for (final CliffTexture x : cliffTextures.values()) cliffArray.put(SSJSJS.serialize(x));
+			for (final CliffTexture x : cliffTextures.values()) cliffArray.put(SSJSJS.encode(x));
 
 			o.put("sprite_priorities", prioritiesArray);
 			o.put("sprites", spriteArray);
 			o.put("terrains", terrainArray);
 			o.put("cliffTextures", cliffArray);
-			if (stage != null) o.put("stage", SSJSJS.serialize(stage));
+			if (stage != null) o.put("stage", SSJSJS.encode(stage));
 
 			out.print(o);
 		}

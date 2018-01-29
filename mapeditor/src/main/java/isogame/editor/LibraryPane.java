@@ -52,7 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import ssjsjs.JSONSerializeException;
+import ssjsjs.JSONencodeException;
 
 public class LibraryPane extends VBox {
 	private final GlobalLocalPane sprites;
@@ -211,7 +211,7 @@ public class LibraryPane extends VBox {
 	private void saveGlobal() {
 		try {
 			global.writeToStream(new FileOutputStream(globalLibraryFile));
-		} catch (final IOException|JSONSerializeException e) {
+		} catch (final IOException|JSONencodeException e) {
 			e.printStackTrace();
 			final Alert d = new Alert(Alert.AlertType.ERROR);
 			d.setHeaderText("Cannot save global library to " +

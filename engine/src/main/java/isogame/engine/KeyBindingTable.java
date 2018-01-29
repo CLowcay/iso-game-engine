@@ -12,7 +12,7 @@ import java.util.Optional;
 import ssjsjs.annotations.As;
 import ssjsjs.annotations.Field;
 import ssjsjs.annotations.Implicit;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
 
 /**
@@ -31,7 +31,7 @@ public class KeyBindingTable implements JSONable {
 	public KeyBindingTable() {
 	}
 
-	@JSONConstructor
+	@JSON
 	public KeyBindingTable(
 		@Implicit("getBinding") final Function<String, KeyBinding> getBinding,
 		@Field("allKeys")@As("keys") final Collection<JSONableKeyCodeCombination> keys

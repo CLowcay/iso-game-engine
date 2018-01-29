@@ -33,7 +33,7 @@ import org.json.JSONObject;
 import ssjsjs.annotations.As;
 import ssjsjs.annotations.Field;
 import ssjsjs.annotations.Implicit;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
 
 /**
@@ -62,7 +62,7 @@ public class SpriteInfo implements JSONable {
 		if (defaultAnimation != null) addAnimation(defaultAnimation);
 	}
 
-	@JSONConstructor
+	@JSON
 	public SpriteInfo(
 		@Implicit("locator") final ResourceLocator loc,
 		@Field("id") final String id,

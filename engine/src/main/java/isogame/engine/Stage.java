@@ -45,9 +45,9 @@ import org.json.JSONObject;
 import ssjsjs.annotations.As;
 import ssjsjs.annotations.Field;
 import ssjsjs.annotations.Implicit;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
-import ssjsjs.JSONDeserializeException;
+import ssjsjs.JSONdecodeException;
 import ssjsjs.SSJSJS;
 
 /**
@@ -75,7 +75,7 @@ public class Stage implements JSONable {
 	 * */
 	public final CollisionDetector collisions;
 
-	@JSONConstructor
+	@JSON
 	public Stage(
 		@Implicit("library") Library localLibrary,
 		@Field("name") final String name,
@@ -153,9 +153,9 @@ public class Stage implements JSONable {
 			final Map<String, Object> jsonEnvironment = new HashMap<>();
 			jsonEnvironment.put("library",
 				Library.fromJSON(json, url, locator, global, false));
-			return SSJSJS.deserialize((JSONObject) json.get("stage"), Stage.class, jsonEnvironment);
+			return SSJSJS.decode((JSONObject) json.get("stage"), Stage.class, jsonEnvironment);
 
-		} catch (final JSONException|JSONDeserializeException e) {
+		} catch (final JSONException|JSONdecodeException e) {
 			throw new CorruptDataException("Error parsing stage", e);
 		}
 	}

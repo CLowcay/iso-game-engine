@@ -4,7 +4,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination.ModifierValue;
 import ssjsjs.annotations.Field;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
 
 /**
@@ -44,7 +44,7 @@ public class JSONableKeyCodeCombination implements JSONable {
 		this.primary = primary;
 	}
 
-	@JSONConstructor
+	@JSON
 	public JSONableKeyCodeCombination(
 		@Field("code") final KeyCode code,
 		@Field("control") final ModifierValue control,

@@ -35,7 +35,7 @@ import org.json.JSONObject;
 import ssjsjs.annotations.As;
 import ssjsjs.annotations.Field;
 import ssjsjs.annotations.Implicit;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
 
 /**
@@ -102,7 +102,7 @@ public class Sprite extends VisibleObject implements JSONable {
 		slicedGraphNode.setCache(true);
 	}
 
-	@JSONConstructor
+	@JSON
 	public Sprite(
 		@Implicit("library") final Library lib,
 		@Field("pos") final MapPoint pos,

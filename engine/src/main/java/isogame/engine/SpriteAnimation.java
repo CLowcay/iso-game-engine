@@ -32,7 +32,7 @@ import java.io.IOException;
 import ssjsjs.annotations.As;
 import ssjsjs.annotations.Field;
 import ssjsjs.annotations.Implicit;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
 
 
@@ -63,7 +63,7 @@ public class SpriteAnimation implements JSONable {
 	private final int hitH;
 	private final double sf;
 
-	@JSONConstructor
+	@JSON
 	public SpriteAnimation(
 		@Implicit("locator") final ResourceLocator loc,
 		@Field("id") final String id,

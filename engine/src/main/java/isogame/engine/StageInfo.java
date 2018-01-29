@@ -32,7 +32,7 @@ import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import ssjsjs.JSONable;
 import ssjsjs.annotations.Field;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import static isogame.GlobalConstants.ELEVATION_H;
 import static isogame.GlobalConstants.TILEH;
 import static isogame.GlobalConstants.TILEW;
@@ -53,7 +53,7 @@ public class StageInfo implements JSONable {
 	private final Rotate rLR;
 	private final Rotate rUR;
 
-	@JSONConstructor
+	@JSON
 	public StageInfo(
 		@Field("w") final int w,
 		@Field("h") final int h,

@@ -46,7 +46,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
 import javax.imageio.ImageIO;
 import org.json.JSONException;
-import ssjsjs.JSONSerializeException;
+import ssjsjs.JSONencodeException;
 
 public class EditorCanvas extends MapView {
 	private final double THUMBW = 288d;
@@ -152,7 +152,7 @@ public class EditorCanvas extends MapView {
 				localLibrary.writeToStream(new FileOutputStream(stageFile), stage);
 				saveThumbnail(dataDir);
 				saved.setValue(true);
-			} catch (final IOException|JSONSerializeException e) {
+			} catch (final IOException|JSONencodeException e) {
 				e.printStackTrace();
 
 				final Alert d = new Alert(Alert.AlertType.ERROR);

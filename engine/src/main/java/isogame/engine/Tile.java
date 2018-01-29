@@ -40,7 +40,7 @@ import org.json.JSONObject;
 import ssjsjs.annotations.As;
 import ssjsjs.annotations.Field;
 import ssjsjs.annotations.Implicit;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
 import static isogame.engine.TilePrerenderer.OFFSETX;
 import static isogame.engine.TilePrerenderer.OFFSETY;
@@ -94,7 +94,7 @@ public class Tile extends VisibleObject implements JSONable {
 	private final String textureID;
 	private final Optional<String> cliffTextureID;
 
-	@JSONConstructor
+	@JSON
 	public Tile(
 		@Implicit("library") final Library lib,
 		@Field("pos")@As("p") final MapPoint pos,

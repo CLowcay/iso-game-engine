@@ -29,7 +29,7 @@ import org.json.JSONObject;
 import ssjsjs.annotations.As;
 import ssjsjs.annotations.Field;
 import ssjsjs.annotations.Implicit;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
 
 /**
@@ -45,7 +45,7 @@ public class TerrainTexture implements JSONable {
 	private final Map<SlopeType, Image> evenPrerendered;
 	private final Map<SlopeType, Image> oddPrerendered;
 
-	@JSONConstructor
+	@JSON
 	public TerrainTexture(
 		@Implicit("locator") final ResourceLocator loc,
 		@Field("id") final String id,

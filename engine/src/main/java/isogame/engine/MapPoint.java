@@ -21,7 +21,7 @@ package isogame.engine;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ssjsjs.annotations.Field;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
 
 /**
@@ -31,7 +31,7 @@ public class MapPoint implements JSONable {
 	public final int x;
 	public final int y;
 
-	@JSONConstructor
+	@JSON
 	public MapPoint(
 		@Field("x") final int x,
 		@Field("y") final int y

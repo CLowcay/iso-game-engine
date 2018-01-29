@@ -31,7 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import ssjsjs.annotations.Field;
 import ssjsjs.annotations.Implicit;
-import ssjsjs.annotations.JSONConstructor;
+import ssjsjs.annotations.JSON;
 import ssjsjs.JSONable;
 
 /**
@@ -49,7 +49,7 @@ public class CliffTexture implements JSONable {
 
 	private final Map<SlopeType, Image> prerendered;
 
-	@JSONConstructor
+	@JSON
 	public CliffTexture(
 		@Implicit("locator") final ResourceLocator loc,
 		@Field("id") final String id,
